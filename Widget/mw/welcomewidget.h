@@ -18,7 +18,7 @@ public:
     void appendRecentFile(const QString &filePath);
 
 private:
-    RecentFileListWidget *rflWidget = new RecentFileListWidget(this);
+    RFLWidget *rflWidget = new RFLWidget(this);
 };
 
 #endif // WELCOMEWIDGET_H

@@ -15,9 +15,9 @@ public:
     public:
         Item(const QModelIndex &index) : index(index) {}
 
-        QString name() { return index.data(Qt::UserRole).toString(); }
-        QString path() { return index.data(Qt::UserRole + 1).toString(); }
-        int row() { return index.row(); }
+        QString name() const { return index.data(Qt::UserRole).toString(); }
+        QString path() const { return index.data(Qt::UserRole + 1).toString(); }
+        int row() const { return index.row(); }
 
     private:
         const QModelIndex &index;
@@ -32,5 +32,7 @@ private:
     RFLDelegate *pDelegate = new RFLDelegate(this);
     RFLModel *pModel = new RFLModel(this);
 };
+
+typedef RecentFileListWidget RFLWidget;
 
 #endif // RECENTFILELISTWIDGET_H

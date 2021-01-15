@@ -3,7 +3,8 @@
 
 RFLModel::RFLModel(QObject *parent) : QAbstractListModel(parent)
 {
-    vDatas << new RFLData{"a", "aa"} << new RFLData{"b", "ccbcc"} << new RFLData{"114", "514"};
+    repeat(int, i, 4)
+        vDatas << new RFLData{"a", "aa"} << new RFLData{"b", "ccbcc"} << new RFLData{"114", "514"};
 }
 
 RFLModel::~RFLModel() {
