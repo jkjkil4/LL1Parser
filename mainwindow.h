@@ -6,12 +6,12 @@
 
 #include <QHBoxLayout>
 #include <QSettings>
-#include <QDebug>
+//#include <QDebug>
 
-#include <header.h>
+#include <Lib/header.h>
 
 #include "Widget/mw/mainwindowview.h"
-#include "Widget/mw/welcomeview.h"
+#include "Widget/mw/welcomewidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -28,7 +28,7 @@ private:
     QStackedWidget *stackedWidget = new QStackedWidget;     //视图控件
 
     QMap<QString, MainWindowView*> mapWidgets = {
-        { "Welcome", new WelcomeView }
+        { "Welcome", new WelcomeWidget }
     };
 };
 

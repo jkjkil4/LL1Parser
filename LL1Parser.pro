@@ -25,13 +25,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        Widget/mw/RecentFileListWidget/recentfilelistwidget.cpp \
+        Widget/mw/RecentFileListWidget/rfldelegate.cpp \
+        Widget/mw/RecentFileListWidget/rflmodel.cpp \
         Widget/mw/welcomewidget.cpp \
         main.cpp \
         mainwindow.cpp
 
 HEADERS += \
+        Widget/mw/RecentFileListWidget/recentfilelistwidget.h \
+        Widget/mw/RecentFileListWidget/rfldelegate.h \
+        Widget/mw/RecentFileListWidget/rflmodel.h \
         Widget/mw/mainwindowview.h \
-        Widget/mw/welcomeview.h \
+        Widget/mw/welcomewidget.h \
         mainwindow.h
 
 include($(Lib)/MyQtLibs/myqtlibs.pri)

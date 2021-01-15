@@ -1,16 +1,21 @@
-#include "welcomeview.h"
+#include "welcomewidget.h"
+#include <QCoreApplication>
+#include "RecentFileListWidget/rfldelegate.h"
 
-WelcomeView::WelcomeView(QWidget *parent)
-    : MainWindowView(parent), recentFiles(APP_DIR + "/config/RecentFiles.txt")
+WelcomeWidget::WelcomeWidget(QWidget *parent)
+    : MainWindowView(parent)/*, recentFiles(APP_DIR + "/config/RecentFiles.txt")*/
 {
 
+    rflWidget->resize(400, 300);
+    rflWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    rflWidget->setVerticalScrollMode(QListView::ScrollPerPixel);
 }
 
-void WelcomeView::updateRecentFileList() {
-    QStringList lRecentFiles = recentFiles.loadAll();
+void WelcomeWidget::updateRecentFileList() {
+//    QStringList lRecentFiles = recentFiles.loadAll();
 
 }
 
-void WelcomeView::appendRecentFile(const QString &filePath) {
+void WelcomeWidget::appendRecentFile(const QString &filePath) {
 
 }
