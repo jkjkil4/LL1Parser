@@ -18,7 +18,7 @@ void RecentFileListWidget::setPath(const QString &path) {
 
 void RecentFileListWidget::updateList() {
     bool ok;
-    QStringList list = manager.loadAll(20, &ok);
+    QStringList list = manager.loadAll(20, &ok, [](const QString& path) -> bool { return QFileInfo(path).isFile(); });
     pModel->clear();
     for(QString& path : list)
         pModel->append(QFileInfo(path).completeBaseName(), path);

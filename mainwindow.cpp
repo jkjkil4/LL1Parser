@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     layMain->setSpacing(0);
     layMain->addWidget(stackedWidget);
 
-    QWidget *centralWidget = new QWidget;   //中心控件
+    QWidget *centralWidget = new QWidget;
     centralWidget->setLayout(layMain);
     setCentralWidget(centralWidget);
 
