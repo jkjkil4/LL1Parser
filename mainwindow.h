@@ -11,7 +11,7 @@
 #include <Lib/header.h>
 
 #include "Widget/mw/mainwindowview.h"
-#include "Widget/mw/welcomewidget.h"
+#include "Widget/mw/WelcomeWidget/welcomewidget.h"
 
 class MainWindow : public QMainWindow
 {

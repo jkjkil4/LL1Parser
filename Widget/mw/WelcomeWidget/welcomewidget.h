@@ -1,11 +1,11 @@
 #ifndef WELCOMEWIDGET_H
 #define WELCOMEWIDGET_H
 
-#include "mainwindowview.h"
+#include "../mainwindowview.h"
 #include <QLabel>
 #include <QListWidget>
 
-#include "RecentFileListWidget/recentfilelistwidget.h"
+#include "recentfilelistwidget.h"
 
 class WelcomeWidget : public MainWindowView
 {
