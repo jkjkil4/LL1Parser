@@ -1,9 +1,9 @@
-#include "welcomewidget.h"
+#include "homepage.h"
 #include <QCoreApplication>
 
 #include <QDebug>
 
-WelcomeWidget::WelcomeWidget(QWidget *parent)
+HomePage::HomePage(QWidget *parent)
     : MainWindowView(parent)
 {
     rflWidget->setPath(APP_DIR + "/Config/rfl.txt");
@@ -13,15 +13,24 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     rflWidget->setVerticalScrollMode(QListView::ScrollPerPixel);
     connect(rflWidget, SIGNAL(itemClicked(const QString&)), this, SLOT(onOpenProject(const QString&)));
 
+    QFont titleFont = labRfl->font();
+    titleFont.setPointSize(15);
+    titleFont.setBold(true);
+
     labRfl->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    j::SetPointSize(labRfl, 16);
+    labRfl->setFont(titleFont);
+
     labAdd->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    j::SetPointSize(labAdd, 16);
+    labAdd->setFont(titleFont);
+
     j::LimitSize(btnNewProj, 200, 50);
     j::SetPointSize(btnNewProj, 11);
+
     j::LimitSize(btnOpenProj, 200, 50);
     j::SetPointSize(btnOpenProj, 11);
 
+
+    //创建布局
     QVBoxLayout *layRfl = new QVBoxLayout;
     layRfl->setSpacing(10);
     layRfl->addWidget(labRfl);
@@ -44,18 +53,18 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     updateTr();
 }
 
-void WelcomeWidget::updateTr() {
+void HomePage::updateTr() {
     labRfl->setText(tr("Recent Projects"));
     labAdd->setText(tr("Add Project"));
     btnNewProj->setText(tr("New Project"));
     btnOpenProj->setText(tr("Open Project"));
 }
 
-void WelcomeWidget::onOpenProject(const QString& path) {
+void HomePage::onOpenProject(const QString& path) {
 
 }
 
-void WelcomeWidget::changeEvent(QEvent *ev) {
+void HomePage::changeEvent(QEvent *ev) {
     if(ev->type() == QEvent::LanguageChange) {
         updateTr();
     }

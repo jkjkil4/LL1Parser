@@ -10,25 +10,55 @@
 
 #include <Lib/header.h>
 
+#include "Widget/sidebar.h"
+
 #include "Widget/mw/mainwindowview.h"
-#include "Widget/mw/WelcomeWidget/welcomewidget.h"
+#include "Widget/mw/HomePage/homepage.h"
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+protected:
+    void changeEvent(QEvent *ev) override;
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-    bool setCurrentView(const QString &viewName);   //设置当前视图
+    void setCurrentView(const QString &name);
+    void setCurrentView(MainWindowView *view);
+
+    void updateTr();
 
 private:
     QRect normalGeometry;   //默认位置大小
 
     QStackedWidget *stackedWidget = new QStackedWidget;     //视图控件
+    SideBar *sideBar = new SideBar; //侧边栏
 
-    QMap<QString, MainWindowView*> mapWidgets = {
-        { "Welcome", new WelcomeWidget }
+    struct View
+    {
+        QString iconPath;
+        QString(*TrFn)();
+        MainWindowView *p;
+    };
+
+    HomePage *viewHomePage = new HomePage;
+
+    View views[9] = {
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage }
+    };
+
+    QMap<QString, MainWindowView*> mapViews = {
+        { "HomePage", viewHomePage }
     };
 };
 

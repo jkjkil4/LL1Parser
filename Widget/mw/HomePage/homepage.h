@@ -12,15 +12,15 @@
 
 #include "recentfilelistwidget.h"
 
-class WelcomeWidget : public MainWindowView
+class HomePage : public MainWindowView
 {
     Q_OBJECT
 protected:
     void changeEvent(QEvent *ev) override;
 
 public:
-    explicit WelcomeWidget(QWidget *parent = nullptr);
-    ~WelcomeWidget() override = default;
+    explicit HomePage(QWidget *parent = nullptr);
+    ~HomePage() override = default;
 
     void updateTr();
 

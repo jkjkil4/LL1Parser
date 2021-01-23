@@ -5,17 +5,21 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     //创建控件
-    for(auto widget : mapWidgets) { //遍历所有的视图
-        stackedWidget->addWidget(widget);   //将该视图添加至stackedWidget中
-        connect(widget, &MainWindowView::changeView, [=](const QString &viewName){ setCurrentView(viewName); });    //绑定信号与槽
+    for(auto &view : views) { //遍历所有的视图
+        stackedWidget->addWidget(view.p);   //将该视图添加至stackedWidget中
+        sideBar->append(QIcon(view.iconPath), view.TrFn());
+        connect(view.p, &MainWindowView::changeView, [this](const QString &viewName){ setCurrentView(viewName); });    //绑定信号与槽
     }
-    setCurrentView("Welcome");  //设置当前视图为"Welcome"
+    setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
+
+    j::LimitWidth(sideBar, 70);
 
 
     //创建布局
     QHBoxLayout *layMain = new QHBoxLayout; //主布局
     layMain->setMargin(0);
     layMain->setSpacing(0);
+    layMain->addWidget(sideBar);
     layMain->addWidget(stackedWidget);
 
     QWidget *centralWidget = new QWidget;
@@ -25,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //设置窗口位置大小
     resize(800, 608);
-    setMinimumSize(500, 400);
+    //setMinimumSize(500, 400);
     adjustSize();
 
     QSettings config(APP_DIR + "/config/config.ini", QSettings::IniFormat);     //读取ini
@@ -44,11 +48,25 @@ MainWindow::~MainWindow()
     config.setValue("MW/IsMaximized", isMaximized());
 }
 
-bool MainWindow::setCurrentView(const QString &viewName) {
-    auto iter = mapWidgets.find(viewName);
-    if(iter == mapWidgets.end())
-        return false;
-    stackedWidget->setCurrentWidget(*iter);
-    return true;
+void MainWindow::setCurrentView(const QString &name) {
+    MainWindowView *view = mapViews.value(name, nullptr);
+    if(view) setCurrentView(view);
+}
+void MainWindow::setCurrentView(MainWindowView *view) {
+    stackedWidget->setCurrentWidget(view);
+}
+
+void MainWindow::updateTr() {
+    int index = 0;
+    for(View &view : views) {
+        sideBar->setText(index, view.TrFn());
+        index++;
+    }
+}
+
+void MainWindow::changeEvent(QEvent *ev) {
+    if(ev->type() == QEvent::LanguageChange) {
+        updateTr();
+    }
 }
 

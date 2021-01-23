@@ -13,6 +13,8 @@ TEMPLATE = app
 
 RC_ICONS += LL1Parser.ico
 
+TRANSLATIONS += tr/tr_zh_CN.ts
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -27,15 +29,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        Widget/mw/WelcomeWidget/recentfilelistwidget.cpp \
-        Widget/mw/WelcomeWidget/welcomewidget.cpp \
+        Widget/mw/HomePage/homepage.cpp \
+        Widget/mw/HomePage/recentfilelistwidget.cpp \
+        Widget/sidebar.cpp \
         main.cpp \
         mainwindow.cpp
 
 HEADERS += \
-        Widget/mw/WelcomeWidget/recentfilelistwidget.h \
+        Widget/mw/HomePage/homepage.h \
+        Widget/mw/HomePage/recentfilelistwidget.h \
         Widget/mw/mainwindowview.h \
-        Widget/mw/WelcomeWidget/welcomewidget.h \
+        Widget/sidebar.h \
         mainwindow.h
 
 include($(Lib)/MyQtLibs/myqtlibs.pri)
@@ -44,3 +48,6 @@ include($(Lib)/MyQtLibs/myqtlibs.pri)
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    qrc.qrc
