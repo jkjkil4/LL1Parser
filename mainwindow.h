@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
+#include <QMenuBar>
+#include <QMessageBox>
 
 #include <QHBoxLayout>
 #include <QSettings>
@@ -30,11 +32,25 @@ public:
 
     void updateTr();
 
+private slots:
+    void onAbout();
+
 private:
     QRect normalGeometry;   //默认位置大小
 
     QStackedWidget *stackedWidget = new QStackedWidget;     //视图控件
     SideBar *sideBar = new SideBar; //侧边栏
+
+
+    struct Menu {
+        QMenu other;
+        QAction other_actAbout;
+        QAction other_actAboutQt;
+
+        void init(QMenuBar *menuBar);
+        void tr();
+    } menu;
+
 
     struct View
     {

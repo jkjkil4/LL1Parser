@@ -1,5 +1,19 @@
 #include "mainwindow.h"
 #include <QCoreApplication>
+#include <QApplication>
+
+void MainWindow::Menu::init(QMenuBar *menuBar) {
+    other.addAction(&other_actAbout);
+    other.addAction(&other_actAboutQt);
+    menuBar->addMenu(&other);
+}
+
+void MainWindow::Menu::tr() {
+    other_actAbout.setText(QApplication::tr("About"));
+    other_actAboutQt.setText(QApplication::tr("AboutQt"));
+    other.setTitle(QApplication::tr("Other"));
+}
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
     j::LimitWidth(sideBar, 70);
-    connect(sideBar, &SideBar::clicked, this, [this](const SideBar::Data &data){ setCurrentView(data.text); });
+    connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.text); });
 
 
     //创建布局
@@ -28,9 +42,14 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(centralWidget);
 
 
+    //菜单
+    menu.init(menuBar());
+    connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
+    connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
+
+
     //设置窗口位置大小
     resize(800, 608);
-    //setMinimumSize(500, 400);
     adjustSize();
 
     QSettings config(APP_DIR + "/config/config.ini", QSettings::IniFormat);     //读取ini
@@ -40,6 +59,8 @@ MainWindow::MainWindow(QWidget *parent)
     setGeometry(normalGeometry);
     if(config.value("MW/IsMaximized", true).toBool())
         showMaximized();
+
+    updateTr();
 }
 
 MainWindow::~MainWindow()
@@ -63,6 +84,12 @@ void MainWindow::updateTr() {
         sideBar->setText(index, view.TrFn());
         index++;
     }
+    menu.tr();
+}
+
+void MainWindow::onAbout() {
+    QString text = tr("Author") + ": jkjkil4<br>";
+    QMessageBox::about(this, QApplication::tr("About"), text);
 }
 
 void MainWindow::changeEvent(QEvent *ev) {
