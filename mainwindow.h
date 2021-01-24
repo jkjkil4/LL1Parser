@@ -44,21 +44,16 @@ private:
     };
 
     HomePage *viewHomePage = new HomePage;
+    MainWindowView *tmp = new MainWindowView;
 
-    View views[9] = {
+    View views[2] = {
         { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage }
+        { ":/SideBtn/qrc/Edit.png", []()->QString { return tr("Edit"); }, tmp }
     };
 
     QMap<QString, MainWindowView*> mapViews = {
-        { "HomePage", viewHomePage }
+        { "HomePage", viewHomePage },
+        { "Edit", tmp }
     };
 };
 

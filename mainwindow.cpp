@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
     j::LimitWidth(sideBar, 70);
+    connect(sideBar, &SideBar::clicked, this, [this](const SideBar::Data &data){ setCurrentView(data.text); });
 
 
     //创建布局

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/SideBtn">
         <file>qrc/HomePage.png</file>
+        <file>qrc/Edit.png</file>
     </qresource>
 </RCC>

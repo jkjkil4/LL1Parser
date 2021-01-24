@@ -9,6 +9,8 @@
 
 #include <Lib/header.h>
 
+#include <QDebug>
+
 class MainWindowView;
 
 class SideBar : public QWidget
@@ -17,6 +19,7 @@ class SideBar : public QWidget
 protected:
     void mousePressEvent(QMouseEvent *ev) override;
     void mouseMoveEvent(QMouseEvent *ev) override;
+    void leaveEvent(QEvent *) override;
     void paintEvent(QPaintEvent *) override;
 
 public:
@@ -40,6 +43,11 @@ public:
     VAR_FUNC_USER(Spacing, spacing, int, update(), , )
     VAR_FUNC_USER(IconSize, iconSize, QSize, update(), , )
     VAR_FUNC_USER(BackgroundColor, backgroundColor, QColor, update(), , )
+    VAR_FUNC_USER(MouseOverColor, mouseOverColor, QColor, update(), , )
+    VAR_FUNC_USER(CheckedColor, checkedColor, QColor, update(), , )
+    VAR_FUNC_USER(CheckedLeftColor, checkedLeftColor, QColor, update(), , )
+    VAR_FUNC_USER(TextColor, textColor, QColor, update(), , )
+    VAR_GET_FUNC(CheckedIndex, checkedIndex, int)
 
 signals:
     void clicked(const Data &data);
@@ -52,10 +60,13 @@ private:
     int itemHeight = 50;
     QSize iconSize = QSize(24, 24);
 
-    QColor backgroundColor = QColor(65, 65, 65);
+    QColor backgroundColor = QColor(70, 70, 70);
+    QColor mouseOverColor = QColor(100, 100, 100);
+    QColor checkedColor = QColor(40, 40, 40);
+    QColor checkedLeftColor = QColor(190, 190, 190);
     QColor textColor = Qt::lightGray;
 
-    int currentIndex = 0;
+    int checkedIndex = 0;
     int mouseOverIndex = -1;
 };
 
