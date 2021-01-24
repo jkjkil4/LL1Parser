@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QStackedWidget>
@@ -14,8 +13,9 @@
 
 #include "Widget/sidebar.h"
 
-#include "Widget/mw/mainwindowview.h"
-#include "Widget/mw/HomePage/homepage.h"
+#include "mw/mainwindowview.h"
+#include "mw/HomePage/homepage.h"
+#include "settingsdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -46,6 +46,7 @@ private:
         QMenu other;
         QAction other_actAbout;
         QAction other_actAboutQt;
+        QAction other_actSettings;
 
         void init(QMenuBar *menuBar);
         void tr();
@@ -72,5 +73,3 @@ private:
         { "Edit", tmp }
     };
 };
-
-#endif // MAINWINDOW_H

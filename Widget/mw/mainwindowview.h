@@ -1,6 +1,4 @@
-#ifndef MAINWINDOWWIDGET_H
-#define MAINWINDOWWIDGET_H
-
+#pragma once
 #include <QWidget>
 
 class MainWindowView : public QWidget
@@ -12,5 +10,3 @@ public:
 signals:
     void changeView(const QString &viewName);
 };
-
-#endif // MAINWINDOWWIDGET_H

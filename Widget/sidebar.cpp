@@ -3,6 +3,7 @@
 
 SideBar::SideBar(QWidget *parent) : QWidget(parent)
 {
+    j::LimitWidth(this, 70);
     setMouseTracking(true);
 }
 

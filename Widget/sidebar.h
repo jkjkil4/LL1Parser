@@ -1,5 +1,4 @@
-#ifndef SIDEBAR_H
-#define SIDEBAR_H
+#pragma once
 
 #include <QWidget>
 
@@ -74,5 +73,3 @@ private:
     int checkedIndex = 0;       //选中的index
     int mouseOverIndex = -1;	//鼠标悬浮的index
 };
-
-#endif // SIDEBAR_H

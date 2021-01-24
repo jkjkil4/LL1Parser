@@ -1,5 +1,4 @@
-#ifndef WELCOMEWIDGET_H
-#define WELCOMEWIDGET_H
+#pragma once
 
 #include "../mainwindowview.h"
 #include <QLabel>
@@ -35,5 +34,3 @@ private:
     PlainButton *btnNewProj = new PlainButton;
     PlainButton *btnOpenProj = new PlainButton;
 };
-
-#endif // WELCOMEWIDGET_H

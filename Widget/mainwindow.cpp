@@ -5,12 +5,15 @@
 void MainWindow::Menu::init(QMenuBar *menuBar) {
     other.addAction(&other_actAbout);
     other.addAction(&other_actAboutQt);
+    other.addSeparator();
+    other.addAction(&other_actSettings);
     menuBar->addMenu(&other);
 }
 
 void MainWindow::Menu::tr() {
     other_actAbout.setText(QApplication::tr("About"));
     other_actAboutQt.setText(QApplication::tr("AboutQt"));
+    other_actSettings.setText(QApplication::tr("Settings"));
     other.setTitle(QApplication::tr("Other"));
 }
 
@@ -26,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
-    j::LimitWidth(sideBar, 70);
     connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.text); });
 
 
@@ -46,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     menu.init(menuBar());
     connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
     connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
+    connect(&menu.other_actSettings, &QAction::triggered, []{ SettingsDialog().exec(); });
 
 
     //设置窗口位置大小

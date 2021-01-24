@@ -1,5 +1,4 @@
-#ifndef RECENTFILELISTWIDGET_H
-#define RECENTFILELISTWIDGET_H
+#pragma once
 
 #include <QListView>
 
@@ -29,5 +28,3 @@ private:
 };
 
 typedef RecentFileListWidget RFLWidget;
-
-#endif // RECENTFILELISTWIDGET_H

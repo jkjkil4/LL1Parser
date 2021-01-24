@@ -31,16 +31,24 @@ CONFIG += c++11
 SOURCES += \
         Widget/mw/HomePage/homepage.cpp \
         Widget/mw/HomePage/recentfilelistwidget.cpp \
+        Widget/settingsdialog.cpp \
         Widget/sidebar.cpp \
         main.cpp \
-        mainwindow.cpp
+        Widget/mainwindow.cpp
 
 HEADERS += \
+        Class/colorwidget.h \
+        Class/translator.h \
         Widget/mw/HomePage/homepage.h \
         Widget/mw/HomePage/recentfilelistwidget.h \
         Widget/mw/mainwindowview.h \
+        Widget/settingsdialog.h \
         Widget/sidebar.h \
-        mainwindow.h
+        Widget/mainwindow.h \
+        header.h
+
+DISTFILES += \
+    tr/tr_zh_CN.ts
 
 include($(Lib)/MyQtLibs/myqtlibs.pri)
 
