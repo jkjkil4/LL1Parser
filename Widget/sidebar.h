@@ -8,22 +8,27 @@
 #include <QMouseEvent>
 
 #include <Lib/header.h>
+#include <Lib/paint.h>
 
 #include <QDebug>
 
 class MainWindowView;
 
+/*
+SideBar
+主窗口左侧的菜单栏
+*/
 class SideBar : public QWidget
 {
     Q_OBJECT
 protected:
-    void mousePressEvent(QMouseEvent *ev) override;
-    void mouseMoveEvent(QMouseEvent *ev) override;
-    void leaveEvent(QEvent *) override;
-    void paintEvent(QPaintEvent *) override;
+    void mousePressEvent(QMouseEvent *ev) override;     //用于相应鼠标点击
+    void mouseMoveEvent(QMouseEvent *ev) override;      //用于更新mouseOverIndex
+    void leaveEvent(QEvent *) override;                 //当鼠标离开控件时，将mouseOverIndex重置为-1
+    void paintEvent(QPaintEvent *) override;            //绘制控件
 
 public:
-    struct Data
+    struct Data  //单个数据
     {
         QIcon icon;
         QString text;
@@ -31,10 +36,10 @@ public:
 
     explicit SideBar(QWidget *parent = nullptr);
 
-    void append(const QIcon &icon, const QString &text);
-    void setText(int index, const QString &text);
+    void append(const QIcon &icon, const QString &text);    //追加内容
+    void setText(int index, const QString &text);       //设置指定index处的文本
 
-    void updateMinHeight();
+    void updateMinHeight();     //更新控件最小高度
 
     VAR_GET_FUNC(ItemHeight, itemHeight, int)
     void setItemHeight(int _itemHeight) { itemHeight = _itemHeight; updateMinHeight(); update(); }
@@ -50,24 +55,24 @@ public:
     VAR_GET_FUNC(CheckedIndex, checkedIndex, int)
 
 signals:
-    void clicked(const Data &data);
+    void clicked(const Data &data);     //当鼠标按下时发出的信号
 
 private:
-    QList<Data> lDatas;
+    QList<Data> lDatas;		//所有内容
 
-    int margin = 2;
-    int spacing = 4;
-    int itemHeight = 50;
-    QSize iconSize = QSize(24, 24);
+    int margin = 2;         //边界空隙
+    int spacing = 4;        //文字与图标的空隙
+    int itemHeight = 50;    //单个内容的高度
+    QSize iconSize = QSize(24, 24);  	//图标的大小
 
-    QColor backgroundColor = QColor(70, 70, 70);
-    QColor mouseOverColor = QColor(100, 100, 100);
-    QColor checkedColor = QColor(40, 40, 40);
-    QColor checkedLeftColor = QColor(190, 190, 190);
-    QColor textColor = Qt::lightGray;
+    QColor backgroundColor = QColor(70, 70, 70);        //背景颜色
+    QColor mouseOverColor = QColor(100, 100, 100);      //当鼠标悬浮时的背景颜色
+    QColor checkedColor = QColor(40, 40, 40);           //选中时的背景颜色
+    QColor checkedLeftColor = QColor(190, 190, 190);	//选中时的左侧细条的颜色
+    QColor textColor = Qt::lightGray;	//文字颜色
 
-    int checkedIndex = 0;
-    int mouseOverIndex = -1;
+    int checkedIndex = 0;       //选中的index
+    int mouseOverIndex = -1;	//鼠标悬浮的index
 };
 
 #endif // SIDEBAR_H

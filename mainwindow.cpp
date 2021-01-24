@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     resize(800, 608);
     adjustSize();
 
-    QSettings config(APP_DIR + "/config/config.ini", QSettings::IniFormat);     //读取ini
+    QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);     //读取ini
 
     //读取窗口位置大小
     normalGeometry = config.value("MW/Geometry", geometry()).toRect();
@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    QSettings config(APP_DIR + "/config/config.ini", QSettings::IniFormat);
+    QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
     config.setValue("MW/Geometry", (isMaximized() || isMinimized()) ? normalGeometry : geometry());
     config.setValue("MW/IsMaximized", isMaximized());
 }
@@ -88,7 +88,11 @@ void MainWindow::updateTr() {
 }
 
 void MainWindow::onAbout() {
-    QString text = tr("Author") + ": jkjkil4<br>";
+    QString text;
+    QTextStream ts(&text);
+    ts << tr("Author") << ": jkjkil4<br>"
+       << "github: <a href=https://github.com/jkjkil4/LL1Parser>https://github.com/jkjkil4/LL1Parser</a><br>"
+       << tr("Feedback") << ": jkjkil@qq.com" ;
     QMessageBox::about(this, QApplication::tr("About"), text);
 }
 
