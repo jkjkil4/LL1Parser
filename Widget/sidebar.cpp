@@ -2,7 +2,10 @@
 
 #include <QDebug>
 
-SideBar::SideBar(QWidget *parent) : QWidget(parent) {}
+SideBar::SideBar(QWidget *parent) : QWidget(parent)
+{
+    setMouseTracking(true);
+}
 
 void SideBar::append(const QIcon &icon, const QString &text) {
     lDatas << Data{ icon, text };
@@ -15,15 +18,26 @@ void SideBar::setText(int index, const QString &text) {
         return;
     lDatas[index].text = text;
     updateMinHeight();
-    update();
 }
 
 void SideBar::updateMinHeight() {
     setMinimumHeight(QFontMetrics(font()).height() * lDatas.size());
 }
 
+
+void SideBar::mousePressEvent(QMouseEvent *ev) {
+
+}
+
+void SideBar::mouseMoveEvent(QMouseEvent *ev) {
+
+}
+
 void SideBar::paintEvent(QPaintEvent *) {
     QPainter p(this);
+
+    p.fillRect(0, 0, width(), height(), backgroundColor);
+    p.setPen(textColor);
 
     int fmHeight = QFontMetrics(font()).height();
 

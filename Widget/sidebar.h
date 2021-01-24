@@ -5,6 +5,7 @@
 
 #include <QIcon>
 #include <QPainter>
+#include <QMouseEvent>
 
 #include <Lib/header.h>
 
@@ -14,6 +15,8 @@ class SideBar : public QWidget
 {
     Q_OBJECT
 protected:
+    void mousePressEvent(QMouseEvent *ev) override;
+    void mouseMoveEvent(QMouseEvent *ev) override;
     void paintEvent(QPaintEvent *) override;
 
 public:
@@ -31,11 +34,12 @@ public:
     void updateMinHeight();
 
     VAR_GET_FUNC(ItemHeight, itemHeight, int)
-    void setItemHeight(int _itemHeight) { itemHeight = _itemHeight; updateMinHeight(); }
+    void setItemHeight(int _itemHeight) { itemHeight = _itemHeight; updateMinHeight(); update(); }
 
-    VAR_FUNC(Margin, margin, int, , )
-    VAR_FUNC(Spacing, spacing, int, , )
-    VAR_FUNC(IconSize, iconSize, QSize, , )
+    VAR_FUNC_USER(Margin, margin, int, update(), , )
+    VAR_FUNC_USER(Spacing, spacing, int, update(), , )
+    VAR_FUNC_USER(IconSize, iconSize, QSize, update(), , )
+    VAR_FUNC_USER(BackgroundColor, backgroundColor, QColor, update(), , )
 
 signals:
     void clicked(const Data &data);
@@ -47,6 +51,12 @@ private:
     int spacing = 4;
     int itemHeight = 50;
     QSize iconSize = QSize(24, 24);
+
+    QColor backgroundColor = QColor(65, 65, 65);
+    QColor textColor = Qt::lightGray;
+
+    int currentIndex = 0;
+    int mouseOverIndex = -1;
 };
 
 #endif // SIDEBAR_H

@@ -5,7 +5,7 @@
 
 #include <Lib/Item/dtextdelegate.h>
 #include <Lib/Item/dtextmodel.h>
-#include <Lib/RecentFileManager/recentfilemanager.h>
+#include <Lib/recentfilemanager.h>
 
 class RecentFileListWidget : public QListView
 {
