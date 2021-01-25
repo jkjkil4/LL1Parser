@@ -64,7 +64,7 @@ void HomePage::updateTr() {
 }
 
 void HomePage::onNewProj() {
-    NewProjDialog dialog;
+    NewProjDialog dialog(this);
     dialog.exec();
 }
 

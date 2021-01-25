@@ -100,7 +100,7 @@ void MainWindow::updateTr() {
 }
 
 void MainWindow::onNewProj() {
-    NewProjDialog dialog;
+    NewProjDialog dialog(this);
     dialog.exec();
 }
 

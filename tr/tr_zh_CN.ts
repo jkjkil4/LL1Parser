@@ -4,22 +4,22 @@
 <context>
     <name>HomePage</name>
     <message>
-        <location filename="../Widget/mw/HomePage/homepage.cpp" line="57"/>
+        <location filename="../Widget/mw/HomePage/homepage.cpp" line="60"/>
         <source>Recent Projects</source>
         <translation>最近项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/HomePage/homepage.cpp" line="58"/>
+        <location filename="../Widget/mw/HomePage/homepage.cpp" line="61"/>
         <source>Add Project</source>
         <translation>添加项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/HomePage/homepage.cpp" line="59"/>
+        <location filename="../Widget/mw/HomePage/homepage.cpp" line="62"/>
         <source>New Project</source>
         <translation>新建项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/HomePage/homepage.cpp" line="60"/>
+        <location filename="../Widget/mw/HomePage/homepage.cpp" line="63"/>
         <source>Open Project</source>
         <translation>打开项目</translation>
     </message>
@@ -27,22 +27,22 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../Widget/mainwindow.h" line="72"/>
+        <location filename="../Widget/mainwindow.h" line="76"/>
         <source>HomePage</source>
         <translation>主页</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.h" line="73"/>
+        <location filename="../Widget/mainwindow.h" line="77"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="104"/>
+        <location filename="../Widget/mainwindow.cpp" line="114"/>
         <source>Author</source>
         <translation>作者</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="106"/>
+        <location filename="../Widget/mainwindow.cpp" line="116"/>
         <source>Feedback</source>
         <translation>反馈</translation>
     </message>
@@ -55,12 +55,27 @@
         <translation>新建项目</translation>
     </message>
     <message>
-        <location filename="../Widget/Dialog/newprojdialog.h" line="21"/>
+        <location filename="../Widget/Dialog/newprojdialog.cpp" line="8"/>
+        <source>Project Path</source>
+        <translation>项目路径</translation>
+    </message>
+    <message>
+        <location filename="../Widget/Dialog/newprojdialog.cpp" line="9"/>
+        <source>Project Name</source>
+        <translation>项目名称</translation>
+    </message>
+    <message>
+        <location filename="../Widget/Dialog/newprojdialog.h" line="25"/>
+        <source>Browse</source>
+        <translation>浏览</translation>
+    </message>
+    <message>
+        <location filename="../Widget/Dialog/newprojdialog.h" line="27"/>
         <source>OK</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../Widget/Dialog/newprojdialog.h" line="22"/>
+        <location filename="../Widget/Dialog/newprojdialog.h" line="28"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -84,7 +99,7 @@
     </message>
     <message>
         <location filename="../Widget/mainwindow.cpp" line="23"/>
-        <location filename="../Widget/mainwindow.cpp" line="107"/>
+        <location filename="../Widget/mainwindow.cpp" line="117"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
