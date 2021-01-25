@@ -39,6 +39,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.name); });
 
+    //菜单
+    menu.init(menuBar());
+    connect(&menu.file_actNewProj, SIGNAL(triggered(bool)), this, SLOT(onNewProj()));
+    connect(&menu.file_actOpenProj, SIGNAL(triggered(bool)), this, SLOT(onOpenProj()));
+    connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
+    connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
+    connect(&menu.other_actSettings, &QAction::triggered, []{ SettingsDialog().exec(); });
+
 
     //创建布局
     QHBoxLayout *layMain = new QHBoxLayout; //主布局
@@ -50,15 +58,6 @@ MainWindow::MainWindow(QWidget *parent)
     QWidget *centralWidget = new QWidget;
     centralWidget->setLayout(layMain);
     setCentralWidget(centralWidget);
-
-
-    //菜单
-    menu.init(menuBar());
-    connect(&menu.file_actNewProj, SIGNAL(triggered(bool)), this, SLOT(onNewProj()));
-    connect(&menu.file_actOpenProj, SIGNAL(triggered(bool)), this, SLOT(onOpenProj()));
-    connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
-    connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
-    connect(&menu.other_actSettings, &QAction::triggered, []{ SettingsDialog().exec(); });
 
 
     //设置窗口位置大小
@@ -101,7 +100,8 @@ void MainWindow::updateTr() {
 }
 
 void MainWindow::onNewProj() {
-
+    NewProjDialog dialog;
+    dialog.exec();
 }
 
 void MainWindow::onOpenProj() {

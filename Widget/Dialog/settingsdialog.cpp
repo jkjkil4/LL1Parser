@@ -13,7 +13,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     //创建布局
     QHBoxLayout *layLanguage = new QHBoxLayout;		//选择语言
     layLanguage->addWidget(labLanguage);
-    layLanguage->addWidget(cbbLanguage);
+    layLanguage->addWidget(cbbLanguage, 1);
 
     QVBoxLayout *layCentral = new QVBoxLayout;		//中心布局
     layCentral->addLayout(layLanguage);

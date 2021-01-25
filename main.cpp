@@ -5,17 +5,20 @@
 #include "Class/translator.h"
 
 Translator translator;
+RecentFileManager rfManager;
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    QDir appDir(APP_DIR);
+    appDir.mkdir("Config");
+    appDir.mkdir("Languages");
+
     translator.setApplication(&a);
     translator.loadLocale();
 
-    QDir dir(APP_DIR);
-    dir.mkdir("Config");
-    dir.mkdir("Languages");
+    rfManager.setFilePath(APP_DIR + "/Config/rfl.txt");
 
     MainWindow w;
     w.show();

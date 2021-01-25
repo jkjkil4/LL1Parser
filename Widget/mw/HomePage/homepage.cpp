@@ -6,12 +6,15 @@
 HomePage::HomePage(QWidget *parent)
     : MainWindowView(parent)
 {
-    rflWidget->setPath(APP_DIR + "/Config/rfl.txt");
+    rflWidget->setSelectionMode(RFLWidget::SelectionMode::NoSelection);
     rflWidget->updateList();
     rflWidget->resize(400, 300);
     rflWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     rflWidget->setVerticalScrollMode(QListView::ScrollPerPixel);
-    connect(rflWidget, SIGNAL(itemClicked(const QString&)), this, SLOT(onOpenProject(const QString&)));
+    connect(rflWidget, &RFLWidget::itemClicked, [this](const QString &filePath){ emit openProj(filePath); });
+
+    connect(btnNewProj, SIGNAL(clicked()), this, SLOT(onNewProj()));
+    connect(btnOpenProj, SIGNAL(clicked()), this, SLOT(onOpenProj()));
 
     QFont titleFont = labRfl->font();
     titleFont.setPointSize(15);
@@ -60,7 +63,12 @@ void HomePage::updateTr() {
     btnOpenProj->setText(tr("Open Project"));
 }
 
-void HomePage::onOpenProject(const QString& path) {
+void HomePage::onNewProj() {
+    NewProjDialog dialog;
+    dialog.exec();
+}
+
+void HomePage::onOpenProj() {
 
 }
 

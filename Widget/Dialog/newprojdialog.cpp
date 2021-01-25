@@ -3,12 +3,13 @@
 NewProjDialog::NewProjDialog(QWidget *parent) : QDialog(parent)
 {
     QLabel *labTitle = new QLabel(tr("New Project"));
-    j::SetPointSize(labTitle, 16);
+    j::SetPointSize(labTitle, 18);
 
     QWidget *centralWidget = new QWidget;
     ColorWidget *bottomWidget = new ColorWidget(C_BOTTOM);
 
     QVBoxLayout *layCentral = new QVBoxLayout;
+    layCentral->setMargin(24);
     layCentral->addWidget(labTitle);
     layCentral->addStretch();
     centralWidget->setLayout(layCentral);

@@ -16,6 +16,7 @@
 #include "mw/mainwindowview.h"
 #include "mw/HomePage/homepage.h"
 #include "Dialog/settingsdialog.h"
+#include "Dialog/newprojdialog.h"
 
 class MainWindow : public QMainWindow
 {

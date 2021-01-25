@@ -5,6 +5,7 @@
 #include <Lib/Item/dtextdelegate.h>
 #include <Lib/Item/dtextmodel.h>
 #include <Lib/recentfilemanager.h>
+#include "header.h"
 
 class RecentFileListWidget : public QListView
 {
@@ -12,19 +13,14 @@ class RecentFileListWidget : public QListView
 public:
     explicit RecentFileListWidget(QWidget *parent = nullptr);
 
-    void setPath(const QString& path);
-
     void updateList();
-    void append(const QString& path);
 
 signals:
-    void itemClicked(const QString &path);
+    void itemClicked(const QString &filePath);
 
 private:
     DTextDelegate *pDelegate = new DTextDelegate(this);
     DTextModel *pModel = new DTextModel(this);
-
-    RecentFileManager manager;
 };
 
 typedef RecentFileListWidget RFLWidget;

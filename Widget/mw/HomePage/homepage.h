@@ -10,6 +10,7 @@
 #include <Lib/PlainButton/plainbutton.h>
 
 #include "recentfilelistwidget.h"
+#include "Widget/Dialog/newprojdialog.h"
 
 class HomePage : public MainWindowView
 {
@@ -23,8 +24,12 @@ public:
 
     void updateTr();
 
+signals:
+    void openProj(const QString &filePath);
+
 private slots:
-    void onOpenProject(const QString& path);
+    void onNewProj();
+    void onOpenProj();
 
 private:
     QLabel *labRfl = new QLabel;
