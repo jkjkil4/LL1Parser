@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
     QDir appDir(APP_DIR);
     appDir.mkdir("Config");
-    appDir.mkdir("Languages");
+    //appDir.mkdir("Languages");
 
     translator.setApplication(&a);
     translator.loadLocale();

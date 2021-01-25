@@ -6,15 +6,17 @@
 
 #include <Lib/header.h>
 
-class Translator : public QTranslator
+class Translator
 {
 public:
     void setApplication(QApplication *app) {
-        app->installTranslator(this);
+        app->installTranslator(&trans);
+        app->installTranslator(&transQt);
     }
     bool setLocale(const QString& _locale) {
         locale = _locale;
-        return load("tr_" + (locale == "Auto" ? QLocale::system().name() : locale), APP_DIR + "/Languages");
+        QString use = (locale == "Auto" ? QLocale::system().name() : locale);
+        return trans.load("tr_" + use, APP_DIR + "/Languages") && transQt.load("qt_" + use, APP_DIR + "/Languages/Qt");
     }
     bool loadLocale() {
         QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
@@ -28,6 +30,9 @@ public:
 
 private:
     QString locale;
+
+    QTranslator trans;
+    QTranslator transQt;
 };
 
 extern Translator translator;
