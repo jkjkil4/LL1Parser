@@ -9,7 +9,7 @@
 #include <Lib/header.h>
 #include <Lib/paint.h>
 
-#include <QDebug>
+//#include <QDebug>
 
 class MainWindowView;
 

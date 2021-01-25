@@ -14,7 +14,7 @@ public:
     }
     bool setLocale(const QString& _locale) {
         locale = _locale;
-        return load(APP_DIR + "/Languages/tr_" + (locale == "Auto" ? QLocale::system().name() : locale));
+        return load("tr_" + (locale == "Auto" ? QLocale::system().name() : locale), APP_DIR + "/Languages");
     }
     bool loadLocale() {
         QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);

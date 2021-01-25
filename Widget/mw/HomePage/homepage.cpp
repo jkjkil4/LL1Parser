@@ -1,7 +1,7 @@
 #include "homepage.h"
 #include <QCoreApplication>
 
-#include <QDebug>
+//#include <QDebug>
 
 HomePage::HomePage(QWidget *parent)
     : MainWindowView(parent)

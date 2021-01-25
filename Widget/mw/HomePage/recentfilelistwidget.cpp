@@ -1,6 +1,6 @@
 #include "recentfilelistwidget.h"
 
-#include <QDebug>
+//#include <QDebug>
 
 RecentFileListWidget::RecentFileListWidget(QWidget *parent) : QListView(parent)
 {
