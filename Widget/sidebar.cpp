@@ -7,8 +7,8 @@ SideBar::SideBar(QWidget *parent) : QWidget(parent)
     setMouseTracking(true);
 }
 
-void SideBar::append(const QIcon &icon, const QString &text) {
-    lDatas << Data{ icon, text };
+void SideBar::append(const QIcon &icon, QString name, const QString &text) {
+    lDatas << Data{ icon, name, text };
     updateMinHeight();
     update();
 }

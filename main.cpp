@@ -22,5 +22,7 @@ int main(int argc, char *argv[])
 
     translator.saveLocale();
 
-    return a.exec();
+    int res = a.exec();
+    translator.saveLocale();
+    return res;
 }

@@ -15,7 +15,7 @@
 
 #include "mw/mainwindowview.h"
 #include "mw/HomePage/homepage.h"
-#include "settingsdialog.h"
+#include "Dialog/settingsdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -33,6 +33,9 @@ public:
     void updateTr();
 
 private slots:
+    void onNewProj();
+    void onOpenProj();
+
     void onAbout();
 
 private:
@@ -43,6 +46,10 @@ private:
 
 
     struct Menu {
+        QMenu file;
+        QAction file_actNewProj;
+        QAction file_actOpenProj;
+
         QMenu other;
         QAction other_actAbout;
         QAction other_actAboutQt;
@@ -56,6 +63,7 @@ private:
     struct View
     {
         QString iconPath;
+        QString name;
         QString(*TrFn)();
         MainWindowView *p;
     };
@@ -64,8 +72,8 @@ private:
     MainWindowView *tmp = new MainWindowView;
 
     View views[2] = {
-        { ":/SideBtn/qrc/HomePage.png", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/Edit.png", []()->QString { return tr("Edit"); }, tmp }
+        { ":/SideBtn/qrc/HomePage.png", "HomePage", []()->QString { return tr("HomePage"); }, viewHomePage },
+        { ":/SideBtn/qrc/Edit.png", "Edit", []()->QString { return tr("Edit"); }, tmp }
     };
 
     QMap<QString, MainWindowView*> mapViews = {

@@ -3,18 +3,26 @@
 #include <QApplication>
 
 void MainWindow::Menu::init(QMenuBar *menuBar) {
+    menuBar->addMenu(&file);
+    file.addAction(&file_actNewProj);
+    file.addAction(&file_actOpenProj);
+
+    menuBar->addMenu(&other);
     other.addAction(&other_actAbout);
     other.addAction(&other_actAboutQt);
     other.addSeparator();
     other.addAction(&other_actSettings);
-    menuBar->addMenu(&other);
 }
 
 void MainWindow::Menu::tr() {
+    file.setTitle(QApplication::tr("File"));
+    file_actNewProj.setText(QApplication::tr("New Project"));
+    file_actOpenProj.setText(QApplication::tr("Open Project"));
+
+    other.setTitle(QApplication::tr("Other"));
     other_actAbout.setText(QApplication::tr("About"));
     other_actAboutQt.setText(QApplication::tr("AboutQt"));
     other_actSettings.setText(QApplication::tr("Settings"));
-    other.setTitle(QApplication::tr("Other"));
 }
 
 
@@ -24,12 +32,12 @@ MainWindow::MainWindow(QWidget *parent)
     //创建控件
     for(auto &view : views) { //遍历所有的视图
         stackedWidget->addWidget(view.p);   //将该视图添加至stackedWidget中
-        sideBar->append(QIcon(view.iconPath), view.TrFn());
+        sideBar->append(QIcon(view.iconPath), view.name, view.TrFn());
         connect(view.p, &MainWindowView::changeView, [this](const QString &viewName){ setCurrentView(viewName); });    //绑定信号与槽
     }
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
-    connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.text); });
+    connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.name); });
 
 
     //创建布局
@@ -46,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     //菜单
     menu.init(menuBar());
+    connect(&menu.file_actNewProj, SIGNAL(triggered(bool)), this, SLOT(onNewProj()));
+    connect(&menu.file_actOpenProj, SIGNAL(triggered(bool)), this, SLOT(onOpenProj()));
     connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
     connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
     connect(&menu.other_actSettings, &QAction::triggered, []{ SettingsDialog().exec(); });
@@ -88,6 +98,14 @@ void MainWindow::updateTr() {
         index++;
     }
     menu.tr();
+}
+
+void MainWindow::onNewProj() {
+
+}
+
+void MainWindow::onOpenProj() {
+
 }
 
 void MainWindow::onAbout() {

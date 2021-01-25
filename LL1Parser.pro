@@ -29,9 +29,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        Widget/Dialog/newprojdialog.cpp \
         Widget/mw/HomePage/homepage.cpp \
         Widget/mw/HomePage/recentfilelistwidget.cpp \
-        Widget/settingsdialog.cpp \
+        Widget/Dialog/settingsdialog.cpp \
         Widget/sidebar.cpp \
         main.cpp \
         Widget/mainwindow.cpp
@@ -39,10 +40,11 @@ SOURCES += \
 HEADERS += \
         Class/colorwidget.h \
         Class/translator.h \
+        Widget/Dialog/newprojdialog.h \
         Widget/mw/HomePage/homepage.h \
         Widget/mw/HomePage/recentfilelistwidget.h \
         Widget/mw/mainwindowview.h \
-        Widget/settingsdialog.h \
+        Widget/Dialog/settingsdialog.h \
         Widget/sidebar.h \
         Widget/mainwindow.h \
         header.h

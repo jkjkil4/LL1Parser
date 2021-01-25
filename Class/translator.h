@@ -18,7 +18,7 @@ public:
     }
     bool loadLocale() {
         QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
-        return setLocale(config.value("Config/TrLocale", QLocale::system().name()).toString());
+        return setLocale(config.value("Config/TrLocale", "Auto").toString());
     }
     void saveLocale() {
         QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);

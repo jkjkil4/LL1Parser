@@ -30,12 +30,13 @@ public:
     struct Data  //单个数据
     {
         QIcon icon;
+        QString name;
         QString text;
     };
 
     explicit SideBar(QWidget *parent = nullptr);
 
-    void append(const QIcon &icon, const QString &text);    //追加内容
+    void append(const QIcon &icon, QString name, const QString &text);    //追加内容
     void setText(int index, const QString &text);       //设置指定index处的文本
 
     void updateMinHeight();     //更新控件最小高度
