@@ -69,7 +69,12 @@ void HomePage::onNewProj() {
 }
 
 void HomePage::onOpenProj() {
-
+    QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open Project"), config.value("Path/OpenProj").toString(), "*.ll1p");
+    if(filePath.isEmpty())
+        return;
+    config.setValue("Path/OpenProj", QFileInfo(filePath).path());
+    emit openProj(filePath);
 }
 
 void HomePage::changeEvent(QEvent *ev) {

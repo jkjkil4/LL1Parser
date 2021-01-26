@@ -51,7 +51,7 @@ void NewProjDialog::onBrowse() {
     QString path = QFileDialog::getExistingDirectory(this, tr("Select Path"), config.value("Path/NewProj").toString());
     if(path.isEmpty())
         return;
-    config.setValue("Path/NewProj", path);
+    config.setValue("Path/NewProj", QFileInfo(path).path());
     editPath->setText(path);
 }
 
