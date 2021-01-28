@@ -80,6 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    //保存设定
     QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
     config.setValue("MW/Geometry", (isMaximized() || isMinimized()) ? normalGeometry : geometry());
     config.setValue("MW/IsMaximized", isMaximized());
@@ -103,12 +104,31 @@ void MainWindow::updateTr() {
 }
 
 void MainWindow::onNewProj() {
-    NewProjDialog dialog(this);
-    if(dialog.exec()) {
+    NewProjDialog dialog(this);		//对话框
+    if(dialog.exec()) {		//若选择了"Ok"
+        //得到路径
         QString path = dialog.projPath();
         QString name = dialog.projName();
+        name += "." SUFFIX;
         QDir dir(path);
+        QString filePath = dir.absoluteFilePath(name);
 
+        //若文件存在，询问是否覆盖
+        int res = dir.exists(name)
+                ? QMessageBox::information(this, "", tr("Are you sure to overlay \"%1\"?").arg(filePath), QMessageBox::Ok, QMessageBox::Cancel)
+                : QMessageBox::Ok;
+
+        if(res == QMessageBox::Ok)	//若不覆盖，则return
+            return;
+
+        //写入空文件
+	    QFile file(filePath);
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::critical(this, tr("Error"), tr("Cannot create the project"));
+            return;
+        }
+        file.close();
+        onOpenProj(filePath);
     }
 }
 
