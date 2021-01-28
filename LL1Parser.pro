@@ -30,6 +30,7 @@ CONFIG += c++11
 
 SOURCES += \
         Widget/Dialog/newprojdialog.cpp \
+        Widget/Other/infowidget.cpp \
         Widget/mw/HomePage/homepage.cpp \
         Widget/mw/HomePage/recentfilelistwidget.cpp \
         Widget/Dialog/settingsdialog.cpp \
@@ -38,9 +39,10 @@ SOURCES += \
         Widget/mainwindow.cpp
 
 HEADERS += \
-        Class/colorwidget.h \
+        Widget/Other/colorwidget.h \
         Class/translator.h \
         Widget/Dialog/newprojdialog.h \
+        Widget/Other/infowidget.h \
         Widget/mw/HomePage/homepage.h \
         Widget/mw/HomePage/recentfilelistwidget.h \
         Widget/mw/mainwindowview.h \

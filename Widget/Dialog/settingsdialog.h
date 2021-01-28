@@ -9,7 +9,7 @@
 
 #include <Lib/PlainButton/plainbutton.h>
 
-#include "Class/colorwidget.h"
+#include "Widget/Other/colorwidget.h"
 #include "Class/translator.h"
 #include "header.h"
 
