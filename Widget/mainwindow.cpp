@@ -118,7 +118,7 @@ void MainWindow::onNewProj() {
                 ? QMessageBox::information(this, "", tr("Are you sure to overlay \"%1\"?").arg(filePath), QMessageBox::Ok, QMessageBox::Cancel)
                 : QMessageBox::Ok;
 
-        if(res == QMessageBox::Ok)	//若不覆盖，则return
+        if(res != QMessageBox::Ok)	//若不覆盖，则return
             return;
 
         //写入空文件
@@ -142,7 +142,8 @@ void MainWindow::onOpenProj() {
 }
 
 void MainWindow::onOpenProj(const QString &filePath) {
-    Q_UNUSED(filePath)
+    rfManager.append(filePath);
+
     //TODO: 打开项目
 }
 
