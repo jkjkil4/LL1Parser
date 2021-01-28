@@ -38,6 +38,9 @@ MainWindow::MainWindow(QWidget *parent)
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
     connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.name); });
+    connect(viewHomePage->recentFileListWidget(), SIGNAL(itemClicked(const QString&)), this, SLOT(onOpenProj(const QString&)));
+    connect(viewHomePage->btnNew(), SIGNAL(clicked()), this, SLOT(onNewProj()));
+    connect(viewHomePage->btnOpen(), SIGNAL(clicked()), this, SLOT(onOpenProj()));
 
     //菜单
     menu.init(menuBar());
@@ -110,6 +113,11 @@ void MainWindow::onOpenProj() {
     if(filePath.isEmpty())
         return;
     config.setValue("Path/OpenProj", QFileInfo(filePath).path());
+    onOpenProj(filePath);
+}
+
+void MainWindow::onOpenProj(const QString &filePath) {
+    Q_UNUSED(filePath)
     //TODO: 打开项目
 }
 

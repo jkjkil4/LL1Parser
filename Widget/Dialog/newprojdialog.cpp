@@ -73,7 +73,7 @@ void NewProjDialog::check() {
     }
     if(dir.exists(name)) {
         infoWidget->setData(tr("Project already exists"), QColor(245, 245, 120));
-    } else infoWidget->clear();;
+    } else infoWidget->clear();
     btnOK->setEnabled(true);
 }
 

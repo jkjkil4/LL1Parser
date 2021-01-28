@@ -1,5 +1,4 @@
-#ifndef INFOWIDGET_H
-#define INFOWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -28,4 +27,3 @@ private:
     QColor col;
 };
 
-#endif // INFOWIDGET_H

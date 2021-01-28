@@ -27,6 +27,9 @@ class NewProjDialog : public QDialog
 public:
     explicit NewProjDialog(QWidget *parent = nullptr);
 
+    QString projPath() { return editPath->text(); }
+    QString projName() { return editName->text(); }
+
 private slots:
     void onBrowse();
 

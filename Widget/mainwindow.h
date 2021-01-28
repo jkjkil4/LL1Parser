@@ -36,6 +36,7 @@ public:
 private slots:
     void onNewProj();
     void onOpenProj();
+    void onOpenProj(const QString &filePath);
 
     void onAbout();
 

@@ -24,12 +24,9 @@ public:
 
     void updateTr();
 
-signals:
-    void openProj(const QString &filePath);
-
-private slots:
-    void onNewProj();
-    void onOpenProj();
+    RFLWidget* recentFileListWidget() { return rflWidget; }
+    PlainButton* btnNew() { return btnNewProj; }
+    PlainButton* btnOpen() { return btnOpenProj; }
 
 private:
     QLabel *labRfl = new QLabel;
