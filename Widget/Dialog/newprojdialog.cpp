@@ -18,8 +18,9 @@ NewProjDialog::NewProjDialog(QWidget *parent) : QDialog(parent)
     QWidget *centralWidget = new QWidget;	//中心控件
     ColorWidget *bottomWidget = new ColorWidget(C_BOTTOM);	//底部控件
 
-    connect(editPath, &QLineEdit::textChanged, [this]{ check(); });
-    connect(editName, &QLineEdit::textChanged, [this]{ check(); });
+    //绑定信号与槽
+    connect(editPath, SIGNAL(textChanged(const QString&)), this, SLOT(onCheck()));
+    connect(editName, SIGNAL(textChanged(const QString&)), this, SLOT(onCheck()));
     connect(btnBrowse, SIGNAL(clicked()), this, SLOT(onBrowse()));
     connect(btnOK, SIGNAL(clicked()), this, SLOT(onAccept()));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(onCancel()));
@@ -55,26 +56,33 @@ NewProjDialog::NewProjDialog(QWidget *parent) : QDialog(parent)
 
 
     resize(560, 380);	//设置大小
-    check();
+    onCheck();
 }
 
-void NewProjDialog::check() {
+void NewProjDialog::onCheck() {
+    //得到路径和名称
     QString path = editPath->text();
     QString name = editName->text();
+
     QDir dir(path);
-    btnOK->setEnabled(false);
-    if(!QFileInfo(path).isAbsolute() || !dir.cd(path)) {
-        infoWidget->setData(tr("Project path does not exists"), QColor(245, 120, 120));
+    btnOK->setEnabled(false);	//暂时设置按钮不可用
+    if(!QFileInfo(path).isAbsolute() || !dir.cd(path)) {	//如果路径不存在
+        infoWidget->setData(tr("The project path does not exists"), QColor(245, 120, 120));
         return;
     }
-    if(name.isEmpty()) {
-        infoWidget->setData(tr("Project name is empty"), QColor(245, 120, 120));
+    if(name.isEmpty()) {	//如果名称为空
+        infoWidget->setData(tr("The project name is empty"), QColor(245, 120, 120));
         return;
     }
-    if(dir.exists(name)) {
-        infoWidget->setData(tr("Project already exists"), QColor(245, 245, 120));
+    name += "." SUFFIX;		//名称附加上后缀名
+    if(dir.exists(name)) {	//如果文件存在
+        if(QFileInfo(dir.absoluteFilePath(name)).isDir()) {	//判断是否与文件夹重复
+            infoWidget->setData(tr("The project name(%1) is duplicated with a folder").arg(name), QColor(245, 120, 120));
+            return;
+        }
+        infoWidget->setData(tr("Project already exists"), QColor(245, 245, 120));	//显示警告，但是不视为错误
     } else infoWidget->clear();
-    btnOK->setEnabled(true);
+    btnOK->setEnabled(true);	//设置按钮可用
 }
 
 void NewProjDialog::onBrowse() {
@@ -87,6 +95,9 @@ void NewProjDialog::onBrowse() {
 }
 
 void NewProjDialog::onAccept() {
+    onCheck();
+    if(!btnOK->isEnabled())
+        return;
     accept();
 }
 

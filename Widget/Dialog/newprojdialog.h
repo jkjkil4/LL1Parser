@@ -31,14 +31,14 @@ public:
     QString projName() { return editName->text(); }
 
 private slots:
-    void onBrowse();
+    void onBrowse();	//浏览文件
+    void onCheck();	//检查路径和文件名
 
     void onAccept();
     void onCancel();
 
 private:
-    void check();
-
+    //输入框的正则表达式
     QRegExpValidator *regExpDir = new QRegExpValidator(QRegExp("[^*?\"<>|]*"), this);
     QRegExpValidator *regExpFile = new QRegExpValidator(QRegExp("[A-Za-z0-9_-]*"), this);
 
@@ -47,7 +47,7 @@ private:
 
     PlainButton *btnBrowse = new PlainButton(tr("Browse") + "...");	//用于浏览文件
 
-    InfoWidget *infoWidget = new InfoWidget;
+    InfoWidget *infoWidget = new InfoWidget;	//用于显示提示信息
 
     PlainButton *btnOK = new PlainButton(tr("OK"));         //"确认"按钮
     PlainButton *btnCancel = new PlainButton(tr("Cancel"));	//"取消"按钮

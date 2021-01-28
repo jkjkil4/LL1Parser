@@ -104,7 +104,12 @@ void MainWindow::updateTr() {
 
 void MainWindow::onNewProj() {
     NewProjDialog dialog(this);
-    dialog.exec();
+    if(dialog.exec()) {
+        QString path = dialog.projPath();
+        QString name = dialog.projName();
+        QDir dir(path);
+
+    }
 }
 
 void MainWindow::onOpenProj() {
