@@ -5,6 +5,7 @@
 
 class RFLMenu : public QMenu
 {
+    Q_OBJECT
 public:
     explicit RFLMenu(QWidget *parent = nullptr);
     explicit RFLMenu(const QString &title, QWidget *parent = nullptr);

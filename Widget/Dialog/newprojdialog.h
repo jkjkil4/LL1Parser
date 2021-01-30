@@ -48,7 +48,7 @@ private:
 
     PlainButton *btnBrowse = new PlainButton(tr("Browse") + "...");	//用于浏览文件
 
-    QCheckBox *checkSetToDefault = new QCheckBox("Use as default project path");    //用于选择是否作为默认路径
+    QCheckBox *checkSetToDefault = new QCheckBox(tr("Use as default project path"));    //用于选择是否作为默认路径
 
     InfoWidget *infoWidget = new InfoWidget;	//用于显示提示信息
 
