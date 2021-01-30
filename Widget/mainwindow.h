@@ -77,15 +77,15 @@ private:
     };
 
     HomePage *viewHomePage = new HomePage;
-    MainWindowView *tmp = new MainWindowView;
+    MainWindowView *viewEdit = new MainWindowView;
 
     View views[2] = {
         { ":/SideBtn/qrc/HomePage.png", "HomePage", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/Edit.png", "Edit", []()->QString { return tr("Edit"); }, tmp }
+        { ":/SideBtn/qrc/Edit.png", "Edit", []()->QString { return tr("Edit"); }, viewEdit }
     };
 
     QMap<QString, MainWindowView*> mapViews = {
         { "HomePage", viewHomePage },
-        { "Edit", tmp }
+        { "Edit", viewEdit }
     };
 };

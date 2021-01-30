@@ -16,6 +16,9 @@ NewProjDialog::NewProjDialog(QWidget *parent) : QDialog(parent)
     editPath->setValidator(regExpDir);  //输入框的正则表达式，下同
     editName->setValidator(regExpFile);
 
+    btnBrowse->setFocusPolicy(Qt::NoFocus);
+    btnCancel->setFocusPolicy(Qt::NoFocus);
+
     infoWidget->setPointSize(10);
 
     QWidget *centralWidget = new QWidget;	//中心控件

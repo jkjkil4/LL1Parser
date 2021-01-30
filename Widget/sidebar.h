@@ -30,14 +30,16 @@ public:
     struct Data  //单个数据
     {
         QIcon icon;
-        QString name;
+        MainWindowView *view;
         QString text;
     };
 
     explicit SideBar(QWidget *parent = nullptr);
 
-    void append(const QIcon &icon, QString name, const QString &text);    //追加内容
+    void append(const QIcon &icon, MainWindowView *view, const QString &text);    //追加内容
     void setText(int index, const QString &text);       //设置指定index处的文本
+
+    void setCurrent(MainWindowView *view);
 
     void updateMinHeight();     //更新控件最小高度
 
@@ -55,7 +57,7 @@ public:
     VAR_GET_FUNC(CheckedIndex, checkedIndex, int)
 
 signals:
-    void clicked(const Data &data);     //当鼠标按下时发出的信号
+    void actived(const Data &data);     //当鼠标按下时发出的信号
 
 private:
     QList<Data> lDatas;		//所有内容

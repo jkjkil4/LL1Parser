@@ -32,12 +32,12 @@ MainWindow::MainWindow(QWidget *parent)
     //创建控件
     for(auto &view : views) { //遍历所有的视图
         stackedWidget->addWidget(view.p);   //将该视图添加至stackedWidget中
-        sideBar->append(QIcon(view.iconPath), view.name, view.TrFn());
+        sideBar->append(QIcon(view.iconPath), view.p, view.TrFn());
         connect(view.p, &MainWindowView::changeView, [this](const QString &viewName){ setCurrentView(viewName); });    //绑定信号与槽
     }
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
-    connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.name); });
+    connect(sideBar, &SideBar::actived, [this](const SideBar::Data &data){ setCurrentView(data.view); });
     connect(viewHomePage->recentFileListWidget(), &RFLWidget::itemClicked, [this](const RFLWidget::Item &item){ onOpenProj(item.filePath); });
     connect(viewHomePage->recentFileListWidget(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onRFLMenuRequested(const QPoint&)));
     connect(viewHomePage->btnNew(), SIGNAL(clicked()), this, SLOT(onNewProj()));
@@ -135,7 +135,7 @@ void MainWindow::onNewProj() {
 
 void MainWindow::onOpenProj() {
     QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Open Project"), config.value("Path/OpenProj").toString(), "LL1Parser Project (*.llp)");
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Open Project"), config.value("Path/OpenProj").toString(), "LL1Parser Project (*.lpp)");
     if(filePath.isEmpty())
         return;
     config.setValue("Path/OpenProj", QFileInfo(filePath).path());
@@ -146,6 +146,7 @@ void MainWindow::onOpenProj(const QString &filePath) {
     rfManager.append(filePath);
 
     //TODO: 打开项目
+    sideBar->setCurrent(viewEdit);
 }
 
 void MainWindow::onAbout() {

@@ -7,8 +7,8 @@ SideBar::SideBar(QWidget *parent) : QWidget(parent)
     setMouseTracking(true);
 }
 
-void SideBar::append(const QIcon &icon, QString name, const QString &text) {
-    lDatas << Data{ icon, name, text };
+void SideBar::append(const QIcon &icon, MainWindowView *view, const QString &text) {
+    lDatas << Data{ icon, view, text };
     updateMinHeight();
     update();
 }
@@ -18,6 +18,20 @@ void SideBar::setText(int index, const QString &text) {
         return;
     lDatas[index].text = text;
     updateMinHeight();
+    update();
+}
+
+void SideBar::setCurrent(MainWindowView *view) {
+    int index = 0;
+    for(Data &data : lDatas) {
+        if(data.view == view) {
+            checkedIndex = index;
+            update();
+            emit actived(data);
+            return;
+        }
+        index++;
+    }
 }
 
 void SideBar::updateMinHeight() {
@@ -32,7 +46,7 @@ void SideBar::mousePressEvent(QMouseEvent *ev) {
         int _checkedIndex = ev->y() / _itemHeight;  //新的checkedIndex
         if(_checkedIndex >= 0 && _checkedIndex < lDatas.size() && checkedIndex != _checkedIndex) {  //判断是否在一定范围内并且是否变化
             checkedIndex = _checkedIndex;
-            emit clicked(lDatas[checkedIndex]);
+            emit actived(lDatas[checkedIndex]);
             update();
         }
     }

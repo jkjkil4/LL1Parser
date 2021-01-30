@@ -3,11 +3,12 @@
 #include <QDialog>
 #include <QComboBox>
 #include <QLabel>
+#include <QPushButton>
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-#include <Lib/PlainButton/plainbutton.h>
+//#include <Lib/PlainButton/plainbutton.h>
 
 #include "Widget/Other/colorwidget.h"
 #include "Class/translator.h"
@@ -32,6 +33,8 @@ private:
 
     QComboBox *cbbLanguage = new QComboBox;     //语言选择框
 
-    PlainButton *btnOK = new PlainButton(tr("OK"));         //"确定"按钮
-    PlainButton *btnCancel = new PlainButton(tr("Cancel"));	//"取消"按钮
+//    PlainButton *btnOK = new PlainButton(tr("OK"));         //"确定"按钮
+//    PlainButton *btnCancel = new PlainButton(tr("Cancel"));	//"取消"按钮
+    QPushButton *btnOK = new QPushButton(tr("OK"));         //"确定"按钮
+    QPushButton *btnCancel = new QPushButton(tr("Cancel"));	//"取消"按钮
 };

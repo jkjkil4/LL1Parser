@@ -6,6 +6,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     connect(btnOK, SIGNAL(clicked()), this, SLOT(onAccept()));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(onCancel()));
 
+    btnCancel->setFocusPolicy(Qt::NoFocus);
+
     QWidget *centralWidget = new QWidget;   //中心控件
     ColorWidget *bottomWidget = new ColorWidget(C_BOTTOM);	//底部控件
 
