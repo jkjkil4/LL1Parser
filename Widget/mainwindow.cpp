@@ -38,7 +38,8 @@ MainWindow::MainWindow(QWidget *parent)
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
     connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.name); });
-    connect(viewHomePage->recentFileListWidget(), SIGNAL(itemClicked(const QString&)), this, SLOT(onOpenProj(const QString&)));
+    connect(viewHomePage->recentFileListWidget(), &RFLWidget::itemClicked, [this](const RFLWidget::Item &item){ onOpenProj(item.filePath); });
+    connect(viewHomePage->recentFileListWidget(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onRFLMenuRequested()));
     connect(viewHomePage->btnNew(), SIGNAL(clicked()), this, SLOT(onNewProj()));
     connect(viewHomePage->btnOpen(), SIGNAL(clicked()), this, SLOT(onOpenProj()));
 
@@ -154,6 +155,30 @@ void MainWindow::onAbout() {
        << "github: <a href=https://github.com/jkjkil4/LL1Parser>https://github.com/jkjkil4/LL1Parser</a><br>"
        << tr("Feedback") << ": jkjkil@qq.com" ;
     QMessageBox::about(this, QApplication::tr("About"), text);
+}
+#include <QDebug>
+void MainWindow::onRFLMenuRequested() {
+    RFLWidget::Item item = viewHomePage->recentFileListWidget()->currentItem();
+    QString path = item.filePath;
+
+    RFLMenu menu;
+
+    QMap<QAction*, void(*)(MainWindow*)> map;
+    map[menu.actMoveToFirst] = [](MainWindow *mw) {
+
+    };
+    map[menu.actRemove] = [](MainWindow *mw) {
+
+    };
+    map[menu.actShowInExplorer] = [](MainWindow *mw) {
+
+    };
+
+    menu.move(cursor().pos());
+    QAction *res = menu.exec();
+
+    auto iter = map.find(res);
+    if(iter != map.end()) (*iter)(this);
 }
 
 void MainWindow::changeEvent(QEvent *ev) {

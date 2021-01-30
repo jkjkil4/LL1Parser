@@ -15,8 +15,11 @@
 
 #include "mw/mainwindowview.h"
 #include "mw/HomePage/homepage.h"
+
 #include "Dialog/settingsdialog.h"
 #include "Dialog/newprojdialog.h"
+
+#include "Menu/rflmenu.h"
 
 class MainWindow : public QMainWindow
 {
@@ -39,6 +42,8 @@ private slots:
     void onOpenProj(const QString &filePath);
 
     void onAbout();
+
+    void onRFLMenuRequested();
 
 private:
     QRect normalGeometry;   //默认位置大小

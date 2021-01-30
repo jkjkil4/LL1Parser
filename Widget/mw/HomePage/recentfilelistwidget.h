@@ -11,12 +11,21 @@ class RecentFileListWidget : public QListView
 {
     Q_OBJECT
 public:
+    struct Item
+    {
+        const int row;
+        const QString &filePath;
+    };
+
     explicit RecentFileListWidget(QWidget *parent = nullptr);
 
+    Item currentItem();
+
     void updateList();
+    void remove(int index);
 
 signals:
-    void itemClicked(const QString &filePath);
+    void itemClicked(const Item &item);
 
 private:
     DTextDelegate *pDelegate = new DTextDelegate(this);
