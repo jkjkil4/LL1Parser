@@ -7,7 +7,7 @@ HomePage::HomePage(QWidget *parent)
     : MainWindowView(parent)
 {
     rflWidget->setSelectionMode(RFLWidget::SelectionMode::NoSelection);
-    rflWidget->updateList();
+    rflWidget->loadList();
     rflWidget->resize(400, 300);
     rflWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     rflWidget->setVerticalScrollMode(QListView::ScrollPerPixel);

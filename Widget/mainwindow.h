@@ -5,6 +5,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
+#include <QProcess>
 #include <QHBoxLayout>
 #include <QSettings>
 //#include <QDebug>
@@ -43,7 +44,7 @@ private slots:
 
     void onAbout();
 
-    void onRFLMenuRequested();
+    void onRFLMenuRequested(const QPoint &pos);
 
 private:
     QRect normalGeometry;   //默认位置大小

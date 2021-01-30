@@ -3,6 +3,9 @@
 
 NewProjDialog::NewProjDialog(QWidget *parent) : QDialog(parent)
 {
+    QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
+    editPath->setText(config.value("Path/ProjDefault").toString());
+
     QLabel *labTitle = new QLabel(tr("New Project"));		//标题文本
     j::SetPointSize(labTitle, 18);
     j::SetBold(labTitle, true);
@@ -37,6 +40,7 @@ NewProjDialog::NewProjDialog(QWidget *parent) : QDialog(parent)
     layCentral->addWidget(labTitle);
     layCentral->addSpacing(10);
     layCentral->addLayout(layEdit);
+    layCentral->addWidget(checkSetToDefault, 0, Qt::AlignLeft);
     layCentral->addSpacing(5);
     layCentral->addWidget(infoWidget);
     layCentral->addStretch();
@@ -90,7 +94,7 @@ void NewProjDialog::onBrowse() {
     QString path = QFileDialog::getExistingDirectory(this, tr("Select Path"), config.value("Path/NewProj").toString());
     if(path.isEmpty())
         return;
-    config.setValue("Path/NewProj", QFileInfo(path).path());
+    config.setValue("Path/NewProj", path);
     editPath->setText(path);
 }
 
@@ -98,6 +102,10 @@ void NewProjDialog::onAccept() {
     onCheck();
     if(!btnOK->isEnabled())
         return;
+    if(checkSetToDefault->isChecked()) {
+        QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
+        config.setValue("Path/ProjDefault", editPath->text());
+    }
     accept();
 }
 

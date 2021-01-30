@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(sideBar, &SideBar::clicked, [this](const SideBar::Data &data){ setCurrentView(data.name); });
     connect(viewHomePage->recentFileListWidget(), &RFLWidget::itemClicked, [this](const RFLWidget::Item &item){ onOpenProj(item.filePath); });
-    connect(viewHomePage->recentFileListWidget(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onRFLMenuRequested()));
+    connect(viewHomePage->recentFileListWidget(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onRFLMenuRequested(const QPoint&)));
     connect(viewHomePage->btnNew(), SIGNAL(clicked()), this, SLOT(onNewProj()));
     connect(viewHomePage->btnOpen(), SIGNAL(clicked()), this, SLOT(onOpenProj()));
 
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&menu.file_actOpenProj, SIGNAL(triggered(bool)), this, SLOT(onOpenProj()));
     connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
     connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
-    connect(&menu.other_actSettings, &QAction::triggered, []{ SettingsDialog().exec(); });
+    connect(&menu.other_actSettings, &QAction::triggered, [this]{ SettingsDialog(this).exec(); });
 
 
     //创建布局
@@ -157,28 +157,26 @@ void MainWindow::onAbout() {
     QMessageBox::about(this, QApplication::tr("About"), text);
 }
 #include <QDebug>
-void MainWindow::onRFLMenuRequested() {
-    RFLWidget::Item item = viewHomePage->recentFileListWidget()->currentItem();
-    QString path = item.filePath;
+void MainWindow::onRFLMenuRequested(const QPoint &pos) {
+    RFLWidget::Item item = viewHomePage->recentFileListWidget()->itemAt(pos.y());
+    if(item.row == -1)
+        return;
 
     RFLMenu menu;
-
-    QMap<QAction*, void(*)(MainWindow*)> map;
-    map[menu.actMoveToFirst] = [](MainWindow *mw) {
-
-    };
-    map[menu.actRemove] = [](MainWindow *mw) {
-
-    };
-    map[menu.actShowInExplorer] = [](MainWindow *mw) {
-
-    };
-
     menu.move(cursor().pos());
     QAction *res = menu.exec();
 
-    auto iter = map.find(res);
-    if(iter != map.end()) (*iter)(this);
+    if(res == menu.actMoveToFirst) {
+        rfManager.append(item.filePath);
+    } else if(res == menu.actRemove) {
+        rfManager.remove(item.row);
+    } else if(res == menu.actShowInExplorer) {
+#ifdef Q_OS_WIN
+        QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << QFileInfo(item.filePath).path());
+#else
+        QMessageBox::information(this, "", tr("This function is not supported in this operating system"));
+#endif
+    }
 }
 
 void MainWindow::changeEvent(QEvent *ev) {

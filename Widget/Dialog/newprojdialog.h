@@ -5,6 +5,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QFileDialog>
+#include <QCheckBox>
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -46,6 +47,8 @@ private:
     QLineEdit *editName = new QLineEdit;	//用于编辑名称
 
     PlainButton *btnBrowse = new PlainButton(tr("Browse") + "...");	//用于浏览文件
+
+    QCheckBox *checkSetToDefault = new QCheckBox("Use as default project path");    //用于选择是否作为默认路径
 
     InfoWidget *infoWidget = new InfoWidget;	//用于显示提示信息
 

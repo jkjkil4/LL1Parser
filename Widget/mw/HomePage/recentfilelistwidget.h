@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QListView>
+#include <QScrollBar>
 
 #include <Lib/Item/dtextdelegate.h>
 #include <Lib/Item/dtextmodel.h>
@@ -13,19 +14,23 @@ class RecentFileListWidget : public QListView
 public:
     struct Item
     {
-        const int row;
-        const QString &filePath;
+        int row;
+        QString filePath;
     };
 
     explicit RecentFileListWidget(QWidget *parent = nullptr);
 
     Item currentItem();
+    Item itemAt(int y);
 
-    void updateList();
+    void loadList();
     void remove(int index);
 
 signals:
     void itemClicked(const Item &item);
+
+private slots:
+    void onRFChanged();
 
 private:
     DTextDelegate *pDelegate = new DTextDelegate(this);

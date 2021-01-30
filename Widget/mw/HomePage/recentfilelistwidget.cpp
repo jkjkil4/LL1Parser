@@ -12,15 +12,7 @@ RecentFileListWidget::RecentFileListWidget(QWidget *parent) : QListView(parent)
     connect(this, &RecentFileListWidget::clicked, [this](const QModelIndex &index){
         emit itemClicked(Item{ index.row(), index.data(Qt::UserRole + 1).toString() });
     });
-    connect(&rfManager, &RecentFileManager::appended, [this](const QString &path) {
-        DTextModel::Data data{ QFileInfo(path).completeBaseName(), path };
-        int index = pModel->indexOf(data);
-        if(index != 0) {
-            pModel->remove(index);
-            pModel->insert(0, data);
-            update();
-        }
-    });
+    connect(&rfManager, SIGNAL(changed()), this, SLOT(onRFChanged()));
 }
 
 RFLWidget::Item RecentFileListWidget::currentItem() {
@@ -28,16 +20,23 @@ RFLWidget::Item RecentFileListWidget::currentItem() {
     return Item{ index.row(), index.data(Qt::UserRole + 1).toString() };
 }
 
-void RecentFileListWidget::updateList() {
-    bool ok;
-    QStringList list = rfManager.loadAll(20, &ok, [](const QString& path) -> bool {
+RFLWidget::Item RecentFileListWidget::itemAt(int y) {
+    int realY = y + verticalScrollBar()->value();
+    if(realY >= 0) {
+        int index = realY / pDelegate->getHeight();
+        if(index < pModel->count()) {
+            return Item{ index, pModel->data(index) };
+        }
+    }
+    return Item{ -1, "" };
+}
+
+void RecentFileListWidget::loadList() {
+    rfManager.load(20, nullptr, [](const QString& path) -> bool {
         QFileInfo info(path);
         return info.isFile() && info.completeSuffix() == SUFFIX;
     });
-    pModel->clear();
-    for(QString& path : list)
-        pModel->append(DTextModel::Data{ QFileInfo(path).completeBaseName(), path });
-    update();
+
 }
 
 void RecentFileListWidget::remove(int index) {
@@ -48,5 +47,12 @@ void RecentFileListWidget::remove(int index) {
     for(int i = pModel->count() - 1; i >= 0; i--)
         rfManager.append(pModel->at(i).text2);
     blockSignals(false);
+}
+
+void RecentFileListWidget::onRFChanged() {
+    pModel->clear();
+    for(const QString& path : rfManager.list())
+        pModel->append(DTextModel::Data{ QFileInfo(path).completeBaseName(), path });
+    update();
 }
 

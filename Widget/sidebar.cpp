@@ -61,6 +61,7 @@ void SideBar::paintEvent(QPaintEvent *) {
     p.fillRect(0, 0, width(), height(), backgroundColor); //填充背景
     p.setPen(textColor);    //设置画笔颜色(绘制文字)
     j::SetPointSize(&p, 8); //设置点大小
+    j::SetBold(&p, true);
 
     int fmHeight = QFontMetrics(font()).height();   //字体高度
 

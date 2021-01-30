@@ -23,9 +23,10 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    translator.saveLocale();
-
     int res = a.exec();
+
     translator.saveLocale();
+    rfManager.save();
+
     return res;
 }
