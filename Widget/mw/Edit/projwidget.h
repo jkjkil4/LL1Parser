@@ -24,6 +24,9 @@ public:
 
     VAR_GET_FUNC(ProjPath, projPath, QString)
 
+signals:
+    void stateChanged(bool isSaved);
+
 private:
     QString projPath;
 

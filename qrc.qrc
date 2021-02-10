@@ -3,4 +3,7 @@
         <file>qrc/HomePage.png</file>
         <file>qrc/Edit.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>qrc/SourceCodePro-Medium.ttf</file>
+    </qresource>
 </RCC>

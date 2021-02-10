@@ -2,6 +2,9 @@
 
 ProjWidget::ProjWidget(const QString &projPath, QWidget *parent) : QWidget(parent), projPath(projPath)
 {
+    j::SetFamily(edit, fontSourceCodePro.family);
+    j::SetPointSize(edit, 10);
+
     ColorWidget *bottomWidget = new ColorWidget;
 
 
