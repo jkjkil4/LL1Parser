@@ -1,5 +1,4 @@
-#ifndef RFLMENU_H
-#define RFLMENU_H
+#pragma once
 
 #include <QMenu>
 
@@ -19,4 +18,3 @@ private:
     void init();
 };
 
-#endif // RFLMENU_H

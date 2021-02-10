@@ -145,7 +145,7 @@ void MainWindow::onOpenProj() {
 void MainWindow::onOpenProj(const QString &filePath) {
     rfManager.append(filePath);
 
-    //TODO: 打开项目
+    viewEdit->open(filePath);
     sideBar->setCurrent(viewEdit);
 }
 
@@ -157,7 +157,7 @@ void MainWindow::onAbout() {
        << tr("Feedback") << ": jkjkil@qq.com" ;
     QMessageBox::about(this, QApplication::tr("About"), text);
 }
-#include <QDebug>
+
 void MainWindow::onRFLMenuRequested(const QPoint &pos) {
     RFLWidget::Item item = viewHomePage->recentFileListWidget()->itemAt(pos.y());
     if(item.row == -1)

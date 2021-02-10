@@ -14,8 +14,8 @@
 
 #include "Widget/sidebar.h"
 
-#include "mw/mainwindowview.h"
 #include "mw/HomePage/homepage.h"
+#include "mw/Edit/editview.h"
 
 #include "Dialog/settingsdialog.h"
 #include "Dialog/newprojdialog.h"
@@ -77,7 +77,7 @@ private:
     };
 
     HomePage *viewHomePage = new HomePage;
-    MainWindowView *viewEdit = new MainWindowView;
+    EditView *viewEdit = new EditView;
 
     View views[2] = {
         { ":/SideBtn/qrc/HomePage.png", "HomePage", []()->QString { return tr("HomePage"); }, viewHomePage },

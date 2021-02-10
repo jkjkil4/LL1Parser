@@ -1,5 +1,4 @@
-#ifndef NEWPROJDIALOG_H
-#define NEWPROJDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QLineEdit>
@@ -60,4 +59,3 @@ private:
     QPushButton *btnCancel = new QPushButton(tr("Cancel"));	//"取消"按钮
 };
 
-#endif // NEWPROJDIALOG_H
