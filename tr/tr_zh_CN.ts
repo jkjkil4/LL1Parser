@@ -2,6 +2,30 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>EditView</name>
+    <message>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="39"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="60"/>
+        <source>Error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="39"/>
+        <source>Cannot load the project &quot;%1&quot;</source>
+        <translation>无法加载项目 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="53"/>
+        <source>Do you want to save the project &quot;%1&quot;?</source>
+        <translation>你要保存项目 &quot;%1&quot; 吗?</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="60"/>
+        <source>Cannot save the project &quot;%1&quot;, force close?</source>
+        <translation>无法保存项目 &quot;%1&quot;，强制关闭吗?</translation>
+    </message>
+</context>
+<context>
     <name>HomePage</name>
     <message>
         <location filename="../Widget/mw/HomePage/homepage.cpp" line="56"/>
@@ -27,47 +51,58 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../Widget/mainwindow.h" line="83"/>
+        <location filename="../Widget/mainwindow.h" line="89"/>
         <source>HomePage</source>
         <translation>主页</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.h" line="84"/>
+        <location filename="../Widget/mainwindow.h" line="90"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="119"/>
+        <location filename="../Widget/mainwindow.cpp" line="146"/>
         <source>Are you sure to overlay &quot;%1&quot;?</source>
-        <translation>你确定要覆盖%1吗?</translation>
+        <translation>你确定要覆盖 &quot;%1&quot; 吗?</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="128"/>
+        <location filename="../Widget/mainwindow.cpp" line="155"/>
+        <location filename="../Widget/mainwindow.cpp" line="183"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="128"/>
+        <location filename="../Widget/mainwindow.cpp" line="155"/>
         <source>Cannot create the project</source>
         <translation>无法创建项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="138"/>
+        <location filename="../Widget/mainwindow.cpp" line="165"/>
         <source>Open Project</source>
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="155"/>
+        <location filename="../Widget/mainwindow.cpp" line="183"/>
+        <source>Cannot save the project &quot;%1&quot;</source>
+        <translation>无法保存项目 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mainwindow.cpp" line="188"/>
+        <source>This function is not done</source>
+        <translation>该功能未完成</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mainwindow.cpp" line="194"/>
         <source>Author</source>
         <translation>作者</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="157"/>
+        <location filename="../Widget/mainwindow.cpp" line="196"/>
         <source>Feedback</source>
         <translation>反馈</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="178"/>
+        <location filename="../Widget/mainwindow.cpp" line="217"/>
         <source>This function is not supported in this operating system</source>
         <translation>当前操作系统不支持该功能</translation>
     </message>
@@ -138,7 +173,7 @@
 <context>
     <name>ProjWidget</name>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="28"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="66"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>
@@ -146,38 +181,48 @@
 <context>
     <name>QApplication</name>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="18"/>
+        <location filename="../Widget/mainwindow.cpp" line="31"/>
         <source>File</source>
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="19"/>
+        <location filename="../Widget/mainwindow.cpp" line="32"/>
         <source>New Project</source>
         <translation>新建项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="20"/>
+        <location filename="../Widget/mainwindow.cpp" line="33"/>
         <source>Open Project</source>
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="23"/>
-        <location filename="../Widget/mainwindow.cpp" line="158"/>
+        <location filename="../Widget/mainwindow.cpp" line="34"/>
+        <source>Save Project</source>
+        <translation>保存项目</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mainwindow.cpp" line="35"/>
+        <source>Save Project As</source>
+        <translation>项目另存为</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mainwindow.cpp" line="38"/>
+        <location filename="../Widget/mainwindow.cpp" line="197"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="24"/>
+        <location filename="../Widget/mainwindow.cpp" line="39"/>
         <source>AboutQt</source>
         <translation>关于Qt</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="25"/>
+        <location filename="../Widget/mainwindow.cpp" line="40"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="22"/>
+        <location filename="../Widget/mainwindow.cpp" line="37"/>
         <source>Other</source>
         <translation>其它</translation>
     </message>
