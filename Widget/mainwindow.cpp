@@ -3,9 +3,22 @@
 #include <QApplication>
 
 void MainWindow::Menu::init(QMenuBar *menuBar) {
+    file_actNewProj.setShortcut(QString("Ctrl+N"));
+    file_actOpenProj.setShortcut(QString("Ctrl+O"));
+    file_actSave.setShortcut(QString("Ctrl+S"));
+    //file_actSaveAs
+
+    //other_actAbout
+    //other_actAboutQt
+    //other_actSettings
+
+
     menuBar->addMenu(&file);
     file.addAction(&file_actNewProj);
     file.addAction(&file_actOpenProj);
+    file.addSeparator();
+    file.addAction(&file_actSave);
+    file.addAction(&file_actSaveAs);
 
     menuBar->addMenu(&other);
     other.addAction(&other_actAbout);
@@ -15,14 +28,16 @@ void MainWindow::Menu::init(QMenuBar *menuBar) {
 }
 
 void MainWindow::Menu::tr() {
-    file.setTitle(QApplication::tr("File"));
-    file_actNewProj.setText(QApplication::tr("New Project"));
-    file_actOpenProj.setText(QApplication::tr("Open Project"));
+    file.setTitle(QApplication::tr("File") + "(&F)");
+    file_actNewProj.setText(QApplication::tr("New Project") + "(&N)");
+    file_actOpenProj.setText(QApplication::tr("Open Project") + "(&O)");
+    file_actSave.setText(QApplication::tr("Save Project") + "(&S)");
+    file_actSaveAs.setText(QApplication::tr("Save Project As") + "(&A)");
 
-    other.setTitle(QApplication::tr("Other"));
-    other_actAbout.setText(QApplication::tr("About"));
-    other_actAboutQt.setText(QApplication::tr("AboutQt"));
-    other_actSettings.setText(QApplication::tr("Settings"));
+    other.setTitle(QApplication::tr("Other") + "(&O)");
+    other_actAbout.setText(QApplication::tr("About") + "(&A)");
+    other_actAboutQt.setText(QApplication::tr("AboutQt") + "(&Q)");
+    other_actSettings.setText(QApplication::tr("Settings") + "(&S)");
 }
 
 
@@ -37,7 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
     setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
 
-    connect(sideBar, &SideBar::actived, [this](const SideBar::Data &data){ setCurrentView(data.view); });
+    connect(sideBar, &SideBar::actived, [this](const SideBar::Data &data){
+        stackedWidget->setCurrentWidget(data.view);
+        updateProjMenuState();
+    });
     connect(viewHomePage->recentFileListWidget(), &RFLWidget::itemClicked, [this](const RFLWidget::Item &item){ onOpenProj(item.filePath); });
     connect(viewHomePage->recentFileListWidget(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onRFLMenuRequested(const QPoint&)));
     connect(viewHomePage->btnNew(), SIGNAL(clicked()), this, SLOT(onNewProj()));
@@ -47,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent)
     menu.init(menuBar());
     connect(&menu.file_actNewProj, SIGNAL(triggered(bool)), this, SLOT(onNewProj()));
     connect(&menu.file_actOpenProj, SIGNAL(triggered(bool)), this, SLOT(onOpenProj()));
+    connect(&menu.file_actSave, SIGNAL(triggered(bool)), this, SLOT(onSaveProj()));
+    connect(&menu.file_actSaveAs, SIGNAL(triggered(bool)), this, SLOT(onSaveProjAs()));
     connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
     connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
     connect(&menu.other_actSettings, &QAction::triggered, [this]{ SettingsDialog(this).exec(); });
@@ -77,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
         showMaximized();
 
     updateTr();
+    updateProjMenuState();
 }
 
 MainWindow::~MainWindow()
@@ -92,7 +113,13 @@ void MainWindow::setCurrentView(const QString &name) {
     if(view) setCurrentView(view);
 }
 void MainWindow::setCurrentView(MainWindowView *view) {
-    stackedWidget->setCurrentWidget(view);
+    sideBar->setCurrent(view);
+}
+
+void MainWindow::updateProjMenuState() {
+    bool atProj = sideBar->current() == viewEdit && viewEdit->count() != 0;
+    menu.file_actSave.setEnabled(atProj);
+    menu.file_actSaveAs.setEnabled(atProj);
 }
 
 void MainWindow::updateTr() {
@@ -147,6 +174,18 @@ void MainWindow::onOpenProj(const QString &filePath) {
 
     viewEdit->open(filePath);
     sideBar->setCurrent(viewEdit);
+}
+
+void MainWindow::onSaveProj() {
+    ProjWidget *proj = viewEdit->current();
+    if(proj && !proj->getIsSaved()) {
+        if(!proj->save())
+            QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\"").arg(proj->getProjName()));
+    }
+}
+
+void MainWindow::onSaveProjAs() {
+    QMessageBox::information(this, "", tr("This function is not done"));
 }
 
 void MainWindow::onAbout() {

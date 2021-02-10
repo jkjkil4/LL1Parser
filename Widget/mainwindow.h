@@ -35,12 +35,16 @@ public:
     void setCurrentView(const QString &name);
     void setCurrentView(MainWindowView *view);
 
+    void updateProjMenuState();
+
     void updateTr();
 
 private slots:
     void onNewProj();
     void onOpenProj();
     void onOpenProj(const QString &filePath);
+    void onSaveProj();
+    void onSaveProjAs();
 
     void onAbout();
 
@@ -57,6 +61,8 @@ private:
         QMenu file;
         QAction file_actNewProj;
         QAction file_actOpenProj;
+        QAction file_actSave;
+        QAction file_actSaveAs;
 
         QMenu other;
         QAction other_actAbout;

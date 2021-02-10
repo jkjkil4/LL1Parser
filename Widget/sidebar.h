@@ -39,6 +39,7 @@ public:
     void append(const QIcon &icon, MainWindowView *view, const QString &text);    //追加内容
     void setText(int index, const QString &text);       //设置指定index处的文本
 
+    MainWindowView* current() { return lDatas[checkedIndex].view; }
     void setCurrent(MainWindowView *view);
 
     void updateMinHeight();     //更新控件最小高度

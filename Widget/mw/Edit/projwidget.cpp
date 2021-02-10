@@ -1,11 +1,14 @@
 #include "projwidget.h"
 
-ProjWidget::ProjWidget(const QString &projPath, QWidget *parent) : QWidget(parent), projPath(projPath)
+ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
+    : QWidget(parent), projName(QFileInfo(projPath).completeBaseName()), projPath(projPath)
 {
     j::SetFamily(edit, fontSourceCodePro.family);
     j::SetPointSize(edit, 10);
 
     ColorWidget *bottomWidget = new ColorWidget;
+
+    connect(edit, &QPlainTextEdit::textChanged, [this]{ setSaved(false); });
 
 
     //创建布局
@@ -22,6 +25,41 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent) : QWidget(paren
 
 
     updateTr();
+}
+
+bool ProjWidget::load() {
+    QFile file(projPath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream in(&file);
+    edit->blockSignals(true);
+    edit->setPlainText(in.readAll());
+    edit->blockSignals(false);
+    file.close();
+
+    return true;
+}
+
+bool ProjWidget::save() {
+    QFile file(projPath);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return false;
+
+    QTextStream out(&file);
+    out << edit->toPlainText();
+    file.close();
+
+    setSaved(true);
+
+    return true;
+}
+
+void ProjWidget::setSaved(bool _isSaved) {
+    if(_isSaved != isSaved) {
+        isSaved = _isSaved;
+        emit stateChanged(_isSaved);
+    }
 }
 
 void ProjWidget::updateTr() {
