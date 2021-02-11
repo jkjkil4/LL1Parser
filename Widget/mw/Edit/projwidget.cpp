@@ -12,13 +12,17 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
 
     ColorWidget *bottomWidget = new ColorWidget;
 
-    connect(edit, &QPlainTextEdit::textChanged, [this]{ setSaved(false); });
+    connect(edit, &PlainTextEdit::textChanged, [this]{ setSaved(false); });
+    connect(edit, &PlainTextEdit::pointSizeChanged, [this](int cur){
+        noteWidget->setText(tr("Pointsize changed: %1 (Default: %2)").arg(QString::number(cur), "10"));
+    });
 
 
     //创建布局
-    QHBoxLayout *layBtn = new QHBoxLayout;
-    layBtn->addWidget(btnParse, 0, Qt::AlignRight);
-    bottomWidget->setLayout(layBtn);
+    QHBoxLayout *layBottom = new QHBoxLayout;
+    layBottom->addWidget(noteWidget);
+    layBottom->addWidget(btnParse, 0, Qt::AlignRight);
+    bottomWidget->setLayout(layBottom);
 
     QVBoxLayout *layMain = new QVBoxLayout;
     layMain->setMargin(0);

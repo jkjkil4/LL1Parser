@@ -6,9 +6,11 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QTimer>
 
 #include <Lib/PlainButton/plainbutton.h>
 #include "Widget/Other/colorwidget.h"
+#include "notewidget.h"
 #include "plaintextedit.h"
 #include "header.h"
 
@@ -21,8 +23,8 @@ protected:
 public:
     explicit ProjWidget(const QString &projPath, QWidget *parent = nullptr);
 
-    bool load();
-    bool save();
+    bool load();    //读取
+    bool save();    //保存
 
     void setSaved(bool _isSaved);
 
@@ -33,14 +35,15 @@ public:
     VAR_GET_FUNC(IsSaved, isSaved, bool)
 
 signals:
-    void stateChanged(bool isSaved);
+    void stateChanged(bool isSaved);    //当保存情况改变时发出的信号
 
 private:
-    QString projName;
-    QString projPath;
+    QString projName;   //项目名称
+    QString projPath;   //项目路径
 
-    bool isSaved = true;
+    bool isSaved = true;    //是否保存
 
     PlainTextEdit *edit = new PlainTextEdit;
+    NoteWidget *noteWidget = new NoteWidget;
     PlainButton *btnParse = new PlainButton;
 };

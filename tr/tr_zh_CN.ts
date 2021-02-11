@@ -21,8 +21,8 @@
     </message>
     <message>
         <location filename="../Widget/mw/Edit/editview.cpp" line="61"/>
-        <source>Cannot save the project &quot;%1&quot;, force close?</source>
-        <translation>无法保存项目 &quot;%1&quot;，强制关闭吗?</translation>
+        <source>Cannot save the project &quot;%1&quot;, force it to close?</source>
+        <translation>无法保存项目 &quot;%1&quot;，强制关闭它吗?</translation>
     </message>
 </context>
 <context>
@@ -173,7 +173,12 @@
 <context>
     <name>ProjWidget</name>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="73"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="17"/>
+        <source>Pointsize changed: %1 (Default: %2)</source>
+        <translation>点大小变化: %1 (默认: %2)</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="77"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>

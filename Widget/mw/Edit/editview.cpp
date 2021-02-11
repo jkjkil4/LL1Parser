@@ -58,7 +58,7 @@ bool EditView::confirmClose(int index) {
         return false;
     if(res == QMessageBox::Yes && !widget->save()) {    //如果选择了保存
         //如果保存失败，则提示是否强制关闭
-        int res2 = QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\", force close?").arg(widget->getProjName()),
+        int res2 = QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\", force it to close?").arg(widget->getProjName()),
                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if(res2 == QMessageBox::No) //如果不强制关闭，则return
             return false;
