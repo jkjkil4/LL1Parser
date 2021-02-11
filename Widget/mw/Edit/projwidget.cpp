@@ -6,6 +6,10 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     j::SetFamily(edit, fontSourceCodePro.family);
     j::SetPointSize(edit, 10);
 
+    QLabel *labPath = new QLabel(projPath);
+    labPath->setAlignment(Qt::AlignLeft);
+    j::SetPointSize(labPath, 8);
+
     ColorWidget *bottomWidget = new ColorWidget;
 
     connect(edit, &QPlainTextEdit::textChanged, [this]{ setSaved(false); });
@@ -19,6 +23,9 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     QVBoxLayout *layMain = new QVBoxLayout;
     layMain->setMargin(0);
     layMain->setSpacing(0);
+    layMain->addSpacing(4);
+    layMain->addWidget(labPath);
+    layMain->addSpacing(4);
     layMain->addWidget(edit);
     layMain->addWidget(bottomWidget);
     setLayout(layMain);
