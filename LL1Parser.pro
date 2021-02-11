@@ -33,6 +33,7 @@ SOURCES += \
         Widget/Menu/rflmenu.cpp \
         Widget/Other/infowidget.cpp \
         Widget/mw/Edit/editview.cpp \
+        Widget/mw/Edit/plaintextedit.cpp \
         Widget/mw/Edit/projwidget.cpp \
         Widget/mw/HomePage/homepage.cpp \
         Widget/mw/HomePage/recentfilelistwidget.cpp \
@@ -48,6 +49,7 @@ HEADERS += \
         Widget/Dialog/newprojdialog.h \
         Widget/Other/infowidget.h \
         Widget/mw/Edit/editview.h \
+        Widget/mw/Edit/plaintextedit.h \
         Widget/mw/Edit/projwidget.h \
         Widget/mw/HomePage/homepage.h \
         Widget/mw/HomePage/recentfilelistwidget.h \

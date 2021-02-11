@@ -224,4 +224,8 @@ void MainWindow::changeEvent(QEvent *ev) {
         updateTr();
     }
 }
+void MainWindow::closeEvent(QCloseEvent *ev) {
+    if(!viewEdit->closeAll())
+        ev->ignore();
+}
 

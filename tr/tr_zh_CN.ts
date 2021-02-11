@@ -5,7 +5,7 @@
     <name>EditView</name>
     <message>
         <location filename="../Widget/mw/Edit/editview.cpp" line="39"/>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="60"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="61"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
@@ -15,12 +15,12 @@
         <translation>无法加载项目 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="53"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="54"/>
         <source>Do you want to save the project &quot;%1&quot;?</source>
         <translation>你要保存项目 &quot;%1&quot; 吗?</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="60"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="61"/>
         <source>Cannot save the project &quot;%1&quot;, force close?</source>
         <translation>无法保存项目 &quot;%1&quot;，强制关闭吗?</translation>
     </message>
@@ -51,12 +51,12 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../Widget/mainwindow.h" line="89"/>
+        <location filename="../Widget/mainwindow.h" line="90"/>
         <source>HomePage</source>
         <translation>主页</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.h" line="90"/>
+        <location filename="../Widget/mainwindow.h" line="91"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
@@ -173,7 +173,7 @@
 <context>
     <name>ProjWidget</name>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="66"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="73"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>

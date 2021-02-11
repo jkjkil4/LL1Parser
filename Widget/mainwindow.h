@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 protected:
     void changeEvent(QEvent *ev) override;
+    void closeEvent(QCloseEvent *ev) override;
 
 public:
     MainWindow(QWidget *parent = nullptr);

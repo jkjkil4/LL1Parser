@@ -1,5 +1,4 @@
-#ifndef PROJWIDGET_H
-#define PROJWIDGET_H
+#pragma once
 
 #include <QWidget>
 #include <QPlainTextEdit>
@@ -10,6 +9,7 @@
 
 #include <Lib/PlainButton/plainbutton.h>
 #include "Widget/Other/colorwidget.h"
+#include "plaintextedit.h"
 #include "header.h"
 
 class ProjWidget : public QWidget
@@ -41,8 +41,6 @@ private:
 
     bool isSaved = true;
 
-    QPlainTextEdit *edit = new QPlainTextEdit;
+    PlainTextEdit *edit = new PlainTextEdit;
     PlainButton *btnParse = new PlainButton;
 };
-
-#endif // PROJWIDGET_H
