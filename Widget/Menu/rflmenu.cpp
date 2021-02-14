@@ -5,14 +5,14 @@ RFLMenu::RFLMenu(QWidget *parent) : QMenu(parent) { init(); }
 RFLMenu::RFLMenu(const QString &title, QWidget *parent) : QMenu(title, parent) { init(); }
 
 RFLMenu::~RFLMenu() {
-    delete actMoveToFirst;
-    delete actRemove;
-    delete actShowInExplorer;
+    delete mActMoveToFirst;
+    delete mActRemove;
+    delete mActShowInExplorer;
 }
 
 void RFLMenu::init() {
-    addAction(actMoveToFirst);
-    addAction(actRemove);
+    addAction(mActMoveToFirst);
+    addAction(mActRemove);
     addSeparator();
-    addAction(actShowInExplorer);
+    addAction(mActShowInExplorer);
 }

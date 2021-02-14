@@ -31,10 +31,10 @@ private slots:
 private:
     void initCbbLanguage();     //设置语言选择框内容
 
-    QComboBox *cbbLanguage = new QComboBox;     //语言选择框
+    QComboBox *mCbbLanguage = new QComboBox;     //语言选择框
 
 //    PlainButton *btnOK = new PlainButton(tr("OK"));         //"确定"按钮
 //    PlainButton *btnCancel = new PlainButton(tr("Cancel"));	//"取消"按钮
-    QPushButton *btnOK = new QPushButton(tr("OK"));         //"确定"按钮
-    QPushButton *btnCancel = new QPushButton(tr("Cancel"));	//"取消"按钮
+    QPushButton *mBtnOK = new QPushButton(tr("OK"));         //"确定"按钮
+    QPushButton *mBtnCancel = new QPushButton(tr("Cancel"));	//"取消"按钮
 };

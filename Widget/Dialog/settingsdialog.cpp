@@ -3,10 +3,10 @@
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 {
     QLabel *labLanguage = new QLabel(tr("Language") + ":");
-    connect(btnOK, SIGNAL(clicked()), this, SLOT(onAccept()));
-    connect(btnCancel, SIGNAL(clicked()), this, SLOT(onCancel()));
+    connect(mBtnOK, SIGNAL(clicked()), this, SLOT(onAccept()));
+    connect(mBtnCancel, SIGNAL(clicked()), this, SLOT(onCancel()));
 
-    btnCancel->setFocusPolicy(Qt::NoFocus);
+    mBtnCancel->setFocusPolicy(Qt::NoFocus);
 
     QWidget *centralWidget = new QWidget;   //中心控件
     ColorWidget *bottomWidget = new ColorWidget(C_BOTTOM);	//底部控件
@@ -15,7 +15,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     //创建布局
     QHBoxLayout *layLanguage = new QHBoxLayout;		//选择语言
     layLanguage->addWidget(labLanguage);
-    layLanguage->addWidget(cbbLanguage, 1);
+    layLanguage->addWidget(mCbbLanguage, 1);
 
     QVBoxLayout *layCentral = new QVBoxLayout;		//中心布局
     layCentral->addLayout(layLanguage);
@@ -24,8 +24,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 
     QHBoxLayout *layBottom = new QHBoxLayout;		//底部按钮
     layBottom->addStretch();
-    layBottom->addWidget(btnOK);
-    layBottom->addWidget(btnCancel);
+    layBottom->addWidget(mBtnOK);
+    layBottom->addWidget(mBtnCancel);
     bottomWidget->setLayout(layBottom);
 
     QVBoxLayout *layMain = new QVBoxLayout;         //主布局
@@ -40,8 +40,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 }
 
 void SettingsDialog::onAccept() {
-    QString locale = cbbLanguage->currentData().toString();
-    if(locale != translator.getLocale())
+    QString locale = mCbbLanguage->currentData().toString();
+    if(locale != translator.locale())
         translator.setLocale(locale);
     accept();
 }
@@ -50,9 +50,9 @@ void SettingsDialog::onCancel() {
     reject();
 }
 
-#define ADD_ITEM(text, data) cbbLanguage->addItem(text, data)
+#define ADD_ITEM(text, data) mCbbLanguage->addItem(text, data)
 void SettingsDialog::initCbbLanguage() {
-    cbbLanguage->clear();   //清空原有的选项
+    mCbbLanguage->clear();   //清空原有的选项
 
     //添加选项
     ADD_ITEM("<" + tr("Auto") + ">", "Auto");
@@ -60,11 +60,11 @@ void SettingsDialog::initCbbLanguage() {
     ADD_ITEM(tr("Chinese(Simplified)") + " - " + "中文(简体)", "zh_CN");
 
     //根据当前语言设定所选的选项
-    QString locale = translator.getLocale();
-    int count = cbbLanguage->count();
+    QString locale = translator.locale();
+    int count = mCbbLanguage->count();
     for(int i = 0; i < count; i++) {
-        if(cbbLanguage->itemData(i) == locale) {
-            cbbLanguage->setCurrentIndex(i);
+        if(mCbbLanguage->itemData(i) == locale) {
+            mCbbLanguage->setCurrentIndex(i);
             break;
         }
     }

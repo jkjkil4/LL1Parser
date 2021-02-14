@@ -20,6 +20,6 @@ signals:
     void pointSizeChanged(int pointSize);   //当字体的点大小发生改变时发出的信号
 
 private:
-    int prevFontWidth = 0;  //之前的字体宽度，用于判断是否自动更新tab距离
+    int mPrevFontWidth = 0;  //之前的字体宽度，用于判断是否自动更新tab距离
 };
 

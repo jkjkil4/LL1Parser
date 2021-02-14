@@ -24,15 +24,15 @@ public:
 
     void updateTr();
 
-    RFLWidget* recentFileListWidget() { return rflWidget; }
-    PlainButton* btnNew() { return btnNewProj; }
-    PlainButton* btnOpen() { return btnOpenProj; }
+    RFLWidget* recentFileListWidget() { return mRflWidget; }
+    PlainButton* btnNew() { return mBtnNewProj; }
+    PlainButton* btnOpen() { return mBtnOpenProj; }
 
 private:
-    QLabel *labRfl = new QLabel;
-    RFLWidget *rflWidget = new RFLWidget;
+    QLabel *mLabRfl = new QLabel;
+    RFLWidget *mRflWidget = new RFLWidget;
 
-    QLabel *labAdd = new QLabel;
-    PlainButton *btnNewProj = new PlainButton;
-    PlainButton *btnOpenProj = new PlainButton;
+    QLabel *mLabAdd = new QLabel;
+    PlainButton *mBtnNewProj = new PlainButton;
+    PlainButton *mBtnOpenProj = new PlainButton;
 };

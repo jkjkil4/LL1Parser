@@ -45,39 +45,39 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     //创建控件
-    for(auto &view : views) { //遍历所有的视图
-        stackedWidget->addWidget(view.p);   //将该视图添加至stackedWidget中
-        sideBar->append(QIcon(view.iconPath), view.p, view.TrFn());
+    for(auto &view : mViews) { //遍历所有的视图
+        mStackedWidget->addWidget(view.p);   //将该视图添加至stackedWidget中
+        mSideBar->append(QIcon(view.iconPath), view.p, view.TrFn());
         connect(view.p, &MainWindowView::changeView, [this](const QString &viewName){ setCurrentView(viewName); });    //绑定信号与槽
     }
-    setCurrentView(viewHomePage);  //设置当前视图为"HomePage"
+    setCurrentView(mViewHomePage);  //设置当前视图为"HomePage"
 
-    connect(sideBar, &SideBar::actived, [this](const SideBar::Data &data){
-        stackedWidget->setCurrentWidget(data.view);
+    connect(mSideBar, &SideBar::actived, [this](const SideBar::Data &data){
+        mStackedWidget->setCurrentWidget(data.view);
         updateProjMenuState();
     });
-    connect(viewHomePage->recentFileListWidget(), &RFLWidget::itemClicked, [this](const RFLWidget::Item &item){ onOpenProj(item.filePath); });
-    connect(viewHomePage->recentFileListWidget(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onRFLMenuRequested(const QPoint&)));
-    connect(viewHomePage->btnNew(), SIGNAL(clicked()), this, SLOT(onNewProj()));
-    connect(viewHomePage->btnOpen(), SIGNAL(clicked()), this, SLOT(onOpenProj()));
+    connect(mViewHomePage->recentFileListWidget(), &RFLWidget::itemClicked, [this](const RFLWidget::Item &item){ onOpenProj(item.filePath); });
+    connect(mViewHomePage->recentFileListWidget(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onRFLMenuRequested(const QPoint&)));
+    connect(mViewHomePage->btnNew(), SIGNAL(clicked()), this, SLOT(onNewProj()));
+    connect(mViewHomePage->btnOpen(), SIGNAL(clicked()), this, SLOT(onOpenProj()));
 
     //菜单
-    menu.init(menuBar());
-    connect(&menu.file_actNewProj, SIGNAL(triggered(bool)), this, SLOT(onNewProj()));
-    connect(&menu.file_actOpenProj, SIGNAL(triggered(bool)), this, SLOT(onOpenProj()));
-    connect(&menu.file_actSave, SIGNAL(triggered(bool)), this, SLOT(onSaveProj()));
-    connect(&menu.file_actSaveAs, SIGNAL(triggered(bool)), this, SLOT(onSaveProjAs()));
-    connect(&menu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
-    connect(&menu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
-    connect(&menu.other_actSettings, &QAction::triggered, [this]{ SettingsDialog(this).exec(); });
+    mMenu.init(menuBar());
+    connect(&mMenu.file_actNewProj, SIGNAL(triggered(bool)), this, SLOT(onNewProj()));
+    connect(&mMenu.file_actOpenProj, SIGNAL(triggered(bool)), this, SLOT(onOpenProj()));
+    connect(&mMenu.file_actSave, SIGNAL(triggered(bool)), this, SLOT(onSaveProj()));
+    connect(&mMenu.file_actSaveAs, SIGNAL(triggered(bool)), this, SLOT(onSaveProjAs()));
+    connect(&mMenu.other_actAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
+    connect(&mMenu.other_actAboutQt, &QAction::triggered, [this]{ QMessageBox::aboutQt(this); });
+    connect(&mMenu.other_actSettings, &QAction::triggered, [this]{ SettingsDialog(this).exec(); });
 
 
     //创建布局
     QHBoxLayout *layMain = new QHBoxLayout; //主布局
     layMain->setMargin(0);
     layMain->setSpacing(0);
-    layMain->addWidget(sideBar);
-    layMain->addWidget(stackedWidget);
+    layMain->addWidget(mSideBar);
+    layMain->addWidget(mStackedWidget);
 
     QWidget *centralWidget = new QWidget;
     centralWidget->setLayout(layMain);
@@ -91,8 +91,8 @@ MainWindow::MainWindow(QWidget *parent)
     QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);     //读取ini
 
     //读取窗口位置大小
-    normalGeometry = config.value("MW/Geometry", geometry()).toRect();
-    setGeometry(normalGeometry);
+    mNormalGeometry = config.value("MW/Geometry", geometry()).toRect();
+    setGeometry(mNormalGeometry);
     if(config.value("MW/IsMaximized", true).toBool())
         showMaximized();
 
@@ -104,31 +104,31 @@ MainWindow::~MainWindow()
 {
     //保存设定
     QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
-    config.setValue("MW/Geometry", (isMaximized() || isMinimized()) ? normalGeometry : geometry());
+    config.setValue("MW/Geometry", (isMaximized() || isMinimized()) ? mNormalGeometry : geometry());
     config.setValue("MW/IsMaximized", isMaximized());
 }
 
 void MainWindow::setCurrentView(const QString &name) {
-    MainWindowView *view = mapViews.value(name, nullptr);
+    MainWindowView *view = mMapViews.value(name, nullptr);
     if(view) setCurrentView(view);
 }
 void MainWindow::setCurrentView(MainWindowView *view) {
-    sideBar->setCurrent(view);
+    mSideBar->setCurrent(view);
 }
 
 void MainWindow::updateProjMenuState() {
-    bool atProj = sideBar->current() == viewEdit && viewEdit->count() != 0;
-    menu.file_actSave.setEnabled(atProj);
-    menu.file_actSaveAs.setEnabled(atProj);
+    bool atProj = mSideBar->current() == mViewEdit && mViewEdit->count() != 0;
+    mMenu.file_actSave.setEnabled(atProj);
+    mMenu.file_actSaveAs.setEnabled(atProj);
 }
 
 void MainWindow::updateTr() {
     int index = 0;
-    for(View &view : views) {
-        sideBar->setText(index, view.TrFn());
+    for(View &view : mViews) {
+        mSideBar->setText(index, view.TrFn());
         index++;
     }
-    menu.tr();
+    mMenu.tr();
 }
 
 void MainWindow::onNewProj() {
@@ -172,12 +172,12 @@ void MainWindow::onOpenProj() {
 void MainWindow::onOpenProj(const QString &filePath) {
     rfManager.append(filePath);
 
-    viewEdit->open(filePath);
-    sideBar->setCurrent(viewEdit);
+    mViewEdit->open(filePath);
+    mSideBar->setCurrent(mViewEdit);
 }
 
 void MainWindow::onSaveProj() {
-    ProjWidget *proj = viewEdit->current();
+    ProjWidget *proj = mViewEdit->current();
     if(proj && !proj->getIsSaved()) {
         if(!proj->save())
             QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\"").arg(proj->getProjName()));
@@ -198,7 +198,7 @@ void MainWindow::onAbout() {
 }
 
 void MainWindow::onRFLMenuRequested(const QPoint &pos) {
-    RFLWidget::Item item = viewHomePage->recentFileListWidget()->itemAt(pos.y());
+    RFLWidget::Item item = mViewHomePage->recentFileListWidget()->itemAt(pos.y());
     if(item.row == -1)
         return;
 
@@ -206,11 +206,11 @@ void MainWindow::onRFLMenuRequested(const QPoint &pos) {
     menu.move(cursor().pos());
     QAction *res = menu.exec();
 
-    if(res == menu.actMoveToFirst) {
+    if(res == menu.mActMoveToFirst) {
         rfManager.append(item.filePath);
-    } else if(res == menu.actRemove) {
+    } else if(res == menu.mActRemove) {
         rfManager.remove(item.row);
-    } else if(res == menu.actShowInExplorer) {
+    } else if(res == menu.mActShowInExplorer) {
 #ifdef Q_OS_WIN
         QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << QFileInfo(item.filePath).path());
 #else
@@ -225,7 +225,7 @@ void MainWindow::changeEvent(QEvent *ev) {
     }
 }
 void MainWindow::closeEvent(QCloseEvent *ev) {
-    if(!viewEdit->closeAll())
+    if(!mViewEdit->closeAll())
         ev->ignore();
 }
 

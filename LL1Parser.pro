@@ -29,10 +29,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        Class/parser.cpp \
         Widget/Dialog/newprojdialog.cpp \
         Widget/Menu/rflmenu.cpp \
         Widget/Other/infowidget.cpp \
         Widget/mw/Edit/editview.cpp \
+        Widget/mw/Edit/errorlistwidget.cpp \
         Widget/mw/Edit/notewidget.cpp \
         Widget/mw/Edit/plaintextedit.cpp \
         Widget/mw/Edit/projwidget.cpp \
@@ -44,12 +46,14 @@ SOURCES += \
         Widget/mainwindow.cpp
 
 HEADERS += \
+        Class/parser.h \
         Widget/Menu/rflmenu.h \
         Widget/Other/colorwidget.h \
         Class/translator.h \
         Widget/Dialog/newprojdialog.h \
         Widget/Other/infowidget.h \
         Widget/mw/Edit/editview.h \
+        Widget/mw/Edit/errorlistwidget.h \
         Widget/mw/Edit/notewidget.h \
         Widget/mw/Edit/plaintextedit.h \
         Widget/mw/Edit/projwidget.h \

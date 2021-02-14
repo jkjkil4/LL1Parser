@@ -28,8 +28,8 @@ class NewProjDialog : public QDialog
 public:
     explicit NewProjDialog(QWidget *parent = nullptr);
 
-    QString projPath() { return editPath->text(); }
-    QString projName() { return editName->text(); }
+    QString projPath() { return mEditPath->text(); }
+    QString projName() { return mEditName->text(); }
 
 private slots:
     void onBrowse();	//浏览文件
@@ -40,22 +40,22 @@ private slots:
 
 private:
     //输入框的正则表达式
-    QRegExpValidator *regExpDir = new QRegExpValidator(QRegExp("[^*?\"<>|]*"), this);
-    QRegExpValidator *regExpFile = new QRegExpValidator(QRegExp("[A-Za-z0-9_-]*"), this);
+    QRegExpValidator *mRegExpDir = new QRegExpValidator(QRegExp("[^*?\"<>|]*"), this);
+    QRegExpValidator *mRegExpFile = new QRegExpValidator(QRegExp("[A-Za-z0-9_-]*"), this);
 
-    QLineEdit *editPath = new QLineEdit;	//用于编辑路径
-    QLineEdit *editName = new QLineEdit;	//用于编辑名称
+    QLineEdit *mEditPath = new QLineEdit;	//用于编辑路径
+    QLineEdit *mEditName = new QLineEdit;	//用于编辑名称
 
     //PlainButton *btnBrowse = new PlainButton(tr("Browse") + "...");	//用于浏览文件
-    QPushButton *btnBrowse = new QPushButton(tr("Browse") + "...");	//用于浏览文件
+    QPushButton *mBtnBrowse = new QPushButton(tr("Browse") + "...");	//用于浏览文件
 
-    QCheckBox *checkSetToDefault = new QCheckBox(tr("Use as default project path"));    //用于选择是否作为默认路径
+    QCheckBox *mCheckSetToDefault = new QCheckBox(tr("Use as default project path"));    //用于选择是否作为默认路径
 
-    InfoWidget *infoWidget = new InfoWidget;	//用于显示提示信息
+    InfoWidget *mInfoWidget = new InfoWidget;	//用于显示提示信息
 
     //PlainButton *btnOK = new PlainButton(tr("OK"));         //"确认"按钮
     //PlainButton *btnCancel = new PlainButton(tr("Cancel"));	//"取消"按钮
-    QPushButton *btnOK = new QPushButton(tr("OK"));         //"确认"按钮
-    QPushButton *btnCancel = new QPushButton(tr("Cancel"));	//"取消"按钮
+    QPushButton *mBtnOK = new QPushButton(tr("OK"));         //"确认"按钮
+    QPushButton *mBtnCancel = new QPushButton(tr("Cancel"));	//"取消"按钮
 };
 

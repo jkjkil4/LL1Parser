@@ -15,15 +15,15 @@ public:
     explicit InfoWidget(QWidget *parent = nullptr);
     explicit InfoWidget(const QString &text, QColor col, QWidget *parent = nullptr);
 
-    void setData(const QString &_text, QColor _col);
+    void setData(const QString &text, QColor col);
     void clear();
     void setPointSize(int pointSize);
 
 private:
     void updateHeight();
 
-    bool paint = false;
-    QString text;
-    QColor col;
+    bool mPaint = false;
+    QString mText;
+    QColor mCol;
 };
 

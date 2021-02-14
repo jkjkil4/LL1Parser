@@ -13,6 +13,7 @@
 #include "notewidget.h"
 #include "plaintextedit.h"
 #include "header.h"
+#include "Class/parser.h"
 
 class ProjWidget : public QWidget
 {
@@ -30,20 +31,23 @@ public:
 
     void updateTr();
 
-    VAR_GET_FUNC(ProjName, projName, QString)
-    VAR_GET_FUNC(ProjPath, projPath, QString)
-    VAR_GET_FUNC(IsSaved, isSaved, bool)
+    VAR_GET_FUNC(ProjName, mProjName, QString)
+    VAR_GET_FUNC(ProjPath, mProjPath, QString)
+    VAR_GET_FUNC(IsSaved, mIsSaved, bool)
 
 signals:
-    void stateChanged(bool isSaved);    //当保存情况改变时发出的信号
+    void stateChanged(bool mIsSaved);    //当保存情况改变时发出的信号
+
+private slots:
+    void onParse();
 
 private:
-    QString projName;   //项目名称
-    QString projPath;   //项目路径
+    QString mProjName;   //项目名称
+    QString mProjPath;   //项目路径
 
-    bool isSaved = true;    //是否保存
+    bool mIsSaved = true;    //是否保存
 
-    PlainTextEdit *edit = new PlainTextEdit;
-    NoteWidget *noteWidget = new NoteWidget;
-    PlainButton *btnParse = new PlainButton;
+    PlainTextEdit *mEdit = new PlainTextEdit;
+    NoteWidget *mNoteWidget = new NoteWidget;
+    PlainButton *mBtnParse = new PlainButton;
 };

@@ -11,9 +11,9 @@ PlainTextEdit::PlainTextEdit(QWidget *parent) : QPlainTextEdit(parent)
 
 void PlainTextEdit::updateTabStopDistance() {
     int fontWidth = fontMetrics().horizontalAdvance('_');
-    if(prevFontWidth != fontWidth) {
+    if(mPrevFontWidth != fontWidth) {
         setTabStopDistance(fontWidth * 4);
-        prevFontWidth = fontWidth;
+        mPrevFontWidth = fontWidth;
     }
 }
 

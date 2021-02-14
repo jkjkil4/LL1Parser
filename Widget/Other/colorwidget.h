@@ -11,15 +11,15 @@ class ColorWidget : public QWidget
 protected:
     void paintEvent(QPaintEvent *) override {
         QPainter p(this);
-        p.fillRect(0, 0, width(), height(), color);
+        p.fillRect(0, 0, width(), height(), mColor);
     }
 
 public:
     using QWidget::QWidget;
-    ColorWidget(QColor color, QWidget *parent = nullptr) : QWidget(parent), color(color) {}
+    ColorWidget(QColor color, QWidget *parent = nullptr) : QWidget(parent), mColor(color) {}
 
-    VAR_FUNC_USER(Color, color, QColor, update(), , )
+    VAR_FUNC_USER(Color, mColor, QColor, update(), , )
 
 private:
-    QColor color = QColor(250, 250, 250);
+    QColor mColor = QColor(250, 250, 250);
 };

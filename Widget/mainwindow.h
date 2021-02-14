@@ -52,10 +52,10 @@ private slots:
     void onRFLMenuRequested(const QPoint &pos);
 
 private:
-    QRect normalGeometry;   //默认位置大小
+    QRect mNormalGeometry;   //默认位置大小
 
-    QStackedWidget *stackedWidget = new QStackedWidget;     //视图控件
-    SideBar *sideBar = new SideBar; //侧边栏
+    QStackedWidget *mStackedWidget = new QStackedWidget;     //视图控件
+    SideBar *mSideBar = new SideBar; //侧边栏
 
 
     struct Menu {
@@ -72,7 +72,7 @@ private:
 
         void init(QMenuBar *menuBar);
         void tr();
-    } menu;
+    } mMenu;
 
 
     struct View
@@ -83,16 +83,16 @@ private:
         MainWindowView *p;
     };
 
-    HomePage *viewHomePage = new HomePage;
-    EditView *viewEdit = new EditView;
+    HomePage *mViewHomePage = new HomePage;
+    EditView *mViewEdit = new EditView;
 
-    View views[2] = {
-        { ":/SideBtn/qrc/HomePage.png", "HomePage", []()->QString { return tr("HomePage"); }, viewHomePage },
-        { ":/SideBtn/qrc/Edit.png", "Edit", []()->QString { return tr("Edit"); }, viewEdit }
+    View mViews[2] = {
+        { ":/SideBtn/qrc/HomePage.png", "HomePage", []()->QString { return tr("HomePage"); }, mViewHomePage },
+        { ":/SideBtn/qrc/Edit.png", "Edit", []()->QString { return tr("Edit"); }, mViewEdit }
     };
 
-    QMap<QString, MainWindowView*> mapViews = {
-        { "HomePage", viewHomePage },
-        { "Edit", viewEdit }
+    QMap<QString, MainWindowView*> mMapViews = {
+        { "HomePage", mViewHomePage },
+        { "Edit", mViewEdit }
     };
 };

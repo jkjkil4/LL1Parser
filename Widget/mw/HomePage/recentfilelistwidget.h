@@ -33,8 +33,8 @@ private slots:
     void onRFChanged();
 
 private:
-    DTextDelegate *pDelegate = new DTextDelegate(this);
-    DTextModel *pModel = new DTextModel(this);
+    DTextDelegate *mDelegate = new DTextDelegate(this);
+    DTextModel *mModel = new DTextModel(this);
 };
 
 typedef RecentFileListWidget RFLWidget;

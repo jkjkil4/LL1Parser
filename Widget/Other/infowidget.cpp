@@ -10,14 +10,14 @@ InfoWidget::InfoWidget(const QString &text, QColor col, QWidget *parent) : InfoW
     setData(text, col);
 }
 
-void InfoWidget::setData(const QString &_text, QColor _col) {
-    paint = true;
-    text = _text;
-    col = _col;
+void InfoWidget::setData(const QString &text, QColor col) {
+    mPaint = true;
+    mText = text;
+    mCol = col;
     update();
 }
 void InfoWidget::clear() {
-    paint = false;
+    mPaint = false;
     update();
 }
 void InfoWidget::setPointSize(int pointSize) {
@@ -31,13 +31,13 @@ void InfoWidget::updateHeight() {
 }
 
 void InfoWidget::paintEvent(QPaintEvent *) {
-    if(!paint)
+    if(!mPaint)
         return;
 
     QPainter p(this);
 
     QRect rect(0, 0, width(), height());
 
-    p.fillRect(rect, col);
-    p.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, text);
+    p.fillRect(rect, mCol);
+    p.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, mText);
 }

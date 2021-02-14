@@ -4,8 +4,8 @@
 
 RecentFileListWidget::RecentFileListWidget(QWidget *parent) : QListView(parent)
 {
-    setItemDelegate(pDelegate);
-    setModel(pModel);
+    setItemDelegate(mDelegate);
+    setModel(mModel);
     setMouseTracking(true);
     setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
@@ -23,9 +23,9 @@ RFLWidget::Item RecentFileListWidget::currentItem() {
 RFLWidget::Item RecentFileListWidget::itemAt(int y) {
     int realY = y + verticalScrollBar()->value();
     if(realY >= 0) {
-        int index = realY / pDelegate->getHeight();
-        if(index < pModel->count()) {
-            return Item{ index, pModel->data(index) };
+        int index = realY / mDelegate->getHeight();
+        if(index < mModel->count()) {
+            return Item{ index, mModel->data(index) };
         }
     }
     return Item{ -1, "" };
@@ -40,19 +40,19 @@ void RecentFileListWidget::loadList() {
 }
 
 void RecentFileListWidget::remove(int index) {
-    if(index < 0 || index >= pModel->count())
+    if(index < 0 || index >= mModel->count())
         return;
-    pModel->remove(index);
+    mModel->remove(index);
     blockSignals(true);
-    for(int i = pModel->count() - 1; i >= 0; i--)
-        rfManager.append(pModel->at(i).text2);
+    for(int i = mModel->count() - 1; i >= 0; i--)
+        rfManager.append(mModel->at(i).text2);
     blockSignals(false);
 }
 
 void RecentFileListWidget::onRFChanged() {
-    pModel->clear();
+    mModel->clear();
     for(const QString& path : rfManager.list())
-        pModel->append(DTextModel::Data{ QFileInfo(path).completeBaseName(), path });
+        mModel->append(DTextModel::Data{ QFileInfo(path).completeBaseName(), path });
     update();
 }
 

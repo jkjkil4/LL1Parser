@@ -10,13 +10,13 @@ class Translator
 {
 public:
     void setApplication(QApplication *app) {
-        app->installTranslator(&trans);
-        app->installTranslator(&transQt);
+        app->installTranslator(&mTrans);
+        app->installTranslator(&mTransQt);
     }
     bool setLocale(const QString& _locale) {
-        locale = _locale;
-        QString use = (locale == "Auto" ? QLocale::system().name() : locale);
-        return trans.load("tr_" + use, APP_DIR + "/Languages") && transQt.load("qt_" + use, APP_DIR + "/Languages/Qt");
+        mLocale = _locale;
+        QString use = (mLocale == "Auto" ? QLocale::system().name() : mLocale);
+        return mTrans.load("tr_" + use, APP_DIR + "/Languages") && mTransQt.load("qt_" + use, APP_DIR + "/Languages/Qt");
     }
     bool loadLocale() {
         QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
@@ -24,15 +24,15 @@ public:
     }
     void saveLocale() {
         QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
-        config.setValue("Config/TrLocale", locale);
+        config.setValue("Config/TrLocale", mLocale);
     }
-    VAR_GET_FUNC(Locale, locale, QString)
+    QString locale() { return mLocale; }
 
 private:
-    QString locale;
+    QString mLocale;
 
-    QTranslator trans;
-    QTranslator transQt;
+    QTranslator mTrans;
+    QTranslator mTransQt;
 };
 
 extern Translator translator;
