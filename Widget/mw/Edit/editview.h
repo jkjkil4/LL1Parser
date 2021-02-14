@@ -14,7 +14,7 @@ class EditView : public MainWindowView
 public:
     explicit EditView(QWidget *parent = nullptr);
 
-    void open(const QString &projPath);     //打开项目
+    bool open(const QString &projPath);     //打开项目
     int count() { return mTabWidget->count(); }      //得到项目数量
     ProjWidget* current() { return (ProjWidget*)mTabWidget->currentWidget(); }   //得到当前项目
 

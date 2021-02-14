@@ -170,9 +170,10 @@ void MainWindow::onOpenProj() {
 }
 
 void MainWindow::onOpenProj(const QString &filePath) {
-    rfManager.append(filePath);
+    if(!mViewEdit->open(filePath))
+        return;
 
-    mViewEdit->open(filePath);
+    rfManager.append(filePath);
     mSideBar->setCurrent(mViewEdit);
 }
 

@@ -4,23 +4,29 @@
 <context>
     <name>EditView</name>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="39"/>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="61"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="23"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="43"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="67"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="39"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="23"/>
+        <source>&quot;%1&quot; dose not exists</source>
+        <translation>&quot;%1&quot; 不存在</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="43"/>
         <source>Cannot load the project &quot;%1&quot;</source>
         <translation>无法加载项目 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="54"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="60"/>
         <source>Do you want to save the project &quot;%1&quot;?</source>
         <translation>你要保存项目 &quot;%1&quot; 吗?</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="61"/>
+        <location filename="../Widget/mw/Edit/editview.cpp" line="67"/>
         <source>Cannot save the project &quot;%1&quot;, force it to close?</source>
         <translation>无法保存项目 &quot;%1&quot;，强制关闭它吗?</translation>
     </message>
@@ -67,7 +73,7 @@
     </message>
     <message>
         <location filename="../Widget/mainwindow.cpp" line="155"/>
-        <location filename="../Widget/mainwindow.cpp" line="183"/>
+        <location filename="../Widget/mainwindow.cpp" line="184"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
@@ -82,27 +88,27 @@
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="183"/>
+        <location filename="../Widget/mainwindow.cpp" line="184"/>
         <source>Cannot save the project &quot;%1&quot;</source>
         <translation>无法保存项目 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="188"/>
+        <location filename="../Widget/mainwindow.cpp" line="189"/>
         <source>This function is not done</source>
         <translation>该功能未完成</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="194"/>
+        <location filename="../Widget/mainwindow.cpp" line="195"/>
         <source>Author</source>
         <translation>作者</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="196"/>
+        <location filename="../Widget/mainwindow.cpp" line="197"/>
         <source>Feedback</source>
         <translation>反馈</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="217"/>
+        <location filename="../Widget/mainwindow.cpp" line="218"/>
         <source>This function is not supported in this operating system</source>
         <translation>当前操作系统不支持该功能</translation>
     </message>
@@ -171,6 +177,19 @@
     </message>
 </context>
 <context>
+    <name>Parser</name>
+    <message>
+        <location filename="../Class/parser.cpp" line="15"/>
+        <source>Lack of &quot;-&gt;&quot; to represent production</source>
+        <translation>缺少 &quot;-&gt;&quot; 来表示产生式</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="19"/>
+        <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
+        <translation>应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
+    </message>
+</context>
+<context>
     <name>ProjWidget</name>
     <message>
         <location filename="../Widget/mw/Edit/projwidget.cpp" line="17"/>
@@ -178,7 +197,7 @@
         <translation>点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="77"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="78"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>
@@ -212,7 +231,7 @@
     </message>
     <message>
         <location filename="../Widget/mainwindow.cpp" line="38"/>
-        <location filename="../Widget/mainwindow.cpp" line="197"/>
+        <location filename="../Widget/mainwindow.cpp" line="198"/>
         <source>About</source>
         <translation>关于</translation>
     </message>

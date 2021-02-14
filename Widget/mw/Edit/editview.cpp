@@ -17,8 +17,12 @@ EditView::EditView(QWidget *parent) : MainWindowView(parent)
     setLayout(layMain);
 }
 
-void EditView::open(const QString &projPath) {
+bool EditView::open(const QString &projPath) {
     QFileInfo info(projPath);
+    if(!info.exists()) {
+        QMessageBox::critical(this, tr("Error"), tr("\"%1\" dose not exists").arg(projPath));
+        return false;
+    }
     QString canonicalProjPath = info.canonicalFilePath();
 
     int count = mTabWidget->count();
@@ -37,7 +41,7 @@ void EditView::open(const QString &projPath) {
         if(!widget->load()) {   //如果读取失败，则提示并return
             delete widget;
             QMessageBox::critical(this, tr("Error"), tr("Cannot load the project \"%1\"").arg(widget->projName()));
-            return;
+            return false;
         }
         mTabWidget->addTab(widget, " " + widget->projName() + " ");
         mTabWidget->setCurrentWidget(widget);
@@ -45,6 +49,8 @@ void EditView::open(const QString &projPath) {
             mTabWidget->setTabText(mTabWidget->indexOf(widget), " " + (isSaved ? widget->projName() : widget->projName() + "*") + " ");
         });
     }
+
+    return true;
 }
 
 
