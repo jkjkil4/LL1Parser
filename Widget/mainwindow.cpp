@@ -170,6 +170,8 @@ void MainWindow::onOpenProj() {
 }
 
 void MainWindow::onOpenProj(const QString &filePath) {
+    if(QFileInfo(filePath).suffix() != SUFFIX)
+        return;
     if(!mViewEdit->open(filePath))
         return;
 

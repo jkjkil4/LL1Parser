@@ -34,7 +34,7 @@ RFLWidget::Item RecentFileListWidget::itemAt(int y) {
 void RecentFileListWidget::loadList() {
     rfManager.load(20, nullptr, [](const QString& path) -> bool {
         QFileInfo info(path);
-        return info.isFile() && info.completeSuffix() == SUFFIX;
+        return info.isFile() && info.suffix() == SUFFIX;
     });
 
 }

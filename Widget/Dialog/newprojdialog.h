@@ -41,7 +41,7 @@ private slots:
 private:
     //输入框的正则表达式
     QRegExpValidator *mRegExpDir = new QRegExpValidator(QRegExp("[^*?\"<>|]*"), this);
-    QRegExpValidator *mRegExpFile = new QRegExpValidator(QRegExp("[A-Za-z0-9_-]*"), this);
+    QRegExpValidator *mRegExpFile = new QRegExpValidator(QRegExp(/*"[A-Za-z0-9_-]*"*/"[^/\\\\*?\"<>|]*"), this);
 
     QLineEdit *mEditPath = new QLineEdit;	//用于编辑路径
     QLineEdit *mEditName = new QLineEdit;	//用于编辑名称
