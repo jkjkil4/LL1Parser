@@ -178,9 +178,9 @@ void MainWindow::onOpenProj(const QString &filePath) {
 
 void MainWindow::onSaveProj() {
     ProjWidget *proj = mViewEdit->current();
-    if(proj && !proj->getIsSaved()) {
+    if(proj && !proj->isSaved()) {
         if(!proj->save())
-            QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\"").arg(proj->getProjName()));
+            QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\"").arg(proj->projName()));
     }
 }
 

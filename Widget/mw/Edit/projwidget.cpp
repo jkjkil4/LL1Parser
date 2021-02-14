@@ -68,8 +68,8 @@ bool ProjWidget::save() {
 }
 
 void ProjWidget::setSaved(bool _isSaved) {
-    if(_isSaved != mIsSaved) {
-        mIsSaved = _isSaved;
+    if(_isSaved != mSaved) {
+        mSaved = _isSaved;
         emit stateChanged(_isSaved);
     }
 }

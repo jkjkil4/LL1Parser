@@ -25,7 +25,7 @@ void SideBar::setCurrent(MainWindowView *view) {
     int index = 0;
     for(Data &data : lDatas) {
         if(data.view == view) {
-            checkedIndex = index;
+            mCheckedIndex = index;
             update();
             emit actived(data);
             return;
@@ -44,9 +44,9 @@ void SideBar::mousePressEvent(QMouseEvent *ev) {
         bool paintIcon = lDatas.size() * itemHeight <= height();
         int _itemHeight = (paintIcon ? itemHeight : height() / lDatas.size());
         int _checkedIndex = ev->y() / _itemHeight;  //新的checkedIndex
-        if(_checkedIndex >= 0 && _checkedIndex < lDatas.size() && checkedIndex != _checkedIndex) {  //判断是否在一定范围内并且是否变化
-            checkedIndex = _checkedIndex;
-            emit actived(lDatas[checkedIndex]);
+        if(_checkedIndex >= 0 && _checkedIndex < lDatas.size() && mCheckedIndex != _checkedIndex) {  //判断是否在一定范围内并且是否变化
+            mCheckedIndex = _checkedIndex;
+            emit actived(lDatas[mCheckedIndex]);
             update();
         }
     }
@@ -72,8 +72,8 @@ void SideBar::leaveEvent(QEvent *) {
 void SideBar::paintEvent(QPaintEvent *) {
     QPainter p(this);
 
-    p.fillRect(0, 0, width(), height(), backgroundColor); //填充背景
-    p.setPen(textColor);    //设置画笔颜色(绘制文字)
+    p.fillRect(0, 0, width(), height(), mBackgroundColor); //填充背景
+    p.setPen(mTextColor);    //设置画笔颜色(绘制文字)
     j::SetPointSize(&p, 8); //设置点大小
     j::SetBold(&p, true);
 
@@ -82,34 +82,34 @@ void SideBar::paintEvent(QPaintEvent *) {
     bool paintIcon = lDatas.size() * itemHeight <= height();  //是否绘制图标
     int _itemHeight = (paintIcon ? itemHeight : height() / lDatas.size()); //调整后的itemHeight
 
-    int iconX = (width() - iconSize.width()) / 2;  //图标的x
-    int iconY = _itemHeight - fmHeight - spacing - iconSize.height(); //图标相对当前位置的y
+    int iconX = (width() - mIconSize.width()) / 2;  //图标的x
+    int iconY = _itemHeight - fmHeight - mSpacing - mIconSize.height(); //图标相对当前位置的y
     int index = 0;
     for(Data &data : lDatas) {  //遍历所有的内容
         QRect rect(0, index * _itemHeight, width(), _itemHeight); //全范围
-        QRect clipRect(margin, margin + index * _itemHeight, width() - 2 * margin, _itemHeight - 2 * margin);  //裁剪范围
+        QRect clipRect(mMargin, mMargin + index * _itemHeight, width() - 2 * mMargin, _itemHeight - 2 * mMargin);  //裁剪范围
 
         //绘制背景
         p.setClipRect(rect);
-        if(checkedIndex == index) {
-            p.fillRect(rect.x() + 2, rect.y(), rect.width() - 2, rect.height(), checkedColor);
+        if(mCheckedIndex == index) {
+            p.fillRect(rect.x() + 2, rect.y(), rect.width() - 2, rect.height(), mCheckedColor);
         } else if(mouseOverIndex == index) {
-            p.fillRect(rect, mouseOverColor);
+            p.fillRect(rect, mMouseOverColor);
         }
 
         //绘制图标和文字
         p.setClipRect(clipRect);
         if(paintIcon) {
             p.drawText(clipRect, Qt::AlignCenter | Qt::AlignBottom, data.text);
-            data.icon.paint(&p, QRect(QPoint(iconX, iconY + index * _itemHeight), iconSize));
+            data.icon.paint(&p, QRect(QPoint(iconX, iconY + index * _itemHeight), mIconSize));
         } else {
             p.drawText(clipRect, Qt::AlignCenter | Qt::AlignVCenter, data.text);
         }
 
         //绘制左侧细条
         p.setClipRect(rect);
-        if(checkedIndex == index) {
-            p.fillRect(rect.x(), rect.y(), 2, rect.height(), checkedLeftColor);
+        if(mCheckedIndex == index) {
+            p.fillRect(rect.x(), rect.y(), 2, rect.height(), mCheckedLeftColor);
         }
 
         index++;

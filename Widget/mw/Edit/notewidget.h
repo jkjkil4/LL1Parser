@@ -15,8 +15,8 @@ protected:
 public:
     explicit NoteWidget(QWidget *parent = nullptr);
 
-    VAR_FUNC_USER(Text, mText, QString, start(), const, &)
-    VAR_FUNC_USER(Color, mColor, QRgb, update(), , )
+    VAR_FUNC_USER(text, setText, mText, QString, start(), const, &)
+    VAR_FUNC_USER(color, setColor, mColor, QRgb, update(), , )
 
 private slots:
     void onTimer();

@@ -23,7 +23,7 @@ RFLWidget::Item RecentFileListWidget::currentItem() {
 RFLWidget::Item RecentFileListWidget::itemAt(int y) {
     int realY = y + verticalScrollBar()->value();
     if(realY >= 0) {
-        int index = realY / mDelegate->getHeight();
+        int index = realY / mDelegate->height();
         if(index < mModel->count()) {
             return Item{ index, mModel->data(index) };
         }

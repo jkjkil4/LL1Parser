@@ -18,7 +18,7 @@ public:
     using QWidget::QWidget;
     ColorWidget(QColor color, QWidget *parent = nullptr) : QWidget(parent), mColor(color) {}
 
-    VAR_FUNC_USER(Color, mColor, QColor, update(), , )
+    VAR_FUNC_USER(color, setColor, mColor, QColor, update(), , )
 
 private:
     QColor mColor = QColor(250, 250, 250);

@@ -31,12 +31,12 @@ public:
 
     void updateTr();
 
-    VAR_GET_FUNC(ProjName, mProjName, QString)
-    VAR_GET_FUNC(ProjPath, mProjPath, QString)
-    VAR_GET_FUNC(IsSaved, mIsSaved, bool)
+    VAR_GET_FUNC(projName, mProjName, QString)
+    VAR_GET_FUNC(projPath, mProjPath, QString)
+    VAR_GET_FUNC(isSaved, mSaved, bool)
 
 signals:
-    void stateChanged(bool mIsSaved);    //当保存情况改变时发出的信号
+    void stateChanged(bool mSaved);    //当保存情况改变时发出的信号
 
 private slots:
     void onParse();
@@ -45,7 +45,7 @@ private:
     QString mProjName;   //项目名称
     QString mProjPath;   //项目路径
 
-    bool mIsSaved = true;    //是否保存
+    bool mSaved = true;    //是否保存
 
     PlainTextEdit *mEdit = new PlainTextEdit;
     NoteWidget *mNoteWidget = new NoteWidget;

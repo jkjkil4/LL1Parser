@@ -25,7 +25,7 @@ void EditView::open(const QString &projPath) {
     bool has = false;
     repeat(int, i, count) { //遍历所有已打开的项目
         ProjWidget *widget = (ProjWidget*)mTabWidget->widget(i);
-        if(widget->getProjPath() == canonicalProjPath) {    //如果项目已打开
+        if(widget->projPath() == canonicalProjPath) {    //如果项目已打开
             mTabWidget->setCurrentIndex(i);  //切换到该项目
             has = true;
             break;
@@ -36,13 +36,13 @@ void EditView::open(const QString &projPath) {
         ProjWidget *widget = new ProjWidget(canonicalProjPath);
         if(!widget->load()) {   //如果读取失败，则提示并return
             delete widget;
-            QMessageBox::critical(this, tr("Error"), tr("Cannot load the project \"%1\"").arg(widget->getProjName()));
+            QMessageBox::critical(this, tr("Error"), tr("Cannot load the project \"%1\"").arg(widget->projName()));
             return;
         }
-        mTabWidget->addTab(widget, " " + widget->getProjName() + " ");
+        mTabWidget->addTab(widget, " " + widget->projName() + " ");
         mTabWidget->setCurrentWidget(widget);
         connect(widget, &ProjWidget::stateChanged, [this, widget](bool isSaved){
-            mTabWidget->setTabText(mTabWidget->indexOf(widget), " " + (isSaved ? widget->getProjName() : widget->getProjName() + "*") + " ");
+            mTabWidget->setTabText(mTabWidget->indexOf(widget), " " + (isSaved ? widget->projName() : widget->projName() + "*") + " ");
         });
     }
 }
@@ -51,14 +51,14 @@ void EditView::open(const QString &projPath) {
 bool EditView::confirmClose(int index) {
     ProjWidget *widget = (ProjWidget*)mTabWidget->widget(index);
 
-    int res = QMessageBox::information(this, "", tr("Do you want to save the project \"%1\"?").arg(widget->getProjName()),
+    int res = QMessageBox::information(this, "", tr("Do you want to save the project \"%1\"?").arg(widget->projName()),
                              QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
 
     if(res == QMessageBox::Cancel)  //如果选择了取消，则return
         return false;
     if(res == QMessageBox::Yes && !widget->save()) {    //如果选择了保存
         //如果保存失败，则提示是否强制关闭
-        int res2 = QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\", force it to close?").arg(widget->getProjName()),
+        int res2 = QMessageBox::warning(this, tr("Error"), tr("Cannot save the project \"%1\", force it to close?").arg(widget->projName()),
                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if(res2 == QMessageBox::No) //如果不强制关闭，则return
             return false;
@@ -72,7 +72,7 @@ bool EditView::closeAll() {
     int count = mTabWidget->count();
     for(int i = count - 1; i >= 0; i--) {     //遍历所有打开的项目
         ProjWidget *widget = (ProjWidget*)mTabWidget->widget(i);
-        if(!widget->getIsSaved()) {     //如果该项目未保存
+        if(!widget->isSaved()) {     //如果该项目未保存
             //将视图切换到该项目
             mTabWidget->setCurrentIndex(i);
             if(!viewChanged) {
@@ -94,7 +94,7 @@ bool EditView::closeAll() {
 
 void EditView::onTabCloseRequested(int index) {
     ProjWidget *widget = (ProjWidget*)mTabWidget->widget(index);
-    if(!widget->getIsSaved() && !confirmClose(index))
+    if(!widget->isSaved() && !confirmClose(index))
         return;
 
     mTabWidget->removeTab(index);    //从tabWidget中移除该控件
