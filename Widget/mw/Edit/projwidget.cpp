@@ -11,6 +11,7 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     j::SetPointSize(labPath, 8);
 
     ColorWidget *bottomWidget = new ColorWidget;
+    QWidget *mainWidget = new QWidget;
 
     connect(mEdit, &PlainTextEdit::textChanged, [this]{ setSaved(false); });
     connect(mEdit, &PlainTextEdit::pointSizeChanged, [this](int cur){
@@ -25,16 +26,26 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     layBottom->addWidget(mBtnParse, 0, Qt::AlignRight);
     bottomWidget->setLayout(layBottom);
 
-    QVBoxLayout *layMain = new QVBoxLayout;
-    layMain->setMargin(0);
-    layMain->setSpacing(0);
-    layMain->addSpacing(4);
-    layMain->addWidget(labPath);
-    layMain->addSpacing(4);
-    layMain->addWidget(mEdit);
-    layMain->addWidget(bottomWidget);
-    setLayout(layMain);
+    QVBoxLayout *layCentral = new QVBoxLayout;
+    layCentral->setMargin(0);
+    layCentral->setSpacing(0);
+    layCentral->addSpacing(4);
+    layCentral->addWidget(labPath);
+    layCentral->addSpacing(4);
+    layCentral->addWidget(mEdit);
+    layCentral->addWidget(bottomWidget);
+    mainWidget->setLayout(layCentral);
 
+    mSplitter->addWidget(mainWidget);
+    mSplitter->addWidget(mOutputWidget);
+    mSplitter->setStretchFactor(0, 40);
+    mSplitter->setStretchFactor(1, 1);
+    mSplitter->setChildrenCollapsible(false);
+
+    QHBoxLayout *layMain = new QHBoxLayout;
+    layMain->setMargin(0);
+    layMain->addWidget(mSplitter);
+    setLayout(layMain);
 
     updateTr();
 }
@@ -79,8 +90,32 @@ void ProjWidget::updateTr() {
 }
 
 void ProjWidget::onParse() {
-    Parser::parse(mEdit->document());
+    QListWidget *errListWidget = mOutputWidget->errListWidget();
+    errListWidget->clear();
 
+    Parser::parse(mEdit->document());
+    if(!Parser::errs.isEmpty()) {   //如果有错误
+        mOutputWidget->setCurrentWidget(errListWidget);     //设置mOutputWidget当前显示的控件为errListWidget
+
+        QString strRow = tr("Row");
+        QString strPhrase = tr("Phrase");
+
+        for(Parser::Error &err : Parser::errs) {    //遍历所有错误
+            //得到文本
+            QString text;
+            if(err.row != -1) {
+                text += strRow + ":" + QString::number(err.row) + "    ";
+                if(err.col != -1)
+                    text += strPhrase + ":" + QString::number(err.col) + "    ";
+            }
+            text += err.what;
+
+            //添加
+            QListWidgetItem *item = new QListWidgetItem(text);
+            item->setIcon(QApplication::style()->standardIcon(QStyle::StandardPixmap::SP_MessageBoxCritical));
+            errListWidget->addItem(item);
+        }
+    }
 }
 
 void ProjWidget::changeEvent(QEvent *ev) {

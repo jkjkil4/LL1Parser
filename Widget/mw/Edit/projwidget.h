@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QPlainTextEdit>
 #include <QLabel>
+#include <QSplitter>
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -12,6 +13,7 @@
 #include "Widget/Other/colorwidget.h"
 #include "notewidget.h"
 #include "plaintextedit.h"
+#include "outputwidget.h"
 #include "header.h"
 #include "Class/parser.h"
 
@@ -50,4 +52,7 @@ private:
     PlainTextEdit *mEdit = new PlainTextEdit;
     NoteWidget *mNoteWidget = new NoteWidget;
     PlainButton *mBtnParse = new PlainButton;
+    OutputWidget *mOutputWidget = new OutputWidget;
+
+    QSplitter *mSplitter = new QSplitter(Qt::Vertical);
 };

@@ -34,8 +34,8 @@ SOURCES += \
         Widget/Menu/rflmenu.cpp \
         Widget/Other/infowidget.cpp \
         Widget/mw/Edit/editview.cpp \
-        Widget/mw/Edit/errorlistwidget.cpp \
         Widget/mw/Edit/notewidget.cpp \
+        Widget/mw/Edit/outputwidget.cpp \
         Widget/mw/Edit/plaintextedit.cpp \
         Widget/mw/Edit/projwidget.cpp \
         Widget/mw/HomePage/homepage.cpp \
@@ -53,8 +53,8 @@ HEADERS += \
         Widget/Dialog/newprojdialog.h \
         Widget/Other/infowidget.h \
         Widget/mw/Edit/editview.h \
-        Widget/mw/Edit/errorlistwidget.h \
         Widget/mw/Edit/notewidget.h \
+        Widget/mw/Edit/outputwidget.h \
         Widget/mw/Edit/plaintextedit.h \
         Widget/mw/Edit/projwidget.h \
         Widget/mw/HomePage/homepage.h \

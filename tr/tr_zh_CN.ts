@@ -73,7 +73,7 @@
     </message>
     <message>
         <location filename="../Widget/mainwindow.cpp" line="155"/>
-        <location filename="../Widget/mainwindow.cpp" line="184"/>
+        <location filename="../Widget/mainwindow.cpp" line="186"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
@@ -88,27 +88,27 @@
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="184"/>
+        <location filename="../Widget/mainwindow.cpp" line="186"/>
         <source>Cannot save the project &quot;%1&quot;</source>
         <translation>无法保存项目 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="189"/>
+        <location filename="../Widget/mainwindow.cpp" line="191"/>
         <source>This function is not done</source>
         <translation>该功能未完成</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="195"/>
+        <location filename="../Widget/mainwindow.cpp" line="197"/>
         <source>Author</source>
         <translation>作者</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="197"/>
+        <location filename="../Widget/mainwindow.cpp" line="199"/>
         <source>Feedback</source>
         <translation>反馈</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="218"/>
+        <location filename="../Widget/mainwindow.cpp" line="220"/>
         <source>This function is not supported in this operating system</source>
         <translation>当前操作系统不支持该功能</translation>
     </message>
@@ -177,6 +177,14 @@
     </message>
 </context>
 <context>
+    <name>OutputWidget</name>
+    <message>
+        <location filename="../Widget/mw/Edit/outputwidget.h" line="33"/>
+        <source>Issues</source>
+        <translation>问题</translation>
+    </message>
+</context>
+<context>
     <name>Parser</name>
     <message>
         <location filename="../Class/parser.cpp" line="15"/>
@@ -192,14 +200,24 @@
 <context>
     <name>ProjWidget</name>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="17"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="18"/>
         <source>Pointsize changed: %1 (Default: %2)</source>
         <translation>点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="78"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="89"/>
         <source>Parse</source>
         <translation>解析</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="100"/>
+        <source>Row</source>
+        <translation>行</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="101"/>
+        <source>Phrase</source>
+        <translation>词</translation>
     </message>
 </context>
 <context>
@@ -231,7 +249,7 @@
     </message>
     <message>
         <location filename="../Widget/mainwindow.cpp" line="38"/>
-        <location filename="../Widget/mainwindow.cpp" line="198"/>
+        <location filename="../Widget/mainwindow.cpp" line="200"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
