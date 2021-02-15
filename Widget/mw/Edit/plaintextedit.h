@@ -16,6 +16,8 @@ protected:
     void resizeEvent(QResizeEvent *ev) override;
 
 public:
+    friend class LineNumberArea;
+
     explicit PlainTextEdit(QWidget *parent = nullptr);
 
     void updateTabStopDistance();   //用于更新tab的距离
@@ -52,6 +54,7 @@ public:
     QSize sizeHint() const override;
 
 protected:
+    void wheelEvent(QWheelEvent *ev) override;
     void paintEvent(QPaintEvent *ev) override;
 
 private:

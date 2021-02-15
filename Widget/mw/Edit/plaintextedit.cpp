@@ -107,6 +107,10 @@ QSize LineNumberArea::sizeHint() const {
     return QSize(pEdit->lineNumberAreaWidth(), 0);
 }
 
+void LineNumberArea::wheelEvent(QWheelEvent *ev) {
+    pEdit->wheelEvent(ev);
+}
+
 void LineNumberArea::paintEvent(QPaintEvent *ev) {
     pEdit->lineNumberAreaPaintEvent(ev);
 }

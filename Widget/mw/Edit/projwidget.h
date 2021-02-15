@@ -41,6 +41,8 @@ signals:
     void stateChanged(bool mSaved);    //当保存情况改变时发出的信号
 
 private slots:
+    void onErrListWidgetDoubleClicked(QListWidgetItem *item);
+
     void onParse();
 
 private:

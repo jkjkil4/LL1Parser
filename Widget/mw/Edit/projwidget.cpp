@@ -17,6 +17,7 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     connect(mEdit, &PlainTextEdit::pointSizeChanged, [this](int cur){
         mNoteWidget->setText(tr("Pointsize changed: %1 (Default: %2)").arg(QString::number(cur), "10"));
     });
+    connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onErrListWidgetDoubleClicked(QListWidgetItem*)));
     connect(mBtnParse, SIGNAL(clicked()), this, SLOT(onParse()));
 
 
@@ -89,6 +90,17 @@ void ProjWidget::updateTr() {
     mBtnParse->setText(tr("Parse"));
 }
 
+void ProjWidget::onErrListWidgetDoubleClicked(QListWidgetItem *item) {
+    //得到相关数据
+    QPoint pos = item->data(Qt::UserRole).toPoint();
+    if(pos.y() != -1 && pos.y() <= mEdit->document()->lineCount()) {
+        QTextCursor tc = mEdit->textCursor();
+        tc.setPosition(mEdit->document()->findBlockByLineNumber(pos.y() - 1).position());
+        mEdit->setTextCursor(tc);
+        mEdit->setFocus();
+    }
+}
+
 void ProjWidget::onParse() {
     QListWidget *errListWidget = mOutputWidget->errListWidget();
     errListWidget->clear();
@@ -105,13 +117,14 @@ void ProjWidget::onParse() {
             QString text;
             if(err.row != -1) {
                 text += strRow + ":" + QString::number(err.row) + "    ";
-                if(err.col != -1)
-                    text += strPhrase + ":" + QString::number(err.col) + "    ";
+                if(err.phrase != -1)
+                    text += strPhrase + ":" + QString::number(err.phrase) + "    ";
             }
             text += err.what;
 
             //添加
             QListWidgetItem *item = new QListWidgetItem(text);
+            item->setData(Qt::UserRole, QPoint(err.phrase, err.row));
             item->setIcon(QApplication::style()->standardIcon(QStyle::StandardPixmap::SP_MessageBoxCritical));
             errListWidget->addItem(item);
         }

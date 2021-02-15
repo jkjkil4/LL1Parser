@@ -19,17 +19,17 @@ class Parser : QObject
 public:
     struct Error
     {
-        Error(const QString &what, int row = -1, int col = -1) : what(what), row(row), col(col) {}
+        Error(const QString &what, int row = -1, int col = -1) : what(what), row(row), phrase(col) {}
         QString what;
         int row = -1;
-        int col = -1;
+        int phrase = -1;
 
         friend inline QDebug& operator<<(QDebug &de, const Error &err) {
             de << "Error(" << err.what;
             if(err.row != -1) {
                 de << "," << err.row;
-                if(err.col != -1) {
-                    de << "," << err.col;
+                if(err.phrase != -1) {
+                    de << "," << err.phrase;
                 }
             }
             de << ")";
