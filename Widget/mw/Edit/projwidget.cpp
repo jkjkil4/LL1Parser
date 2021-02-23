@@ -95,7 +95,7 @@ void ProjWidget::onErrListWidgetDoubleClicked(QListWidgetItem *item) {
     QPoint pos = item->data(Qt::UserRole).toPoint();
     if(pos.y() != -1 && pos.y() <= mEdit->document()->lineCount()) {
         QTextCursor tc = mEdit->textCursor();
-        tc.setPosition(mEdit->document()->findBlockByLineNumber(pos.y() - 1).position());
+        tc.setPosition(mEdit->document()->findBlockByLineNumber(pos.y()).position());
         mEdit->setTextCursor(tc);
         mEdit->setFocus();
     }
@@ -116,9 +116,9 @@ void ProjWidget::onParse() {
             //得到文本
             QString text;
             if(err.row != -1) {
-                text += strRow + ":" + QString::number(err.row) + "    ";
+                text += strRow + ":" + QString::number(err.row + 1) + "    ";
                 if(err.phrase != -1)
-                    text += strPhrase + ":" + QString::number(err.phrase) + "    ";
+                    text += strPhrase + ":" + QString::number(err.phrase + 1) + "    ";
             }
             text += err.what;
 

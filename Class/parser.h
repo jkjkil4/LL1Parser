@@ -4,15 +4,13 @@
 #include <QTextBlock>
 #include <QApplication>
 #include <QStyle>
+#include <QRegularExpression>
 
 #include <QDebug>
 
 #include <Lib/header.h>
 
-/*
-我对编译原理的学习不是很深
-所以这部分代码可能很乱、很差
-*/
+
 class Parser : QObject
 {
     Q_OBJECT
@@ -37,8 +35,40 @@ public:
         }
     };
 
+    struct Divided
+    {
+        struct Part
+        {
+            int row;
+            QString text;
+
+            friend inline QDebug& operator<<(QDebug &de, const Part &part) {
+                de << QString::number(part.row) + "  " + part.text;
+                return de;
+            }
+        };
+
+        QList<Part> parts;
+
+        friend inline QDebug& operator<<(QDebug &de, const Divided &divided) {
+            de << "Divided(\n";
+            for(const Part &part : divided.parts) {
+                de << "    " << part << "\n";
+            }
+            de << ")";
+            return de;
+        }
+    };
+
+    static void divide(QTextDocument *doc);
+
     static void parse(QTextDocument *doc);
 
+    static void clear();
     static QList<Error> errs;
+    static QMap<QString, Divided> mapDivided;
 };
+
+
+
 
