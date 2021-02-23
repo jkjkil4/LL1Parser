@@ -187,14 +187,27 @@
 <context>
     <name>Parser</name>
     <message>
-        <location filename="../Class/parser.cpp" line="15"/>
         <source>Lack of &quot;-&gt;&quot; to represent production</source>
-        <translation>缺少 &quot;-&gt;&quot; 来表示产生式</translation>
+        <translation type="vanished">缺少 &quot;-&gt;&quot; 来表示产生式</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="19"/>
         <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
-        <translation>应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
+        <translation type="vanished">应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="42"/>
+        <source>Unknown tag &quot;%1&quot;</source>
+        <translation>未知的标记 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="76"/>
+        <source>Symbol &quot;%1&quot; is already an nonterminal</source>
+        <translation>符号 &quot;%1&quot; 已经是非终结符</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="78"/>
+        <source>Redefinition of &quot;%1&quot;</source>
+        <translation>重复定义 &quot;%1&quot;</translation>
     </message>
 </context>
 <context>
@@ -205,17 +218,17 @@
         <translation>点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="89"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="90"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="100"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="112"/>
         <source>Row</source>
         <translation>行</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="101"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="113"/>
         <source>Phrase</source>
         <translation>词</translation>
     </message>

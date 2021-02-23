@@ -106,26 +106,26 @@ void ProjWidget::onParse() {
     errListWidget->clear();
 
     Parser::parse(mEdit->document());
-    if(!Parser::errs.isEmpty()) {   //如果有错误
+    if(!Parser::issues.isEmpty()) {   //如果有错误
         mOutputWidget->setCurrentWidget(errListWidget);     //设置mOutputWidget当前显示的控件为errListWidget
 
         QString strRow = tr("Row");
         QString strPhrase = tr("Phrase");
 
-        for(Parser::Error &err : Parser::errs) {    //遍历所有错误
+        for(Parser::Issue &issue : Parser::issues) {    //遍历所有错误
             //得到文本
             QString text;
-            if(err.row != -1) {
-                text += strRow + ":" + QString::number(err.row + 1) + "    ";
-                if(err.phrase != -1)
-                    text += strPhrase + ":" + QString::number(err.phrase + 1) + "    ";
+            if(issue.row != -1) {
+                text += strRow + ":" + QString::number(issue.row + 1) + "    ";
+                if(issue.phrase != -1)
+                    text += strPhrase + ":" + QString::number(issue.phrase + 1) + "    ";
             }
-            text += err.what;
+            text += issue.what;
 
             //添加
             QListWidgetItem *item = new QListWidgetItem(text);
-            item->setData(Qt::UserRole, QPoint(err.phrase, err.row));
-            item->setIcon(QApplication::style()->standardIcon(QStyle::StandardPixmap::SP_MessageBoxCritical));
+            item->setData(Qt::UserRole, QPoint(issue.phrase, issue.row));
+            item->setIcon(issue.icon());
             errListWidget->addItem(item);
         }
     }
