@@ -179,41 +179,59 @@
 <context>
     <name>OutputWidget</name>
     <message>
-        <location filename="../Widget/mw/Edit/outputwidget.h" line="33"/>
+        <location filename="../Widget/mw/Edit/outputwidget.h" line="35"/>
         <source>Issues</source>
         <translation>问题</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/outputwidget.h" line="36"/>
+        <source>Output</source>
+        <translation>输出</translation>
     </message>
 </context>
 <context>
     <name>Parser</name>
     <message>
+        <location filename="../Class/parser.cpp" line="109"/>
         <source>Lack of &quot;-&gt;&quot; to represent production</source>
-        <translation type="vanished">缺少 &quot;-&gt;&quot; 来表示产生式</translation>
+        <translation>缺少 &quot;-&gt;&quot; 来表示产生式</translation>
     </message>
     <message>
+        <location filename="../Class/parser.cpp" line="113"/>
         <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
-        <translation type="vanished">应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
+        <translation>应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="51"/>
+        <location filename="../Class/parser.cpp" line="52"/>
         <source>Unknown tag &quot;%1&quot;</source>
         <translation>未知的标记 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="87"/>
+        <location filename="../Class/parser.cpp" line="72"/>
         <source>Symbol &quot;%1&quot; is already an nonterminal</source>
         <translation>符号 &quot;%1&quot; 已经是非终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="89"/>
-        <location filename="../Class/parser.cpp" line="110"/>
+        <location filename="../Class/parser.cpp" line="74"/>
+        <location filename="../Class/parser.cpp" line="94"/>
         <source>Redefinition of &quot;%1&quot;</source>
         <translation>重复定义 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="108"/>
+        <location filename="../Class/parser.cpp" line="92"/>
         <source>Symbol &quot;%1&quot; is already a terminal</source>
         <translation>符号 &quot;%1&quot; 已经是终结符</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="122"/>
+        <location filename="../Class/parser.cpp" line="133"/>
+        <source>Unknown symbol &quot;%1&quot;</source>
+        <translation>未知的符号 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="125"/>
+        <source>The left of the production cannot be a terminal</source>
+        <translation>产生式左部不能为终结符</translation>
     </message>
 </context>
 <context>

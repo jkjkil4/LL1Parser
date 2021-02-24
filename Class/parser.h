@@ -84,6 +84,11 @@ public:
         inline bool operator<(const Symbol &other) const { return str < other.str; }
     };
 
+    //产生式相关
+    typedef QVector<int> Prod;
+    typedef QList<Prod> Prods;
+    typedef QMap<int, Prods> ProdsMap;
+
     static void divide(QTextDocument *doc);
 
     static void parse(QTextDocument *doc);
@@ -94,11 +99,18 @@ public:
 
     static void clear();
     static bool hasError();
+    static void appendSymbol(Symbol::Type type, const QString &str);
+    static bool isNonterminal(int digit) { return digit <= nonterminalMaxIndex; }
+    static bool isTerminal(int digit) { return digit > nonterminalMaxIndex; }
     static QList<Issue> issues;
+
     static QMap<QString, Divided> mapDivided;
+
     static QMap<Symbol, int> mapSymbols;
     static int symbolsMaxIndex;
-    static int terminalMaxIndex;
+    static int nonterminalMaxIndex;
+
+    static ProdsMap mapProds;
 };
 
 

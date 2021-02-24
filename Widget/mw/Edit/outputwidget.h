@@ -17,11 +17,13 @@ public:
     void setCurrentWidget(QWidget *widget);
 
     QListWidget* errListWidget() { return mErrListWidget; }
+    QListWidget* outputListWidget() { return mOutputListWidget; }
 
 private:
     QTabWidget *tabWidget = new QTabWidget;
 
     QListWidget *mErrListWidget = new QListWidget;
+    QListWidget *mOutputListWidget = new QListWidget;
 
     typedef QString(*TrFn)();
     struct Tab
@@ -29,8 +31,9 @@ private:
         QWidget *p;
         TrFn fn;
     };
-    Tab tabs[1] {
-        { mErrListWidget, []()->QString { return tr("Issues"); } }
+    Tab tabs[2] {
+        { mErrListWidget, []()->QString { return tr("Issues"); } },
+        { mOutputListWidget, []()->QString { return tr("Output"); } }
     };
 };
 
