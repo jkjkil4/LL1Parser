@@ -103,9 +103,18 @@ void ProjWidget::onErrListWidgetDoubleClicked(QListWidgetItem *item) {
 
 void ProjWidget::onParse() {
     QListWidget *errListWidget = mOutputWidget->errListWidget();
+    QListWidget *outputListWidget = mOutputWidget->outputListWidget();
     errListWidget->clear();
+    outputListWidget->clear();
 
+    QTime t;
+    t.start();
     Parser::parse(mEdit->document());
+    int ms = t.elapsed();
+    QListWidgetItem *item = new QListWidgetItem(tr("Elapsed time: %1ms").arg(ms));
+    item->setForeground(Qt::blue);
+    outputListWidget->addItem(item);
+
     if(!Parser::issues.isEmpty()) {   //如果有错误
         mOutputWidget->setCurrentWidget(errListWidget);     //设置mOutputWidget当前显示的控件为errListWidget
 
@@ -128,7 +137,7 @@ void ProjWidget::onParse() {
             item->setIcon(issue.icon());
             errListWidget->addItem(item);
         }
-    }
+    } else mOutputWidget->setCurrentWidget(outputListWidget);
 }
 
 void ProjWidget::changeEvent(QEvent *ev) {

@@ -247,12 +247,17 @@
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="112"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="114"/>
+        <source>Elapsed time: %1ms</source>
+        <translation>用时: %1毫秒</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="121"/>
         <source>Row</source>
         <translation>行</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="113"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="122"/>
         <source>Phrase</source>
         <translation>词</translation>
     </message>
