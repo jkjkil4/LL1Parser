@@ -58,6 +58,7 @@ public:
             }
         };
 
+        QVector<int> rows;
         QList<Part> parts;
         bool parsed = false;
 

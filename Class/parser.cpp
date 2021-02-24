@@ -17,10 +17,11 @@ void Parser::divide(QTextDocument *doc) {
         QRegularExpressionMatch match = regExp.match(line);     //使用正则表达式获取内容
         while(match.hasMatch()) {   //重复直到正则表达式获取不到内容
             QString mid = line.mid(start, match.capturedStart() - start);
-            if(pDivided) pDivided->parts.append(Divided::Part{ i, mid });
+            if(pDivided) pDivided->parts << Divided::Part{ i, mid };
 
             start = match.capturedEnd();
             pDivided = &mapDivided[match.captured(1)];
+            pDivided->rows << i;
             match = regExp.match(line, match.capturedEnd());
         }
         QString right = line.right(line.length() - start);
@@ -45,9 +46,12 @@ void Parser::parse(QTextDocument *doc) {
     TRY_PARSE("Nonterminal", parseNonterminal);
     TRY_PARSE("Production", parseProduction);
 
+    QString trStr = tr("Unknown tag \"%1\"");
     for(auto iter = mapDivided.begin(); iter != mapDivided.end(); ++iter) {
         if(!iter->parsed) {
-            issues << Issue(Issue::Error, tr("Unknown tag \"%1\"").arg(iter.key()));
+            for(int row : iter->rows) {
+                issues << Issue(Issue::Error, trStr.arg(iter.key()), row);
+            }
         }
     }
 
