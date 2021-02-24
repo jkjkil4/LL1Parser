@@ -4,8 +4,10 @@ QList<Parser::Issue> Parser::issues;
 QMap<QString, Parser::Divided> Parser::mapDivided;
 QMap<Parser::Symbol, int> Parser::mapSymbols;
 int Parser::symbolsMaxIndex = 0;
-int Parser::nonterminalMaxIndex = 0;
+int Parser::nonterminalMaxIndex = -1;
+int Parser::terminalMaxIndex = -1;
 Parser::ProdsMap Parser::mapProds;
+QVector<bool> Parser::vecNil;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -44,8 +46,9 @@ void Parser::parse(QTextDocument *doc) {
 
     appendSymbol(Symbol::Nonterminal, "S");
     TRY_PARSE("Nonterminal", parseNonterminal);
-    nonterminalMaxIndex = symbolsMaxIndex;
+    nonterminalMaxIndex = symbolsMaxIndex - 1;
     TRY_PARSE("Terminal", parseTerminal);
+    terminalMaxIndex = symbolsMaxIndex - 1;
 
     TRY_PARSE("Production", parseProduction);
 
@@ -58,9 +61,16 @@ void Parser::parse(QTextDocument *doc) {
         }
     }
 
+    if(nonterminalMaxIndex == -1) {
+        issues << Issue(Issue::Error, tr("Cannot find any nonterminal"));
+    }
+    if(terminalMaxIndex == nonterminalMaxIndex) {
+        issues << Issue(Issue::Error, tr("Cannot find any terminal"));
+    }
+
     if(hasError()) return;
 
-
+    parseNil();
 }
 #undef TRY_PARSE
 
@@ -152,13 +162,22 @@ void Parser::parseProduction(const Divided &divided) {
     }
 }
 
+void Parser::parseNil() {
+    enum NilState { Unknown, Can, Cannot };
+    QVector<NilState> tmpVecNil;
+    tmpVecNil.resize(nonterminalMaxIndex + 1);
+
+}
+
 void Parser::clear() {
     issues.clear();
     mapDivided.clear();
     mapSymbols.clear();
     symbolsMaxIndex = 0;
-    nonterminalMaxIndex = 0;
+    nonterminalMaxIndex = -1;
+    terminalMaxIndex = -1;
     mapProds.clear();
+    vecNil.clear();
 }
 
 bool Parser::hasError() {

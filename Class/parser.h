@@ -97,11 +97,13 @@ public:
     static void parseNonterminal(const Divided &divided);   //处理非终结符
     static void parseProduction(const Divided &divided);    //处理产生式
 
+    static void parseNil();
+
     static void clear();
     static bool hasError();
     static void appendSymbol(Symbol::Type type, const QString &str);
-    static bool isNonterminal(int digit) { return digit <= nonterminalMaxIndex; }
-    static bool isTerminal(int digit) { return digit > nonterminalMaxIndex; }
+    static bool isNonterminal(int digit) { return digit >= 0 && digit <= nonterminalMaxIndex; }
+    static bool isTerminal(int digit) { return digit > nonterminalMaxIndex && digit <= terminalMaxIndex; }
 
     static QString formatProdsMap();
 
@@ -112,8 +114,10 @@ public:
     static QMap<Symbol, int> mapSymbols;
     static int symbolsMaxIndex;
     static int nonterminalMaxIndex;
+    static int terminalMaxIndex;
 
     static ProdsMap mapProds;
+    static QVector<bool> vecNil;
 };
 
 
