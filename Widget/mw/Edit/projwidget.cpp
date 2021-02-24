@@ -18,6 +18,7 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
         mNoteWidget->setText(tr("Pointsize changed: %1 (Default: %2)").arg(QString::number(cur), "10"));
     });
     connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onErrListWidgetDoubleClicked(QListWidgetItem*)));
+    connect(mOutputWidget->outputListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onOutputListWidgetDoubleClicked(QListWidgetItem*)));
     connect(mBtnParse, SIGNAL(clicked()), this, SLOT(onParse()));
 
 
@@ -101,6 +102,21 @@ void ProjWidget::onErrListWidgetDoubleClicked(QListWidgetItem *item) {
     }
 }
 
+void ProjWidget::onOutputListWidgetDoubleClicked(QListWidgetItem *item) {
+    if(item->data(Qt::UserRole).toBool()) {
+        QPlainTextEdit *textWidget = new QPlainTextEdit;
+        textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
+        textWidget->setPlainText(item->data(Qt::UserRole + 2).toString());
+        textWidget->setReadOnly(true);
+        textWidget->setLineWrapMode(QPlainTextEdit::NoWrap);
+        textWidget->setAttribute(Qt::WA_DeleteOnClose);
+        textWidget->setMinimumSize(300, 300);
+        j::SetPointSize(textWidget, 11);
+        j::SetFamily(textWidget, fontSourceCodePro.mFamily);
+        textWidget->show();
+    }
+}
+
 void ProjWidget::onParse() {
     QListWidget *errListWidget = mOutputWidget->errListWidget();
     QListWidget *outputListWidget = mOutputWidget->outputListWidget();
@@ -113,31 +129,39 @@ void ProjWidget::onParse() {
     int ms = t.elapsed();
     QListWidgetItem *item = new QListWidgetItem(tr("Elapsed time: %1ms").arg(ms));
     item->setForeground(Qt::blue);
+    item->setData(Qt::UserRole, false);
     outputListWidget->addItem(item);
 
-    if(!Parser::issues.isEmpty()) {   //如果有错误
-        mOutputWidget->setCurrentWidget(errListWidget);     //设置mOutputWidget当前显示的控件为errListWidget
+    mOutputWidget->setCurrentWidget(Parser::issues.isEmpty() ? outputListWidget : errListWidget);
 
-        QString strRow = tr("Row");
-        QString strPhrase = tr("Phrase");
-
-        for(Parser::Issue &issue : Parser::issues) {    //遍历所有错误
-            //得到文本
-            QString text;
-            if(issue.row != -1) {
-                text += strRow + ":" + QString::number(issue.row + 1) + "    ";
-                if(issue.phrase != -1)
-                    text += strPhrase + ":" + QString::number(issue.phrase + 1) + "    ";
-            }
-            text += issue.what;
-
-            //添加
-            QListWidgetItem *item = new QListWidgetItem(text);
-            item->setData(Qt::UserRole, QPoint(issue.phrase, issue.row));
-            item->setIcon(issue.icon());
-            errListWidget->addItem(item);
+    QString strRow = tr("Row");
+    QString strPhrase = tr("Phrase");
+    for(Parser::Issue &issue : Parser::issues) {    //遍历所有问题
+        //得到文本
+        QString text;
+        if(issue.row != -1) {
+            text += strRow + ":" + QString::number(issue.row + 1) + "    ";
+            if(issue.phrase != -1)
+                text += strPhrase + ":" + QString::number(issue.phrase + 1) + "    ";
         }
-    } else mOutputWidget->setCurrentWidget(outputListWidget);
+        text += issue.what;
+
+        //添加
+        QListWidgetItem *item = new QListWidgetItem(text);
+        item->setData(Qt::UserRole, QPoint(issue.phrase, issue.row));
+        item->setIcon(issue.icon());
+        errListWidget->addItem(item);
+    }
+    if(!Parser::hasError()) {
+        QString strProds = tr("Productions");
+        QString strDbClick = tr("(Double click to show detail)");
+
+        QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
+        itemProds->setData(Qt::UserRole, true);
+        itemProds->setData(Qt::UserRole + 1, strProds);
+        itemProds->setData(Qt::UserRole + 2, Parser::formatProdsMap());
+        outputListWidget->addItem(itemProds);
+    }
 }
 
 void ProjWidget::changeEvent(QEvent *ev) {

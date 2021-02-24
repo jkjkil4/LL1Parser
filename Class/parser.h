@@ -18,7 +18,6 @@ public:
     struct Issue    //问题
     {
         enum Type {
-            Info = QStyle::SP_MessageBoxInformation,
             Warning = QStyle::SP_MessageBoxWarning,
             Error = QStyle::SP_MessageBoxCritical
         } type;
@@ -33,7 +32,7 @@ public:
         }
 
         friend inline QDebug& operator<<(QDebug &de, const Issue &err) {
-            de << QString("Issue-") + (err.type == Info ? "Info" : "Error") + "(" << err.what;
+            de << QString("Issue-") + (err.type == Warning ? "Warning" : "Error") + "(" << err.what;
             if(err.row != -1) {
                 de << "," << err.row;
                 if(err.phrase != -1) {
@@ -77,6 +76,7 @@ public:
         enum Type { Unknown, Terminal, Nonterminal } type = Unknown;
         QString str;
 
+        Symbol() = default;
         Symbol(const QString &str) : str(str) {}
         Symbol(Type type, const QString &str) : type(type), str(str) {}
 
@@ -102,6 +102,9 @@ public:
     static void appendSymbol(Symbol::Type type, const QString &str);
     static bool isNonterminal(int digit) { return digit <= nonterminalMaxIndex; }
     static bool isTerminal(int digit) { return digit > nonterminalMaxIndex; }
+
+    static QString formatProdsMap();
+
     static QList<Issue> issues;
 
     static QMap<QString, Divided> mapDivided;

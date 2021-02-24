@@ -43,6 +43,7 @@ signals:
 
 private slots:
     void onErrListWidgetDoubleClicked(QListWidgetItem *item);
+    void onOutputListWidgetDoubleClicked(QListWidgetItem *item);
 
     void onParse();
 

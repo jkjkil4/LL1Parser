@@ -192,12 +192,12 @@
 <context>
     <name>Parser</name>
     <message>
-        <location filename="../Class/parser.cpp" line="109"/>
+        <location filename="../Class/parser.cpp" line="113"/>
         <source>Lack of &quot;-&gt;&quot; to represent production</source>
         <translation>缺少 &quot;-&gt;&quot; 来表示产生式</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="113"/>
+        <location filename="../Class/parser.cpp" line="117"/>
         <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
         <translation>应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
     </message>
@@ -207,31 +207,36 @@
         <translation>未知的标记 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="72"/>
+        <location filename="../Class/parser.cpp" line="76"/>
         <source>Symbol &quot;%1&quot; is already an nonterminal</source>
         <translation>符号 &quot;%1&quot; 已经是非终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="74"/>
-        <location filename="../Class/parser.cpp" line="94"/>
+        <location filename="../Class/parser.cpp" line="78"/>
+        <location filename="../Class/parser.cpp" line="98"/>
         <source>Redefinition of &quot;%1&quot;</source>
         <translation>重复定义 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="92"/>
+        <location filename="../Class/parser.cpp" line="96"/>
         <source>Symbol &quot;%1&quot; is already a terminal</source>
         <translation>符号 &quot;%1&quot; 已经是终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="122"/>
-        <location filename="../Class/parser.cpp" line="133"/>
+        <location filename="../Class/parser.cpp" line="126"/>
+        <location filename="../Class/parser.cpp" line="137"/>
         <source>Unknown symbol &quot;%1&quot;</source>
         <translation>未知的符号 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="125"/>
+        <location filename="../Class/parser.cpp" line="129"/>
         <source>The left of the production cannot be a terminal</source>
         <translation>产生式左部不能为终结符</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="147"/>
+        <source>Redefinition of the production</source>
+        <translation>产生式重复定义</translation>
     </message>
 </context>
 <context>
@@ -242,24 +247,34 @@
         <translation>点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="90"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="91"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="114"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="130"/>
         <source>Elapsed time: %1ms</source>
         <translation>用时: %1毫秒</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="121"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="137"/>
         <source>Row</source>
         <translation>行</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="122"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="138"/>
         <source>Phrase</source>
         <translation>词</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="156"/>
+        <source>Productions</source>
+        <translation>产生式</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="157"/>
+        <source>(Double click to show detail)</source>
+        <translation>（双击以显示详细信息）</translation>
     </message>
 </context>
 <context>

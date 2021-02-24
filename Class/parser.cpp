@@ -57,6 +57,10 @@ void Parser::parse(QTextDocument *doc) {
             }
         }
     }
+
+    if(hasError()) return;
+
+
 }
 #undef TRY_PARSE
 
@@ -137,7 +141,14 @@ void Parser::parseProduction(const Divided &divided) {
             if(!hasErr) prod << digit;
         }
         //如果没有错误，则将该产生式的右部附加到产生式左部符号的Prods中
-        if(!hasErr) mapProds[leftDigit] << prod;
+        if(!hasErr) {
+            Prods &prods = mapProds[leftDigit];
+            if(prods.contains(prod)) {
+                issues << Issue(Issue::Warning, tr("Redefinition of the production"), part.row);
+            } else {
+                prods << prod;
+            }
+        }
     }
 }
 
@@ -162,5 +173,25 @@ void Parser::appendSymbol(Symbol::Type type, const QString &str) {
     symbolsMaxIndex++;
 }
 
+QString Parser::formatProdsMap() {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
 
+    bool hasPrev = false;
+    for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {     //遍历所有的产生式
+        QString keyStr = mapSymbols.key(iter.key()).str;
+        for(Prod &prod : *iter) {   //遍历所有的产生式右部
+            if(hasPrev) {
+                ts << "\n";
+            } else hasPrev = true;
+
+            ts << keyStr << " ->";
+            for(int digit : prod) {
+                ts << " " << mapSymbols.key(digit).str;
+            }
+        }
+    }
+    return result;
+}
 
