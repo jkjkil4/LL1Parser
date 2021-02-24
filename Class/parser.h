@@ -59,6 +59,7 @@ public:
         };
 
         QList<Part> parts;
+        bool parsed = false;
 
         friend inline QDebug& operator<<(QDebug &de, const Divided &divided) {
             de << "Divided(\n";
@@ -88,8 +89,7 @@ public:
 
     static void parseTerminal(const Divided &divided);      //处理终结符
     static void parseNonterminal(const Divided &divided);   //处理非终结符
-    typedef void(*ParseFn)(const Divided &divided);
-    static QMap<QString, ParseFn> mapParseFn;
+    static void parseProduction(const Divided &divided);    //处理产生式
 
     static void clear();
     static bool hasError();
@@ -97,6 +97,7 @@ public:
     static QMap<QString, Divided> mapDivided;
     static QMap<Symbol, int> mapSymbols;
     static int symbolsMaxIndex;
+    static int terminalMaxIndex;
 };
 
 

@@ -195,19 +195,25 @@
         <translation type="vanished">应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="42"/>
+        <location filename="../Class/parser.cpp" line="46"/>
         <source>Unknown tag &quot;%1&quot;</source>
         <translation>未知的标记 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="76"/>
+        <location filename="../Class/parser.cpp" line="77"/>
         <source>Symbol &quot;%1&quot; is already an nonterminal</source>
         <translation>符号 &quot;%1&quot; 已经是非终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="78"/>
+        <location filename="../Class/parser.cpp" line="79"/>
+        <location filename="../Class/parser.cpp" line="100"/>
         <source>Redefinition of &quot;%1&quot;</source>
         <translation>重复定义 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="98"/>
+        <source>Symbol &quot;%1&quot; is already a terminal</source>
+        <translation>符号 &quot;%1&quot; 已经是终结符</translation>
     </message>
 </context>
 <context>

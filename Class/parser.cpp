@@ -1,14 +1,10 @@
 #include "parser.h"
 
-QMap<QString, Parser::ParseFn> Parser::mapParseFn = {
-    { "Terminal", Parser::parseTerminal },
-    { "Nonterminal", Parser::parseNonterminal }
-};
-
 QList<Parser::Issue> Parser::issues;
 QMap<QString, Parser::Divided> Parser::mapDivided;
 QMap<Parser::Symbol, int> Parser::mapSymbols;
-int Parser::symbolsMaxIndex = 1;
+int Parser::symbolsMaxIndex = 0;
+int Parser::terminalMaxIndex = 0;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -32,17 +28,27 @@ void Parser::divide(QTextDocument *doc) {
     }
 }
 
+
+#define TRY_PARSE(key, fn) {            \
+    auto iter = mapDivided.find(key);   \
+    if(iter != mapDivided.end()) {      \
+        fn(*iter);                      \
+        iter->parsed = true;            \
+    }                                   \
+}
 void Parser::parse(QTextDocument *doc) {
     clear();
     divide(doc);
 
+    TRY_PARSE("Terminal", parseTerminal);
+    terminalMaxIndex = symbolsMaxIndex;
+    TRY_PARSE("Nonterminal", parseNonterminal);
+    TRY_PARSE("Production", parseProduction);
+
     for(auto iter = mapDivided.begin(); iter != mapDivided.end(); ++iter) {
-        auto fn = mapParseFn.value(iter.key(), nullptr);
-        if(!fn) {
+        if(!iter->parsed) {
             issues << Issue(Issue::Error, tr("Unknown tag \"%1\"").arg(iter.key()));
-            continue;
         }
-        fn(iter.value());
     }
 
 //    int count = doc->lineCount();
@@ -61,6 +67,7 @@ void Parser::parse(QTextDocument *doc) {
 //        }
 //    }
 }
+#undef TRY_PARSE
 
 void Parser::parseTerminal(const Divided &divided) {
     for(const Divided::Part &part : divided.parts) {    //遍历所有行
@@ -104,11 +111,15 @@ void Parser::parseNonterminal(const Divided &divided) {
     }
 }
 
+void Parser::parseProduction(const Divided &divided) {
+    Q_UNUSED(divided)
+}
+
 void Parser::clear() {
     issues.clear();
     mapDivided.clear();
     mapSymbols.clear();
-    symbolsMaxIndex = 1;
+    symbolsMaxIndex = 0;
 }
 
 bool Parser::hasError() {
