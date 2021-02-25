@@ -51,6 +51,10 @@ void Parser::parse(QTextDocument *doc) {
     terminalMaxIndex = symbolsMaxIndex - 1;
 
     TRY_PARSE("Production", parseProduction);
+    if(!hasError() && mapProds.isEmpty()) {
+        issues << Issue(Issue::Error, tr("Cannot find any production"));
+    }
+
 
     QString trStr = tr("Unknown tag \"%1\"");
     for(auto iter = mapDivided.begin(); iter != mapDivided.end(); ++iter) {
@@ -59,13 +63,6 @@ void Parser::parse(QTextDocument *doc) {
                 issues << Issue(Issue::Error, trStr.arg(iter.key()), row);
             }
         }
-    }
-
-    if(nonterminalMaxIndex == -1) {
-        issues << Issue(Issue::Error, tr("Cannot find any nonterminal"));
-    }
-    if(terminalMaxIndex == nonterminalMaxIndex) {
-        issues << Issue(Issue::Error, tr("Cannot find any terminal"));
     }
 
     if(hasError()) return;
