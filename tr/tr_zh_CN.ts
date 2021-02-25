@@ -243,6 +243,35 @@
         <source>Redefinition of the production</source>
         <translation>产生式重复定义</translation>
     </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="244"/>
+        <source>Appear left recursive</source>
+        <translation>出现左递归</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="244"/>
+        <source>(Double click to show detail)</source>
+        <translation>（双击以显示详细信息）</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="244"/>
+        <source>Empty string state</source>
+        <translation>空串状态</translation>
+    </message>
+    <message>
+        <source>Infomation</source>
+        <translation type="obsolete">信息</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="310"/>
+        <source>Can be empty string</source>
+        <translation>可以为空串</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="314"/>
+        <source>Cannot be empty string</source>
+        <translation>不能为空串</translation>
+    </message>
 </context>
 <context>
     <name>ProjWidget</name>
@@ -252,32 +281,37 @@
         <translation>点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="91"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="93"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="130"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="174"/>
         <source>Elapsed time: %1ms</source>
         <translation>用时: %1毫秒</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="137"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="181"/>
         <source>Row</source>
         <translation>行</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="138"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="182"/>
         <source>Phrase</source>
         <translation>词</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="156"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="213"/>
         <source>Productions</source>
         <translation>产生式</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="157"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="214"/>
+        <source>Empty string state</source>
+        <translation>空串状态</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="215"/>
         <source>(Double click to show detail)</source>
         <translation>（双击以显示详细信息）</translation>
     </message>

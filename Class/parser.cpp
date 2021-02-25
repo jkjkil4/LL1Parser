@@ -82,7 +82,7 @@ void Parser::parseTerminal(const Divided &divided) {
                 if(iter.key().type == Symbol::Nonterminal) {
                     issues << Issue(Issue::Error, tr("Symbol \"%1\" is already an nonterminal").arg(str), part.row, phrase);
                 } else {
-                    issues << Issue(Issue::Warning, tr("Redefinition of \"%1\"").arg(str), part.row, phrase);
+                    issues << Issue(Issue::Warning, tr("Redefinition of \"%1\"").arg(str),part.row, phrase);
                 }
                 continue;
             }
@@ -160,9 +160,107 @@ void Parser::parseProduction(const Divided &divided) {
 }
 
 void Parser::parseNil() {
-    enum NilState { Unknown, Can, Cannot };
+    enum NilState { Cannot = 0, Unknown = 1, Can = 2 };
     QVector<NilState> tmpVecNil;
-    tmpVecNil.resize(nonterminalMaxIndex + 1);
+    int size = nonterminalMaxIndex + 1;
+    tmpVecNil.resize(size);
+    tmpVecNil.fill(Unknown);
+
+    bool isContinue, isChanged;
+    do {
+        isContinue = false;
+        isChanged = false;
+
+        for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {  //遍历所有产生式
+            if(tmpVecNil[iter.key()] == Unknown) {  //如果没有判断完成，则将isContinue设置为true，否则跳过本次循环
+                isContinue = true;
+            } else continue;
+
+            NilState totalState = Cannot;  //对于所有产生式右部的结果
+            for(Prod &prod : iter.value()) {   //遍历所有产生式右部
+                if(prod.isEmpty()) {    //如果产生式可以直接推导出空串
+                    totalState = Can;    //标记为Can
+                    isChanged = true;               //标记发生变化
+                    break;
+                }
+
+                NilState state = Can;   //对于当前产生式右部的结果
+                for(int symbol : prod) {     //遍历该产生式右部的所有符号
+                    //如果当前位置的符号 不是非终结符 或者 是非终结符但是不能推导出空串
+                    if(!isNonterminal(symbol) || tmpVecNil[symbol] == Cannot) {
+                        state = Cannot;     //标记为Cannot
+                        break;
+                    }
+
+                    //如果不知道当前位置的符号能否推导出空串
+                    if(tmpVecNil[symbol] == Unknown) {
+                        state = Unknown;    //标记为Unknown
+                        break;
+                    }
+                }
+
+                if(state > totalState) totalState = state;  //对是否覆盖总结果进行判断
+                if(totalState == Can) break;    //对是结束该内部循环进行判断
+            }
+
+            if(totalState != Unknown) {     //如果判断出结果，则进行设置
+                tmpVecNil[iter.key()] = totalState;
+                isChanged = true;
+            }
+        }
+
+        if(isContinue && !isChanged) {  //当出现死循环时结束分析
+            struct Format
+            {
+                QString color;
+                QString lighterColor;
+            };
+            QStringList formats = { "#dd3333", "#3333dd", "#33dd33" };
+            QString formatTerminal = "#000000";
+
+            QString text;
+            QTextStream ts(&text);
+            ts.setCodec("UTF-8");
+            bool hasPrev = false;
+            for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {  //遍历所有产生式
+                const QString &symbolStr = mapSymbols.key(iter.key()).str;
+                for(Prod &prod : iter.value()) {   //遍历所有的产生式右部
+                    //换行
+                    if(hasPrev) {
+                        ts << "<br>";
+                    } else hasPrev = true;
+
+                    //产生式左侧
+                    ts << "<font color=\"" << formats[tmpVecNil[iter.key()]] << "\">" << symbolStr << "</font> ->";
+
+                    for(int symbol : prod) {    //遍历该产生式右部
+                        QString &format = (isNonterminal(symbol) ? formats[tmpVecNil[symbol]] : formatTerminal);
+                        ts << " <font color=\"" << format << "\">";
+                        ts << mapSymbols.key(symbol).str;
+                        ts << "</font>";
+                    }
+                }
+            }
+            issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Empty string state"), text });
+            return;
+        }
+    } while(isContinue);
+
+    vecNil.resize(size);
+    repeat(int, i, size) {
+        vecNil[i] = (tmpVecNil[i] == Can);
+    }
+}
+
+void Parser::parseFirstSet() {
+
+}
+
+void Parser::parseFollowSet() {
+
+}
+
+void Parser::parseSelectSet() {
 
 }
 
@@ -208,6 +306,27 @@ QString Parser::formatProdsMap() {
             }
         }
     }
+    return result;
+}
+
+QString Parser::formatNilVec() {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
+
+    QVector<int> vecCanBeNil, vecCannotBeNil;
+    for(int i = 0; i <= nonterminalMaxIndex; i++) {
+        (vecNil[i] ? vecCanBeNil : vecCannotBeNil) << i;
+    }
+
+    ts << tr("Can be empty string") << ":";
+    for(int symbol : vecCanBeNil)
+        ts << "\n" << mapSymbols.key(symbol).str;
+
+    ts << "\n\n" << tr("Cannot be empty string") << ":";
+    for(int symbol : vecCannotBeNil)
+        ts << "\n" << mapSymbols.key(symbol).str;
+
     return result;
 }
 

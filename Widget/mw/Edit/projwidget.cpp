@@ -17,8 +17,10 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     connect(mEdit, &PlainTextEdit::pointSizeChanged, [this](int cur){
         mNoteWidget->setText(tr("Pointsize changed: %1 (Default: %2)").arg(QString::number(cur), "10"));
     });
-    connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onErrListWidgetDoubleClicked(QListWidgetItem*)));
-    connect(mOutputWidget->outputListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onOutputListWidgetDoubleClicked(QListWidgetItem*)));
+//    connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onErrListWidgetDoubleClicked(QListWidgetItem*)));
+//    connect(mOutputWidget->outputListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onOutputListWidgetDoubleClicked(QListWidgetItem*)));
+    connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListWidgetDoubleClicked(QListWidgetItem*)));
+    connect(mOutputWidget->outputListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListWidgetDoubleClicked(QListWidgetItem*)));
     connect(mBtnParse, SIGNAL(clicked()), this, SLOT(onParse()));
 
 
@@ -91,19 +93,35 @@ void ProjWidget::updateTr() {
     mBtnParse->setText(tr("Parse"));
 }
 
-void ProjWidget::onErrListWidgetDoubleClicked(QListWidgetItem *item) {
-    //得到相关数据
-    QPoint pos = item->data(Qt::UserRole).toPoint();
-    if(pos.y() != -1 && pos.y() <= mEdit->document()->lineCount()) {
-        QTextCursor tc = mEdit->textCursor();
-        tc.setPosition(mEdit->document()->findBlockByLineNumber(pos.y()).position());
-        mEdit->setTextCursor(tc);
-        mEdit->setFocus();
-    }
-}
+//void ProjWidget::onErrListWidgetDoubleClicked(QListWidgetItem *item) {
+//    //得到相关数据
+//    QPoint pos = item->data(Qt::UserRole).toPoint();
+//    if(pos.y() != -1 && pos.y() <= mEdit->document()->lineCount()) {
+//        QTextCursor tc = mEdit->textCursor();
+//        tc.setPosition(mEdit->document()->findBlockByLineNumber(pos.y()).position());
+//        mEdit->setTextCursor(tc);
+//        mEdit->setFocus();
+//    }
+//}
 
-void ProjWidget::onOutputListWidgetDoubleClicked(QListWidgetItem *item) {
-    if(item->data(Qt::UserRole).toBool()) {
+//void ProjWidget::onOutputListWidgetDoubleClicked(QListWidgetItem *item) {
+//    if(item->data(Qt::UserRole).toInt() == (int)UserRole::ShowPlainText) {
+//        QPlainTextEdit *textWidget = new QPlainTextEdit;
+//        textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
+//        textWidget->setPlainText(item->data(Qt::UserRole + 2).toString());
+//        textWidget->setReadOnly(true);
+//        textWidget->setLineWrapMode(QPlainTextEdit::NoWrap);
+//        textWidget->setAttribute(Qt::WA_DeleteOnClose);
+//        textWidget->setMinimumSize(300, 300);
+//        j::SetPointSize(textWidget, 11);
+//        j::SetFamily(textWidget, fontSourceCodePro.mFamily);
+//        textWidget->show();
+//    }
+//}
+
+void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
+    switch(item->data(Qt::UserRole).toInt()) {
+    case (int)UserRole::ShowPlainText: {
         QPlainTextEdit *textWidget = new QPlainTextEdit;
         textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
         textWidget->setPlainText(item->data(Qt::UserRole + 2).toString());
@@ -114,6 +132,32 @@ void ProjWidget::onOutputListWidgetDoubleClicked(QListWidgetItem *item) {
         j::SetPointSize(textWidget, 11);
         j::SetFamily(textWidget, fontSourceCodePro.mFamily);
         textWidget->show();
+        break;
+    }
+    case (int)UserRole::ShowHtmlText: {
+        QTextEdit *textWidget = new QTextEdit;
+        textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
+        textWidget->setHtml(item->data(Qt::UserRole + 2).toString());
+        textWidget->setReadOnly(true);
+        textWidget->setLineWrapMode(QTextEdit::NoWrap);
+        textWidget->setAttribute(Qt::WA_DeleteOnClose);
+        textWidget->setMinimumSize(300, 300);
+        j::SetPointSize(textWidget, 11);
+        j::SetFamily(textWidget, fontSourceCodePro.mFamily);
+        textWidget->show();
+        break;
+    }
+    case (int)UserRole::MoveDocumentCursor: {
+        QPoint pos = item->data(Qt::UserRole + 1).toPoint();
+        if(pos.y() >= 0 && pos.y() < mEdit->document()->lineCount()) {
+            QTextBlock block = mEdit->document()->findBlockByLineNumber(pos.y());
+            QTextCursor tc = mEdit->textCursor();
+            tc.setPosition(block.position());
+            mEdit->setTextCursor(tc);
+            mEdit->setFocus();
+        }
+        break;
+    }
     }
 }
 
@@ -129,7 +173,7 @@ void ProjWidget::onParse() {
     int ms = t.elapsed();
     QListWidgetItem *item = new QListWidgetItem(tr("Elapsed time: %1ms").arg(ms));
     item->setForeground(Qt::blue);
-    item->setData(Qt::UserRole, false);
+    item->setData(Qt::UserRole, (int)UserRole::NoRole);
     outputListWidget->addItem(item);
 
     mOutputWidget->setCurrentWidget(Parser::issues.isEmpty() ? outputListWidget : errListWidget);
@@ -148,19 +192,39 @@ void ProjWidget::onParse() {
 
         //添加
         QListWidgetItem *item = new QListWidgetItem(text);
-        item->setData(Qt::UserRole, QPoint(issue.phrase, issue.row));
+        if(issue.userDataList.isEmpty()) {
+            if(issue.row == -1) {
+                item->setData(Qt::UserRole, (int)UserRole::NoRole);
+            } else {
+                item->setData(Qt::UserRole, (int)UserRole::MoveDocumentCursor);
+                item->setData(Qt::UserRole + 1, QPoint(qMax(0, issue.phrase), issue.row));
+            }
+        } else {
+            int offset = 0;
+            for(QVariant &variant : issue.userDataList) {
+                item->setData(Qt::UserRole + offset, variant);
+                offset++;
+            }
+        }
         item->setIcon(issue.icon());
         errListWidget->addItem(item);
     }
     if(!Parser::hasError()) {
         QString strProds = tr("Productions");
+        QString strNil = tr("Empty string state");
         QString strDbClick = tr("(Double click to show detail)");
 
         QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
-        itemProds->setData(Qt::UserRole, true);
+        itemProds->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
         itemProds->setData(Qt::UserRole + 1, strProds);
         itemProds->setData(Qt::UserRole + 2, Parser::formatProdsMap());
         outputListWidget->addItem(itemProds);
+
+        QListWidgetItem *itemNils = new QListWidgetItem(strNil + strDbClick);
+        itemNils->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
+        itemNils->setData(Qt::UserRole + 1, strNil);
+        itemNils->setData(Qt::UserRole + 2, Parser::formatNilVec());
+        outputListWidget->addItem(itemNils);
     }
 }
 

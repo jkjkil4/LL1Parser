@@ -7,5 +7,12 @@
 
 #define SUFFIX "lpp"
 
+enum class UserRole : int {
+    NoRole,
+    ShowPlainText,          //显示纯文本    (QString windowTitle, QString text)
+    ShowHtmlText,           //显示html    (QString windowTitle, QString htmlText)
+    MoveDocumentCursor,     //移动文档鼠标位置    (QPoint(x:phrase, y:row))
+};
+
 extern RecentFileManager rfManager;
 extern FontFamily fontSourceCodePro;

@@ -9,6 +9,7 @@
 #include <QDebug>
 
 #include <Lib/header.h>
+#include "header.h"
 
 
 class Parser : QObject
@@ -24,8 +25,10 @@ public:
         QString what;
         int row = -1;
         int phrase = -1;
+        QList<QVariant> userDataList;
 
-        Issue(Type type, const QString &what, int row = -1, int phrase = -1) : type(type), what(what), row(row), phrase(phrase) {}
+        Issue(Type type, const QString &what, int row = -1, int phrase = -1, const QList<QVariant> &userDataList = QList<QVariant>())
+            : type(type), what(what), row(row), phrase(phrase), userDataList(userDataList) {}
 
         QIcon icon() {
             return QApplication::style()->standardIcon((QStyle::StandardPixmap)type);
@@ -97,7 +100,10 @@ public:
     static void parseNonterminal(const Divided &divided);   //处理非终结符
     static void parseProduction(const Divided &divided);    //处理产生式
 
-    static void parseNil();
+    static void parseNil();         //处理能否推导为空串
+    static void parseFirstSet();    //处理FIRST集
+    static void parseFollowSet();   //处理FOLLOW集
+    static void parseSelectSet();   //处理SELECT集
 
     static void clear();
     static bool hasError();
@@ -106,6 +112,7 @@ public:
     static bool isTerminal(int digit) { return digit > nonterminalMaxIndex && digit <= terminalMaxIndex; }
 
     static QString formatProdsMap();
+    static QString formatNilVec();
 
     static QList<Issue> issues;
 
