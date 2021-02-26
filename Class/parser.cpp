@@ -259,7 +259,7 @@ void Parser::parseNil() {
                     }
                 }
             }
-            issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Empty string state"), text });
+            issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Empty string condition"), text });
             return;
         }
     } while(isContinue);

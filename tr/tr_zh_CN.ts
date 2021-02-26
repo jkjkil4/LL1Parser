@@ -192,89 +192,89 @@
 <context>
     <name>Parser</name>
     <message>
-        <location filename="../Class/parser.cpp" line="137"/>
+        <location filename="../Class/parser.cpp" line="138"/>
         <source>Lack of &quot;-&gt;&quot; to represent production</source>
         <translation>缺少 &quot;-&gt;&quot; 来表示产生式</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="141"/>
+        <location filename="../Class/parser.cpp" line="142"/>
         <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
         <translation>应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="61"/>
+        <location filename="../Class/parser.cpp" line="62"/>
         <source>Unknown tag &quot;%1&quot;</source>
         <translation>未知的标记 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="57"/>
+        <location filename="../Class/parser.cpp" line="58"/>
         <source>Cannot find any production</source>
         <translation>无法找到任何产生式</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="87"/>
-        <location filename="../Class/parser.cpp" line="113"/>
+        <location filename="../Class/parser.cpp" line="88"/>
+        <location filename="../Class/parser.cpp" line="114"/>
         <source>Cannot use &quot;%1&quot; as symbol</source>
         <translation>不能使用 &quot;%1&quot; 作为符号</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="94"/>
+        <location filename="../Class/parser.cpp" line="95"/>
         <source>Symbol &quot;%1&quot; is already an nonterminal</source>
         <translation>符号 &quot;%1&quot; 已经是非终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="96"/>
-        <location filename="../Class/parser.cpp" line="122"/>
+        <location filename="../Class/parser.cpp" line="97"/>
+        <location filename="../Class/parser.cpp" line="123"/>
         <source>Redefinition of &quot;%1&quot;</source>
         <translation>重复定义 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="120"/>
+        <location filename="../Class/parser.cpp" line="121"/>
         <source>Symbol &quot;%1&quot; is already a terminal</source>
         <translation>符号 &quot;%1&quot; 已经是终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="150"/>
-        <location filename="../Class/parser.cpp" line="161"/>
+        <location filename="../Class/parser.cpp" line="151"/>
+        <location filename="../Class/parser.cpp" line="162"/>
         <source>Unknown symbol &quot;%1&quot;</source>
         <translation>未知的符号 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="153"/>
+        <location filename="../Class/parser.cpp" line="154"/>
         <source>The left of the production cannot be a terminal</source>
         <translation>产生式左部不能为终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="171"/>
+        <location filename="../Class/parser.cpp" line="172"/>
         <source>Redefinition of the production</source>
         <translation>产生式重复定义</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="261"/>
+        <location filename="../Class/parser.cpp" line="262"/>
         <source>Appear left recursive</source>
         <translation>出现左递归</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="261"/>
+        <location filename="../Class/parser.cpp" line="262"/>
         <source>(Double click to show detail)</source>
         <translation>（双击以显示详细信息）</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="261"/>
-        <source>Empty string state</source>
-        <translation>空串状态</translation>
+        <location filename="../Class/parser.cpp" line="262"/>
+        <source>Empty string condition</source>
+        <translation>空串情况</translation>
     </message>
     <message>
         <source>Infomation</source>
         <translation type="obsolete">信息</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="484"/>
+        <location filename="../Class/parser.cpp" line="519"/>
         <source>Can be empty string</source>
         <translation>可以为空串</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="488"/>
+        <location filename="../Class/parser.cpp" line="523"/>
         <source>Cannot be empty string</source>
         <translation>不能为空串</translation>
     </message>
@@ -313,8 +313,8 @@
     </message>
     <message>
         <location filename="../Widget/mw/Edit/projwidget.cpp" line="214"/>
-        <source>Empty string state</source>
-        <translation>空串状态</translation>
+        <source>Empty string condition</source>
+        <translation>空串情况</translation>
     </message>
     <message>
         <location filename="../Widget/mw/Edit/projwidget.cpp" line="215"/>
@@ -328,6 +328,11 @@
     </message>
     <message>
         <location filename="../Widget/mw/Edit/projwidget.cpp" line="217"/>
+        <source>SELECT set</source>
+        <translation>SELECT集</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="218"/>
         <source>(Double click to show detail)</source>
         <translation>（双击以显示详细信息）</translation>
     </message>

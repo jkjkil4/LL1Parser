@@ -211,7 +211,7 @@ void ProjWidget::onParse() {
     }
     if(!Parser::hasError()) {
         QString strProds = tr("Productions");
-        QString strNil = tr("Empty string state");
+        QString strNil = tr("Empty string condition");
         QString strFirstSet = tr("FIRST set");
         QString strFollowSet = tr("FOLLOW set");
         QString strSelectSet = tr("SELECT set");
