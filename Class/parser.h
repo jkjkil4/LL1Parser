@@ -92,6 +92,8 @@ public:
     typedef QList<Prod> Prods;
     typedef QMap<int, Prods> ProdsMap;
 
+    typedef QVector<int> SymbolSet;
+
     static void divide(QTextDocument *doc);
 
     static void parse(QTextDocument *doc);
@@ -113,7 +115,9 @@ public:
 
     static QString formatProdsMap();
     static QString formatNilVec();
-    static QString formatFirstSet(bool useHtml);
+    static QString formatSet(const QVector<SymbolSet> &vecSet, bool useHtml, bool showNil);
+    static QString formatFirstSet(bool useHtml) { return formatSet(vecFirstSet, useHtml, true); }
+    static QString formatFollowSet(bool useHtml) { return formatSet(vecFollowSet, useHtml, false); }
 
     static QList<Issue> issues;
 
@@ -127,8 +131,8 @@ public:
     static ProdsMap mapProds;
     static QVector<bool> vecNil;
 
-    typedef QVector<int> FirstSet;
-    static QVector<FirstSet> vecFirstSet;
+    static QVector<SymbolSet> vecFirstSet;
+    static QVector<SymbolSet> vecFollowSet;
 };
 
 

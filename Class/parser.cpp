@@ -8,7 +8,7 @@ int Parser::nonterminalMaxIndex = -1;
 int Parser::terminalMaxIndex = -1;
 Parser::ProdsMap Parser::mapProds;
 QVector<bool> Parser::vecNil;
-QVector<Parser::FirstSet> Parser::vecFirstSet;
+QVector<Parser::SymbolSet> Parser::vecFirstSet, Parser::vecFollowSet;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -329,7 +329,7 @@ void Parser::parseFirstSet() {
 
     vecFirstSet.resize(size);
     for(int i = 0; i < size; i++) {
-        FirstSet &firstSet = vecFirstSet[i];
+        SymbolSet &firstSet = vecFirstSet[i];
         TmpFirstSet &tmpFirstSet = vecTmpFirstSet[i];
 
         firstSet.reserve(tmpFirstSet.size());
@@ -341,15 +341,84 @@ void Parser::parseFirstSet() {
 void Parser::parseFollowSet() {
     struct TmpSymbol
     {
-        enum State { Symbol, FirstSet, FollowSet } state;
+        enum Type { Symbol, FirstSet, FollowSet } type;
         int digit;
+        TmpSymbol(Type state, int digit) : type(state), digit(digit) {}
 
-        TmpSymbol(State state, int digit) : state(state), digit(digit) {}
-        inline bool operator==(const TmpSymbol &other) const { return state == other.state && digit == other.digit; }
+        //这并不是unused，只是Qt没看出来(在QVector<>::contains中使用)
+        inline bool operator==(const TmpSymbol &other) const { return type == other.type && digit == other.digit; }
     };
     typedef QVector<TmpSymbol> TmpFollowSet;
     QVector<TmpFollowSet> vecTmpFollowSet;
+    int size = nonterminalMaxIndex + 1;
+    vecTmpFollowSet.resize(size);
 
+    //初始化解析
+    vecTmpFollowSet[0] << TmpSymbol(TmpSymbol::Symbol, nonterminalMaxIndex + 1);    //向"S"的FOLLOW集中加入"$"
+    for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) { //遍历所有产生式
+        for(Prod &prod : iter.value()) {    //遍历所有的产生式右部
+            QVector<TmpSymbol> vec;
+            vec << TmpSymbol(TmpSymbol::FollowSet, iter.key());     //将产生式左部以FOLLOW集的形式添加到vec中
+            for(auto prodIter = prod.rbegin(); prodIter != prod.rend(); ++prodIter) {   //反向遍历产生式右部
+                //如果该符号是非终结符，则将vec中的所有内容加入到该符号的FOLLOW集中
+                if(isNonterminal(*prodIter)) {
+                    TmpFollowSet &tmpFollowSet = vecTmpFollowSet[*prodIter];
+                    for(TmpSymbol &tmpSymbol : vec) {
+                        if(!tmpFollowSet.contains(tmpSymbol))
+                            tmpFollowSet << tmpSymbol;
+                    }
+                }
+
+                //如果该符号是终结符或者不能推导出空串，则清除vec的内容
+                if(isTerminal(*prodIter) || !vecNil[*prodIter])
+                    vec.clear();
+
+                //如果该符号是非终结符，则将其以FIRST集的形式添加到vec中，否则将其直接添加到vec中
+                TmpSymbol tmpSymbol(isNonterminal(*prodIter) ? TmpSymbol::FirstSet : TmpSymbol::Symbol, *prodIter);
+                if(!vec.contains(tmpSymbol))
+                    vec << tmpSymbol;
+            }
+        }
+    }
+
+    bool isContinue;
+    do {//解析
+        isContinue = false;
+
+        for(TmpFollowSet &tmpFollowSet : vecTmpFollowSet) {     //遍历所有的FOLLOW集
+            for(int i = 0; i < tmpFollowSet.size(); i++) {      //遍历该FOLLOW集的所有内容
+                TmpSymbol &tmpSymbol = tmpFollowSet[i];
+                if(tmpSymbol.type == TmpSymbol::FirstSet) {     //如果是以FIRST集的形式
+                    isContinue = true;
+                    for(int symbol : vecFirstSet[tmpSymbol.digit]) {    //遍历并展开FIRST集
+                        TmpSymbol otherSymbol(TmpSymbol::Symbol, symbol);
+                        if(!tmpFollowSet.contains(otherSymbol))
+                            tmpFollowSet << otherSymbol;
+                    }
+                    tmpFollowSet.removeAt(i);
+                    i--;
+                } else if(tmpSymbol.type == TmpSymbol::FollowSet) {     //如果是以FOLLOW集的形式
+                    isContinue = true;
+                    for(TmpSymbol &otherSymbol : vecTmpFollowSet[tmpSymbol.digit]) {    //遍历并展开FOLLOW集
+                        if(!tmpFollowSet.contains(otherSymbol))
+                            tmpFollowSet << otherSymbol;
+                    }
+                    tmpFollowSet.removeAt(i);
+                    i--;
+                }
+            }
+        }
+    } while(isContinue);
+
+    vecFollowSet.resize(size);
+    for(int i = 0; i < size; i++) {
+        SymbolSet &followSet = vecFollowSet[i];
+        TmpFollowSet &tmpFollowSet = vecTmpFollowSet[i];
+
+        followSet.reserve(tmpFollowSet.size());
+        for(TmpSymbol &tmpSymbol : tmpFollowSet)
+            followSet << tmpSymbol.digit;
+    }
 }
 
 void Parser::parseSelectSet() {
@@ -366,6 +435,7 @@ void Parser::clear() {
     mapProds.clear();
     vecNil.clear();
     vecFirstSet.clear();
+    vecFollowSet.clear();
 }
 
 bool Parser::hasError() {
@@ -423,13 +493,13 @@ QString Parser::formatNilVec() {
     return result;
 }
 
-QString Parser::formatFirstSet(bool useHtml) {
+QString Parser::formatSet(const QVector<SymbolSet> &vecSet, bool useHtml, bool showNil) {
     QString result;
     QTextStream ts(&result);
     ts.setCodec("UTF-8");
 
     bool hasPrev = false;
-    for(int i = 0; i < vecFirstSet.size(); i++) {
+    for(int i = 0; i < vecSet.size(); i++) {
         if(hasPrev) {
             ts << (useHtml ? "<br>" : "\n");
         } else hasPrev = true;
@@ -437,7 +507,7 @@ QString Parser::formatFirstSet(bool useHtml) {
         useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(i).str << "</font>") : (ts << mapSymbols.key(i).str);
         ts << " { ";
 
-        FirstSet &set = vecFirstSet[i];
+        const SymbolSet &set = vecSet[i];
         bool hasPrev2 = false;
         for(int symbol : set) {
             if(hasPrev2) {
@@ -447,7 +517,7 @@ QString Parser::formatFirstSet(bool useHtml) {
             useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
         }
 
-        if(vecNil[i]) {
+        if(showNil && vecNil[i]) {
             if(hasPrev) ts << ", ";
             ts << (useHtml ? "<font color=\"magenta\">nil</font>" : "nil");
         }
@@ -457,4 +527,3 @@ QString Parser::formatFirstSet(bool useHtml) {
 
     return result;
 }
-
