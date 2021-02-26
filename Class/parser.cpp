@@ -9,6 +9,7 @@ int Parser::terminalMaxIndex = -1;
 Parser::ProdsMap Parser::mapProds;
 QVector<bool> Parser::vecNil;
 QVector<Parser::SymbolVec> Parser::vecFirstSet, Parser::vecFollowSet;
+QVector<Parser::SelectSets> Parser::vecSelectSets;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -422,6 +423,7 @@ void Parser::parseFollowSet() {
 }
 
 void Parser::parseSelectSet() {
+    vecSelectSets.resize(nonterminalMaxIndex + 1);
     for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {     //遍历所有产生式
         for(SymbolVec &prod : iter.value()) {   //遍历所有的产生式右部
             SymbolVec firstSet;
@@ -444,8 +446,13 @@ void Parser::parseSelectSet() {
                 }
             }
 
-
-            //vecSelectSets[iter.key()] << SelectSet{ hasNil ?  : , prod };
+            if(hasNil) {
+                for(int symbol : vecFollowSet[iter.key()]) {    //遍历产生式左部符号的FOLLOW集
+                    if(!firstSet.contains(symbol))
+                        firstSet << symbol;
+                }
+            }
+            vecSelectSets[iter.key()] << SelectSet{ firstSet, prod };
         }
     }
 }
@@ -461,6 +468,7 @@ void Parser::clear() {
     vecNil.clear();
     vecFirstSet.clear();
     vecFollowSet.clear();
+    vecSelectSets.clear();
 }
 
 bool Parser::hasError() {
@@ -489,6 +497,7 @@ QString Parser::formatProdsMap() {
             } else hasPrev = true;
 
             ts << keyStr << " ->";
+
             for(int digit : prod) {
                 ts << " " << mapSymbols.key(digit).str;
             }
@@ -539,7 +548,7 @@ QString Parser::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool s
                 ts << ", ";
             } else hasPrev2 = true;
 
-            useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
+            useHtml ? (ts << "<font color=\"purple\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
         }
 
         if(showNil && vecNil[i]) {
@@ -548,6 +557,44 @@ QString Parser::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool s
         }
 
         ts << " }";
+    }
+
+    return result;
+}
+
+QString Parser::formatSelectSet(bool useHtml) {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
+
+    bool hasPrev = false;
+    for(int i = 0; i < vecSelectSets.size(); i++) {     //遍历所有非终结符
+        for(SelectSet &selectSet : vecSelectSets[i]) {  //遍历该非终结符的SELECT集
+            if(hasPrev) {
+                ts << (useHtml ? "<br>" : "\n");
+            } else hasPrev = true;
+
+            useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(i).str << "</font>") : (ts << mapSymbols.key(i).str);
+            ts << " -> ";
+            if(selectSet.prod.isEmpty()) {
+                ts << (useHtml ? "<font color=\"magenta\">nil</font> " : "nil ");
+            } else {
+                for(int symbol : selectSet.prod) {  //遍历该SELECT集对应的产生式右部
+                    useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
+                    ts << " ";
+                }
+            }
+
+            ts << "{ ";
+            bool hasPrev2 = false;
+            for(int symbol : selectSet.symbols) {   //遍历该SELECT集
+                if(hasPrev2) {
+                    ts << ", ";
+                } else hasPrev2 = true;
+                useHtml ? (ts << "<font color=\"purple\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
+            }
+            ts << " }";
+        }
     }
 
     return result;
