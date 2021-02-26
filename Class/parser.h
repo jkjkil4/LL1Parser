@@ -113,6 +113,7 @@ public:
 
     static QString formatProdsMap();
     static QString formatNilVec();
+    static QString formatFirstSet(bool useHtml);
 
     static QList<Issue> issues;
 
@@ -125,6 +126,9 @@ public:
 
     static ProdsMap mapProds;
     static QVector<bool> vecNil;
+
+    typedef QVector<int> FirstSet;
+    static QVector<FirstSet> vecFirstSet;
 };
 
 

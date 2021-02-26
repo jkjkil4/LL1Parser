@@ -212,6 +212,7 @@ void ProjWidget::onParse() {
     if(!Parser::hasError()) {
         QString strProds = tr("Productions");
         QString strNil = tr("Empty string state");
+        QString strFirstSet = tr("FIRST set");
         QString strDbClick = tr("(Double click to show detail)");
 
         QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
@@ -225,6 +226,12 @@ void ProjWidget::onParse() {
         itemNils->setData(Qt::UserRole + 1, strNil);
         itemNils->setData(Qt::UserRole + 2, Parser::formatNilVec());
         outputListWidget->addItem(itemNils);
+
+        QListWidgetItem *itemFirstSet = new QListWidgetItem(strFirstSet + strDbClick);
+        itemFirstSet->setData(Qt::UserRole, (int)UserRole::ShowHtmlText);
+        itemFirstSet->setData(Qt::UserRole + 1, strFirstSet);
+        itemFirstSet->setData(Qt::UserRole + 2, Parser::formatFirstSet(true));
+        outputListWidget->addItem(itemFirstSet);
     }
 }
 

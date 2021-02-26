@@ -8,6 +8,7 @@ int Parser::nonterminalMaxIndex = -1;
 int Parser::terminalMaxIndex = -1;
 Parser::ProdsMap Parser::mapProds;
 QVector<bool> Parser::vecNil;
+QVector<Parser::FirstSet> Parser::vecFirstSet;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -47,6 +48,7 @@ void Parser::parse(QTextDocument *doc) {
     appendSymbol(Symbol::Nonterminal, "S");
     TRY_PARSE("Nonterminal", parseNonterminal);
     nonterminalMaxIndex = symbolsMaxIndex - 1;
+    appendSymbol(Symbol::Terminal, "$");
     TRY_PARSE("Terminal", parseTerminal);
     terminalMaxIndex = symbolsMaxIndex - 1;
 
@@ -68,6 +70,9 @@ void Parser::parse(QTextDocument *doc) {
     if(hasError()) return;
 
     parseNil();
+    parseFirstSet();
+    parseFollowSet();
+    parseSelectSet();
 }
 #undef TRY_PARSE
 
@@ -77,6 +82,12 @@ void Parser::parseTerminal(const Divided &divided) {
         int phrase = -1;
         for(QString &str : list) {  //遍历分割的结果
             phrase++;
+
+            if(str == 'S' || str == '$') {  //如果与自带符号冲突
+                issues << Issue(Issue::Error, tr("Cannot use \"%1\" as symbol").arg(str), part.row, phrase);
+                continue;
+            }
+
             auto iter = mapSymbols.find(str);
             if(iter != mapSymbols.end()) {  //如果该符号已经存在
                 if(iter.key().type == Symbol::Nonterminal) {
@@ -97,6 +108,12 @@ void Parser::parseNonterminal(const Divided &divided) {
         int phrase = -1;
         for(QString &str : list) {  //遍历分割的结果
             phrase++;
+
+            if(str == 'S' || str == '$') {  //如果与自带符号冲突
+                issues << Issue(Issue::Error, tr("Cannot use \"%1\" as symbol").arg(str), part.row, phrase);
+                continue;
+            }
+
             auto iter = mapSymbols.find(str);
             if(iter != mapSymbols.end()) {  //如果该符号已经存在
                 if(iter.key().type == Symbol::Terminal) {
@@ -253,10 +270,85 @@ void Parser::parseNil() {
 }
 
 void Parser::parseFirstSet() {
+    struct TmpSymbol
+    {
+        TmpSymbol(int digit) : digit(digit), isQuote(false) {}
+        TmpSymbol(int digit, bool isQuote) : digit(digit), isQuote(isQuote) {}
+        int digit;
+        bool isQuote;
 
+        //这并不是unused，只是Qt没看出来(在QVector<>::contains中使用)
+        inline bool operator==(const TmpSymbol &other) const { return digit == other.digit && isQuote == other.isQuote; }
+    };
+    typedef QVector<TmpSymbol> TmpFirstSet;
+    QVector<TmpFirstSet> vecTmpFirstSet;
+    int size = nonterminalMaxIndex + 1;
+    vecTmpFirstSet.resize(size);
+
+    //初始化解析
+    for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) { //遍历所有产生式
+        TmpFirstSet &tmpSet = vecTmpFirstSet[iter.key()];
+        for(Prod &prod : iter.value()) {    //遍历所有的产生式右部
+            for(int symbol : prod) {    //遍历产生式右部的所有符号
+                if(isTerminal(symbol)) {    //如果该符号为终结符，则将其添加到当前FIRST集中并跳出该循环
+                    if(!tmpSet.contains(symbol))
+                        tmpSet << symbol;
+                    break;
+                }
+
+                //将该符号以FIRST集的形式添加到当前FIRST集中
+                TmpSymbol quoteSymbol(symbol, true);
+                if(!tmpSet.contains(quoteSymbol))
+                    tmpSet << quoteSymbol;
+
+                if(!vecNil[symbol])     //如果该符号无法推导出空串，则跳出该循环
+                    break;
+            }
+        }
+    }
+
+    bool isContinue;
+    do {//解析
+        isContinue = false;
+
+        for(TmpFirstSet &tmpFirstSet : vecTmpFirstSet) {    //遍历所有FIRST集
+            for(int i = 0; i < tmpFirstSet.size(); i++) {   //遍历FIRST集中的所有内容
+                TmpSymbol &tmpSymbol = tmpFirstSet[i];
+                if(tmpSymbol.isQuote) { //如果是以FIRST集的形式
+                    isContinue = true;
+                    for(TmpSymbol &otherSymbol : vecTmpFirstSet[tmpSymbol.digit]) { //遍历并展开FIRST集
+                        if(!tmpFirstSet.contains(otherSymbol))
+                            tmpFirstSet << otherSymbol;
+                    }
+                    tmpFirstSet.removeAt(i);
+                    i--;
+                }
+            }
+        }
+    } while(isContinue);
+
+    vecFirstSet.resize(size);
+    for(int i = 0; i < size; i++) {
+        FirstSet &firstSet = vecFirstSet[i];
+        TmpFirstSet &tmpFirstSet = vecTmpFirstSet[i];
+
+        firstSet.reserve(tmpFirstSet.size());
+        for(TmpSymbol &tmpSymbol : tmpFirstSet)
+            firstSet << tmpSymbol.digit;
+    }
 }
 
 void Parser::parseFollowSet() {
+    struct TmpSymbol
+    {
+        enum State { Symbol, FirstSet, FollowSet } state;
+        int digit;
+
+        TmpSymbol(State state, int digit) : state(state), digit(digit) {}
+        inline bool operator==(const TmpSymbol &other) const { return state == other.state && digit == other.digit; }
+    };
+    typedef QVector<TmpSymbol> TmpFollowSet;
+    QVector<TmpFollowSet> vecTmpFollowSet;
 
 }
 
@@ -273,6 +365,7 @@ void Parser::clear() {
     terminalMaxIndex = -1;
     mapProds.clear();
     vecNil.clear();
+    vecFirstSet.clear();
 }
 
 bool Parser::hasError() {
@@ -326,6 +419,41 @@ QString Parser::formatNilVec() {
     ts << "\n\n" << tr("Cannot be empty string") << ":";
     for(int symbol : vecCannotBeNil)
         ts << "\n" << mapSymbols.key(symbol).str;
+
+    return result;
+}
+
+QString Parser::formatFirstSet(bool useHtml) {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
+
+    bool hasPrev = false;
+    for(int i = 0; i < vecFirstSet.size(); i++) {
+        if(hasPrev) {
+            ts << (useHtml ? "<br>" : "\n");
+        } else hasPrev = true;
+
+        useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(i).str << "</font>") : (ts << mapSymbols.key(i).str);
+        ts << " { ";
+
+        FirstSet &set = vecFirstSet[i];
+        bool hasPrev2 = false;
+        for(int symbol : set) {
+            if(hasPrev2) {
+                ts << ", ";
+            } else hasPrev2 = true;
+
+            useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
+        }
+
+        if(vecNil[i]) {
+            if(hasPrev) ts << ", ";
+            ts << (useHtml ? "<font color=\"magenta\">nil</font>" : "nil");
+        }
+
+        ts << " }";
+    }
 
     return result;
 }
