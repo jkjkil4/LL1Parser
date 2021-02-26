@@ -17,8 +17,6 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     connect(mEdit, &PlainTextEdit::pointSizeChanged, [this](int cur){
         mNoteWidget->setText(tr("Pointsize changed: %1 (Default: %2)").arg(QString::number(cur), "10"));
     });
-//    connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onErrListWidgetDoubleClicked(QListWidgetItem*)));
-//    connect(mOutputWidget->outputListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onOutputListWidgetDoubleClicked(QListWidgetItem*)));
     connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListWidgetDoubleClicked(QListWidgetItem*)));
     connect(mOutputWidget->outputListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListWidgetDoubleClicked(QListWidgetItem*)));
     connect(mBtnParse, SIGNAL(clicked()), this, SLOT(onParse()));
@@ -92,32 +90,6 @@ void ProjWidget::setSaved(bool _isSaved) {
 void ProjWidget::updateTr() {
     mBtnParse->setText(tr("Parse"));
 }
-
-//void ProjWidget::onErrListWidgetDoubleClicked(QListWidgetItem *item) {
-//    //得到相关数据
-//    QPoint pos = item->data(Qt::UserRole).toPoint();
-//    if(pos.y() != -1 && pos.y() <= mEdit->document()->lineCount()) {
-//        QTextCursor tc = mEdit->textCursor();
-//        tc.setPosition(mEdit->document()->findBlockByLineNumber(pos.y()).position());
-//        mEdit->setTextCursor(tc);
-//        mEdit->setFocus();
-//    }
-//}
-
-//void ProjWidget::onOutputListWidgetDoubleClicked(QListWidgetItem *item) {
-//    if(item->data(Qt::UserRole).toInt() == (int)UserRole::ShowPlainText) {
-//        QPlainTextEdit *textWidget = new QPlainTextEdit;
-//        textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
-//        textWidget->setPlainText(item->data(Qt::UserRole + 2).toString());
-//        textWidget->setReadOnly(true);
-//        textWidget->setLineWrapMode(QPlainTextEdit::NoWrap);
-//        textWidget->setAttribute(Qt::WA_DeleteOnClose);
-//        textWidget->setMinimumSize(300, 300);
-//        j::SetPointSize(textWidget, 11);
-//        j::SetFamily(textWidget, fontSourceCodePro.mFamily);
-//        textWidget->show();
-//    }
-//}
 
 void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
     switch(item->data(Qt::UserRole).toInt()) {
