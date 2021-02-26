@@ -8,7 +8,7 @@ int Parser::nonterminalMaxIndex = -1;
 int Parser::terminalMaxIndex = -1;
 Parser::ProdsMap Parser::mapProds;
 QVector<bool> Parser::vecNil;
-QVector<Parser::SymbolSet> Parser::vecFirstSet, Parser::vecFollowSet;
+QVector<Parser::SymbolVec> Parser::vecFirstSet, Parser::vecFollowSet;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -143,7 +143,7 @@ void Parser::parseProduction(const Divided &divided) {
         }
 
         bool hasErr = false;
-        Prod prod;
+        SymbolVec prod;
         //得到产生式的左部
         int leftDigit = mapSymbols.value(list[0], -1);
         if(leftDigit == -1) {
@@ -194,7 +194,7 @@ void Parser::parseNil() {
             } else continue;
 
             NilState totalState = Cannot;  //对于所有产生式右部的结果
-            for(Prod &prod : iter.value()) {   //遍历所有产生式右部
+            for(SymbolVec &prod : iter.value()) {   //遍历所有产生式右部
                 if(prod.isEmpty()) {    //如果产生式可以直接推导出空串
                     totalState = Can;    //标记为Can
                     isChanged = true;               //标记发生变化
@@ -241,7 +241,7 @@ void Parser::parseNil() {
             bool hasPrev = false;
             for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {  //遍历所有产生式
                 const QString &symbolStr = mapSymbols.key(iter.key()).str;
-                for(Prod &prod : iter.value()) {   //遍历所有的产生式右部
+                for(SymbolVec &prod : iter.value()) {   //遍历所有的产生式右部
                     //换行
                     if(hasPrev) {
                         ts << "<br>";
@@ -288,7 +288,7 @@ void Parser::parseFirstSet() {
     //初始化解析
     for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) { //遍历所有产生式
         TmpFirstSet &tmpSet = vecTmpFirstSet[iter.key()];
-        for(Prod &prod : iter.value()) {    //遍历所有的产生式右部
+        for(SymbolVec &prod : iter.value()) {    //遍历所有的产生式右部
             for(int symbol : prod) {    //遍历产生式右部的所有符号
                 if(isTerminal(symbol)) {    //如果该符号为终结符，则将其添加到当前FIRST集中并跳出该循环
                     if(!tmpSet.contains(symbol))
@@ -329,7 +329,7 @@ void Parser::parseFirstSet() {
 
     vecFirstSet.resize(size);
     for(int i = 0; i < size; i++) {
-        SymbolSet &firstSet = vecFirstSet[i];
+        SymbolVec &firstSet = vecFirstSet[i];
         TmpFirstSet &tmpFirstSet = vecTmpFirstSet[i];
 
         firstSet.reserve(tmpFirstSet.size());
@@ -356,7 +356,7 @@ void Parser::parseFollowSet() {
     //初始化解析
     vecTmpFollowSet[0] << TmpSymbol(TmpSymbol::Symbol, nonterminalMaxIndex + 1);    //向"S"的FOLLOW集中加入"$"
     for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) { //遍历所有产生式
-        for(Prod &prod : iter.value()) {    //遍历所有的产生式右部
+        for(SymbolVec &prod : iter.value()) {    //遍历所有的产生式右部
             QVector<TmpSymbol> vec;
             vec << TmpSymbol(TmpSymbol::FollowSet, iter.key());     //将产生式左部以FOLLOW集的形式添加到vec中
             for(auto prodIter = prod.rbegin(); prodIter != prod.rend(); ++prodIter) {   //反向遍历产生式右部
@@ -412,7 +412,7 @@ void Parser::parseFollowSet() {
 
     vecFollowSet.resize(size);
     for(int i = 0; i < size; i++) {
-        SymbolSet &followSet = vecFollowSet[i];
+        SymbolVec &followSet = vecFollowSet[i];
         TmpFollowSet &tmpFollowSet = vecTmpFollowSet[i];
 
         followSet.reserve(tmpFollowSet.size());
@@ -422,7 +422,32 @@ void Parser::parseFollowSet() {
 }
 
 void Parser::parseSelectSet() {
+    for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {     //遍历所有产生式
+        for(SymbolVec &prod : iter.value()) {   //遍历所有的产生式右部
+            SymbolVec firstSet;
+            bool hasNil = true;
 
+            for(int symbol : prod) {    //遍历产生式右部的所有符号
+                if(isNonterminal(symbol)) {     //如果该符号是非终结符
+                    for(int otherSymbol : vecFirstSet[symbol]) {    //遍历该非终结符的FIRST集
+                        if(!firstSet.contains(otherSymbol))
+                            firstSet << otherSymbol;
+                    }
+                } else {
+                    if(!firstSet.contains(symbol))
+                        firstSet << symbol;
+                }
+
+                if(isTerminal(symbol) || !vecNil[symbol]) {  //如果该符号是终结符或者无法推导出空串
+                    hasNil = false;
+                    break;
+                }
+            }
+
+
+            //vecSelectSets[iter.key()] << SelectSet{ hasNil ?  : , prod };
+        }
+    }
 }
 
 void Parser::clear() {
@@ -458,7 +483,7 @@ QString Parser::formatProdsMap() {
     bool hasPrev = false;
     for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {     //遍历所有的产生式
         QString keyStr = mapSymbols.key(iter.key()).str;
-        for(Prod &prod : *iter) {   //遍历所有的产生式右部
+        for(SymbolVec &prod : *iter) {   //遍历所有的产生式右部
             if(hasPrev) {
                 ts << "\n";
             } else hasPrev = true;
@@ -493,7 +518,7 @@ QString Parser::formatNilVec() {
     return result;
 }
 
-QString Parser::formatSet(const QVector<SymbolSet> &vecSet, bool useHtml, bool showNil) {
+QString Parser::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool showNil) {
     QString result;
     QTextStream ts(&result);
     ts.setCodec("UTF-8");
@@ -507,7 +532,7 @@ QString Parser::formatSet(const QVector<SymbolSet> &vecSet, bool useHtml, bool s
         useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(i).str << "</font>") : (ts << mapSymbols.key(i).str);
         ts << " { ";
 
-        const SymbolSet &set = vecSet[i];
+        const SymbolVec &set = vecSet[i];
         bool hasPrev2 = false;
         for(int symbol : set) {
             if(hasPrev2) {

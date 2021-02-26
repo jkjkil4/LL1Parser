@@ -88,11 +88,13 @@ public:
     };
 
     //产生式相关
-    typedef QVector<int> Prod;
-    typedef QList<Prod> Prods;
+    typedef QVector<int> SymbolVec;
+    typedef QList<SymbolVec> Prods;
     typedef QMap<int, Prods> ProdsMap;
 
-    typedef QVector<int> SymbolSet;
+    //SELECT集
+    struct SelectSet { SymbolVec symbols, prod; };
+    typedef QVector<SelectSet> SelectSets;
 
     static void divide(QTextDocument *doc);
 
@@ -115,7 +117,7 @@ public:
 
     static QString formatProdsMap();
     static QString formatNilVec();
-    static QString formatSet(const QVector<SymbolSet> &vecSet, bool useHtml, bool showNil);
+    static QString formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool showNil);
     static QString formatFirstSet(bool useHtml) { return formatSet(vecFirstSet, useHtml, true); }
     static QString formatFollowSet(bool useHtml) { return formatSet(vecFollowSet, useHtml, false); }
 
@@ -131,8 +133,9 @@ public:
     static ProdsMap mapProds;
     static QVector<bool> vecNil;
 
-    static QVector<SymbolSet> vecFirstSet;
-    static QVector<SymbolSet> vecFollowSet;
+    static QVector<SymbolVec> vecFirstSet;
+    static QVector<SymbolVec> vecFollowSet;
+    static QVector<SelectSets> vecSelectSets;
 };
 
 
