@@ -1,2 +1,2 @@
 # LL1Parser
- LL1语法分析器
+ LL1分析器
