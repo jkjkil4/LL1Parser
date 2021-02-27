@@ -123,6 +123,7 @@ public:
     static QString formatSelectSet(bool useHtml, QVector<SymbolVec> *pVecIntersectedSymbols = nullptr);
 
     static QList<Issue> issues;
+    static bool hasProd;
 
     static QMap<QString, Divided> mapDivided;
 

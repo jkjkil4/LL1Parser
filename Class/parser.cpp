@@ -1,6 +1,7 @@
 #include "parser.h"
 
 QList<Parser::Issue> Parser::issues;
+bool Parser::hasProd = false;
 QMap<QString, Parser::Divided> Parser::mapDivided;
 QMap<Parser::Symbol, int> Parser::mapSymbols;
 int Parser::symbolsMaxIndex = 0;
@@ -34,7 +35,6 @@ void Parser::divide(QTextDocument *doc) {
     }
 }
 
-
 #define TRY_PARSE(key, fn) {            \
     auto iter = mapDivided.find(key);   \
     if(iter != mapDivided.end()) {      \
@@ -54,9 +54,8 @@ void Parser::parse(QTextDocument *doc) {
     terminalMaxIndex = symbolsMaxIndex - 1;
 
     TRY_PARSE("Production", parseProduction);
-    if(!hasError() && mapProds.isEmpty()) {
+    if(!hasProd)
         issues << Issue(Issue::Error, tr("Cannot find any production"));
-    }
 
 
     QString trStr = tr("Unknown tag \"%1\"");
@@ -71,6 +70,8 @@ void Parser::parse(QTextDocument *doc) {
     if(hasError()) return;
 
     parseNil();
+    if(hasError()) return;
+
     parseFirstSet();
     parseFollowSet();
     parseSelectSet();
@@ -102,7 +103,6 @@ void Parser::parseTerminal(const Divided &divided) {
         }
     }
 }
-
 void Parser::parseNonterminal(const Divided &divided) {
     for(const Divided::Part &part : divided.parts) {    //遍历所有行
         QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
@@ -128,14 +128,17 @@ void Parser::parseNonterminal(const Divided &divided) {
         }
     }
 }
-
 void Parser::parseProduction(const Divided &divided) {
     for(const Divided::Part &part : divided.parts) {    //遍历所有行
         QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
         int size = list.size();
-        if(size < 2) {
-            if(size == 1)
-                issues << Issue(Issue::Error, tr("Lack of \"->\" to represent production"), part.row);
+        if(size == 0)
+            continue;
+
+        hasProd = true;
+
+        if(size == 1) {
+            issues << Issue(Issue::Error, tr("Lack of \"->\" to represent production"), part.row);
             continue;
         }
         if(list[1] != "->") {
@@ -269,7 +272,6 @@ void Parser::parseNil() {
         vecNil[i] = (tmpVecNil[i] == Can);
     }
 }
-
 void Parser::parseFirstSet() {
     struct TmpSymbol
     {
@@ -338,7 +340,6 @@ void Parser::parseFirstSet() {
             firstSet << tmpSymbol.digit;
     }
 }
-
 void Parser::parseFollowSet() {
     struct TmpSymbol
     {
@@ -421,7 +422,6 @@ void Parser::parseFollowSet() {
             followSet << tmpSymbol.digit;
     }
 }
-
 void Parser::parseSelectSet() {
     int size = nonterminalMaxIndex + 1;
     vecSelectSets.resize(size);
@@ -485,6 +485,7 @@ void Parser::parseSelectSet() {
 
 void Parser::clear() {
     issues.clear();
+    hasProd = false;
     mapDivided.clear();
     mapSymbols.clear();
     symbolsMaxIndex = 0;
@@ -496,14 +497,12 @@ void Parser::clear() {
     vecFollowSet.clear();
     vecSelectSets.clear();
 }
-
 bool Parser::hasError() {
     for(Issue &issue : issues)
         if(issue.type == Issue::Error)
             return true;
     return false;
 }
-
 void Parser::appendSymbol(Symbol::Type type, const QString &str) {
     mapSymbols.insert(Symbol(type, str), symbolsMaxIndex);
     symbolsMaxIndex++;
@@ -531,7 +530,6 @@ QString Parser::formatProdsMap() {
     }
     return result;
 }
-
 QString Parser::formatNilVec() {
     QString result;
     QTextStream ts(&result);
@@ -552,7 +550,6 @@ QString Parser::formatNilVec() {
 
     return result;
 }
-
 QString Parser::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool showNil) {
     QString result;
     QTextStream ts(&result);
@@ -587,7 +584,6 @@ QString Parser::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool s
 
     return result;
 }
-
 QString Parser::formatSelectSet(bool useHtml, QVector<SymbolVec> *pVecIntersectedSymbols) {
     QString result;
     QTextStream ts(&result);
