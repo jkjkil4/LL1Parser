@@ -261,20 +261,30 @@
     </message>
     <message>
         <location filename="../Class/parser.cpp" line="262"/>
-        <source>Empty string condition</source>
-        <translation>空串情况</translation>
+        <location filename="../Class/parser.cpp" line="483"/>
+        <source>Error infomation</source>
+        <translation>错误信息</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="483"/>
+        <source>SELECT set has intersections</source>
+        <translation>SELECT集有交叉</translation>
+    </message>
+    <message>
+        <source>The SELECT set of &quot;%1&quot; has intersections</source>
+        <translation type="vanished">&quot;%1&quot; 的SELECT集有交叉</translation>
     </message>
     <message>
         <source>Infomation</source>
         <translation type="obsolete">信息</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="519"/>
+        <location filename="../Class/parser.cpp" line="546"/>
         <source>Can be empty string</source>
         <translation>可以为空串</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="523"/>
+        <location filename="../Class/parser.cpp" line="550"/>
         <source>Cannot be empty string</source>
         <translation>不能为空串</translation>
     </message>
@@ -287,52 +297,52 @@
         <translation>点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="93"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="91"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="174"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="146"/>
         <source>Elapsed time: %1ms</source>
         <translation>用时: %1毫秒</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="181"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="153"/>
         <source>Row</source>
         <translation>行</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="182"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="154"/>
         <source>Phrase</source>
         <translation>词</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="213"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="185"/>
         <source>Productions</source>
         <translation>产生式</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="214"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="186"/>
         <source>Empty string condition</source>
         <translation>空串情况</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="215"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="187"/>
         <source>FIRST set</source>
         <translation>FIRST集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="216"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="188"/>
         <source>FOLLOW set</source>
         <translation>FOLLOW集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="217"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="189"/>
         <source>SELECT set</source>
         <translation>SELECT集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="218"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="190"/>
         <source>(Double click to show detail)</source>
         <translation>（双击以显示详细信息）</translation>
     </message>

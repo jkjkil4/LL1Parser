@@ -120,7 +120,7 @@ public:
     static QString formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool showNil);
     static QString formatFirstSet(bool useHtml) { return formatSet(vecFirstSet, useHtml, true); }
     static QString formatFollowSet(bool useHtml) { return formatSet(vecFollowSet, useHtml, false); }
-    static QString formatSelectSet(bool useHtml);
+    static QString formatSelectSet(bool useHtml, QVector<SymbolVec> *pVecIntersectedSymbols = nullptr);
 
     static QList<Issue> issues;
 

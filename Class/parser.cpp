@@ -259,7 +259,7 @@ void Parser::parseNil() {
                     }
                 }
             }
-            issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Empty string condition"), text });
+            issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
             return;
         }
     } while(isContinue);
@@ -423,7 +423,10 @@ void Parser::parseFollowSet() {
 }
 
 void Parser::parseSelectSet() {
-    vecSelectSets.resize(nonterminalMaxIndex + 1);
+    int size = nonterminalMaxIndex + 1;
+    vecSelectSets.resize(size);
+
+    //解析
     for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {     //遍历所有产生式
         for(SymbolVec &prod : iter.value()) {   //遍历所有的产生式右部
             SymbolVec firstSet;
@@ -454,6 +457,29 @@ void Parser::parseSelectSet() {
             }
             vecSelectSets[iter.key()] << SelectSet{ firstSet, prod };
         }
+    }
+
+    //检查SELECT集是否出现交叉
+    QVector<SymbolVec> vecIntersectedSymbols;
+    vecIntersectedSymbols.resize(size);
+    bool hasIntersection = false;
+    for(int i = 0; i < size; i++) {     //遍历所有的非终结符
+        SymbolVec appearedSymbols;
+        SymbolVec &intersectedSymbols = vecIntersectedSymbols[i];
+        for(SelectSet &selectSet : vecSelectSets[i]) {   //遍历该非终结符的所有SELECT集
+            for(int symbol : selectSet.symbols) {   //遍历该SELECT集的所有符号
+                if(appearedSymbols.contains(symbol)) {
+                    hasIntersection = true;
+                    if(!intersectedSymbols.contains(symbol))
+                        intersectedSymbols << symbol;
+                    break;
+                } else appearedSymbols << symbol;
+            }
+        }
+    }
+    if(hasIntersection) {   //如果出现交叉
+        QString text = formatSelectSet(true, &vecIntersectedSymbols);
+        issues << Issue(Issue::Error, tr("SELECT set has intersections"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
     }
 }
 
@@ -562,7 +588,7 @@ QString Parser::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool s
     return result;
 }
 
-QString Parser::formatSelectSet(bool useHtml) {
+QString Parser::formatSelectSet(bool useHtml, QVector<SymbolVec> *pVecIntersectedSymbols) {
     QString result;
     QTextStream ts(&result);
     ts.setCodec("UTF-8");
@@ -591,7 +617,15 @@ QString Parser::formatSelectSet(bool useHtml) {
                 if(hasPrev2) {
                     ts << ", ";
                 } else hasPrev2 = true;
-                useHtml ? (ts << "<font color=\"purple\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
+
+                bool isWrong = (pVecIntersectedSymbols && pVecIntersectedSymbols->at(i).contains(symbol));
+                if(isWrong) {
+                    useHtml ? (ts << "<font color=\"red\"><u>" << mapSymbols.key(symbol).str << "</u></font>")
+                            : (ts << mapSymbols.key(symbol).str);
+                } else {
+                    useHtml ? (ts << "<font color=\"purple\">" << mapSymbols.key(symbol).str << "</font>")
+                            : (ts << mapSymbols.key(symbol).str);
+                }
             }
             ts << " }";
         }
