@@ -196,7 +196,7 @@ void MainWindow::onAbout() {
     QTextStream ts(&text);
     ts << tr("Author") << ": jkjkil4<br>"
        << "github: <a href=https://github.com/jkjkil4/LL1Parser>https://github.com/jkjkil4/LL1Parser</a><br>"
-       << tr("Feedback") << ": jkjkil@qq.com" ;
+       << tr("Feedback") << ": <a href=\"https://github.com/jkjkil4/LL1Parser/issues\">https://github.com/jkjkil4/LL1Parser/issues</a> " << tr("or") << " jkjkil@qq.com" ;
     QMessageBox::about(this, QApplication::tr("About"), text);
 }
 
