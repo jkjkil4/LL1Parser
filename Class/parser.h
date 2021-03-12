@@ -9,6 +9,8 @@
 
 #include <QDebug>
 
+#include "jsobject.h"
+
 #include <Lib/header.h>
 #include "header.h"
 
@@ -141,7 +143,13 @@ public:
     static QVector<SymbolVec> vecFollowSet;
     static QVector<SelectSets> vecSelectSets;
 
-    static QJSEngine *pJsEngine;
+    struct JS {
+        QJSEngine engine;
+        JSObject object;
+    };
+    static JS *js;
+    static QString jsDebugMessage;
+    
 };
 
 

@@ -187,6 +187,7 @@ void ProjWidget::onParse() {
         QString strFirstSet = tr("FIRST set");
         QString strFollowSet = tr("FOLLOW set");
         QString strSelectSet = tr("SELECT set");
+        QString strJSDebugMsg = tr("JS debug message");
         QString strDbClick = tr("(Double click to show detail)");
 
         QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
@@ -218,6 +219,14 @@ void ProjWidget::onParse() {
         itemSelectSet->setData(Qt::UserRole + 1, strSelectSet);
         itemSelectSet->setData(Qt::UserRole + 2, Parser::formatSelectSet(true));
         outputListWidget->addItem(itemSelectSet);
+
+        if(!Parser::jsDebugMessage.isEmpty()) {
+            QListWidgetItem *itemJSDebug = new QListWidgetItem(strJSDebugMsg + strDbClick);
+            itemJSDebug->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
+            itemJSDebug->setData(Qt::UserRole + 1, strJSDebugMsg);
+            itemJSDebug->setData(Qt::UserRole + 2, Parser::jsDebugMessage);
+            outputListWidget->addItem(itemJSDebug);
+        }
     }
 }
 

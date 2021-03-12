@@ -11,7 +11,8 @@ Parser::ProdsMap Parser::mapProds;
 QVector<bool> Parser::vecNil;
 QVector<Parser::SymbolVec> Parser::vecFirstSet, Parser::vecFollowSet;
 QVector<Parser::SelectSets> Parser::vecSelectSets;
-QJSEngine* Parser::pJsEngine = nullptr;
+Parser::JS* Parser::js = nullptr;
+QString Parser::jsDebugMessage;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -78,6 +79,8 @@ void Parser::parse(QTextDocument *doc) {
     parseFirstSet();
     parseFollowSet();
     parseSelectSet();
+
+    j::SafeDelete(js);
 }
 #undef TRY_PARSE
 
@@ -183,6 +186,12 @@ void Parser::parseProduction(const Divided &divided) {
     }
 }
 void Parser::parseJs(const Divided &divided) {
+    //初始化QJSEngine
+    j::SafeDelete(js);
+    js = new JS;
+    QJSValue jsObjVal = js->engine.newQObject(&js->object);
+    js->engine.globalObject().setProperty("lp", jsObjVal);
+
     //将分割的字符串合并为整体
     QString all;
     QTextStream ts(&all);
@@ -191,12 +200,16 @@ void Parser::parseJs(const Divided &divided) {
         ts << part.text << '\n';
 
     //执行js脚本
-    QJSValue result = pJsEngine->evaluate(all);
+    QJSValue result = js->engine.evaluate(all);
     if(result.isError()) {
         int index = result.property("lineNumber").toInt() - 1;
         int row = (index >= 0 && index < divided.parts.size()) ? divided.parts[index].row : -1;
-        issues << Issue(Issue::Error, tr("JavaScript error: \" %1 \"").arg(result.toString()), row, -1);
+        issues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(result.toString()), row, -1);
     }
+
+    //调试信息
+    if(js->object.hasDebugMessage())
+        jsDebugMessage = js->object.debugMessage();
 }
 
 void Parser::parseNil() {
@@ -504,6 +517,7 @@ void Parser::parseSelectSet() {
 
 void Parser::clear() {
     issues.clear();
+
     hasProd = false;
     mapDivided.clear();
     mapSymbols.clear();
@@ -511,12 +525,13 @@ void Parser::clear() {
     nonterminalMaxIndex = -1;
     terminalMaxIndex = -1;
     mapProds.clear();
+
     vecNil.clear();
     vecFirstSet.clear();
     vecFollowSet.clear();
     vecSelectSets.clear();
-    j::SafeDelete(pJsEngine);
-    pJsEngine = new QJSEngine;
+
+    jsDebugMessage.clear();
 }
 bool Parser::hasError() {
     for(Issue &issue : issues)
