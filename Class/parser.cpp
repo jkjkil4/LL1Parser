@@ -11,6 +11,7 @@ Parser::ProdsMap Parser::mapProds;
 QVector<bool> Parser::vecNil;
 QVector<Parser::SymbolVec> Parser::vecFirstSet, Parser::vecFollowSet;
 QVector<Parser::SelectSets> Parser::vecSelectSets;
+QJSEngine* Parser::pJsEngine = nullptr;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
@@ -56,6 +57,8 @@ void Parser::parse(QTextDocument *doc) {
     TRY_PARSE("Production", parseProduction);
     if(!hasProd)
         issues << Issue(Issue::Error, tr("Cannot find any production"));
+
+    TRY_PARSE("JS", parseJs);
 
 
     QString trStr = tr("Unknown tag \"%1\"");
@@ -177,6 +180,22 @@ void Parser::parseProduction(const Divided &divided) {
                 prods << prod;
             }
         }
+    }
+}
+void Parser::parseJs(const Divided &divided) {
+    //将分割的字符串合并为整体
+    QString all;
+    QTextStream ts(&all);
+    ts.setCodec("UTF-8");
+    for(const Divided::Part &part : divided.parts)
+        ts << part.text << '\n';
+
+    //执行js脚本
+    QJSValue result = pJsEngine->evaluate(all);
+    if(result.isError()) {
+        int index = result.property("lineNumber").toInt() - 1;
+        int row = (index >= 0 && index < divided.parts.size()) ? divided.parts[index].row : -1;
+        issues << Issue(Issue::Error, tr("JavaScript error: \" %1 \"").arg(result.toString()), row, -1);
     }
 }
 
@@ -496,6 +515,8 @@ void Parser::clear() {
     vecFirstSet.clear();
     vecFollowSet.clear();
     vecSelectSets.clear();
+    j::SafeDelete(pJsEngine);
+    pJsEngine = new QJSEngine;
 }
 bool Parser::hasError() {
     for(Issue &issue : issues)

@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QStyle>
 #include <QRegularExpression>
+#include <QJSEngine>
 
 #include <QDebug>
 
@@ -103,6 +104,7 @@ public:
     static void parseTerminal(const Divided &divided);      //处理终结符
     static void parseNonterminal(const Divided &divided);   //处理非终结符
     static void parseProduction(const Divided &divided);    //处理产生式
+    static void parseJs(const Divided &divided);            //处理js脚本
 
     static void parseNil();         //处理能否推导为空串
     static void parseFirstSet();    //处理FIRST集
@@ -138,6 +140,8 @@ public:
     static QVector<SymbolVec> vecFirstSet;
     static QVector<SymbolVec> vecFollowSet;
     static QVector<SelectSets> vecSelectSets;
+
+    static QJSEngine *pJsEngine;
 };
 
 
