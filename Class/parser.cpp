@@ -240,7 +240,7 @@ void Parser::parseJs(const Divided &divided) {
     jsObjVal.setProperty("arrNil", jsNilArray);
 
     //传入FIRST集
-    QJSValue jsFirstSet = js->engine.newArray(symbolCount);
+    QJSValue jsFirstSet = js->engine.newArray(nonterminalMaxIndex + 1);
     for(int i = 0; i <= nonterminalMaxIndex; i++) {   //遍历所有非终结符
         SymbolVec &symbols = vecFirstSet[i];        //该符号的FIRST集
         int count = symbols.size();
@@ -250,6 +250,18 @@ void Parser::parseJs(const Divided &divided) {
         jsFirstSet.setProperty(i, jsSymbols);
     }
     jsObjVal.setProperty("arrFirstSet", jsFirstSet);
+
+    //传入FOLLOW集
+    QJSValue jsFollowSet = js->engine.newArray(nonterminalMaxIndex + 1);
+    for(int i = 0; i <= nonterminalMaxIndex; i++) {     //遍历所有非终结符
+        SymbolVec &symbols = vecFollowSet[i];
+        int count = symbols.size();
+        QJSValue jsSymbols = js->engine.newArray(count);
+        repeat(int, j, count)
+            jsSymbols.setProperty(j, symbols[j]);
+        jsFollowSet.setProperty(i, jsSymbols);
+    }
+    jsObjVal.setProperty("arrFollowSet", jsFollowSet);
 
     //将分割的字符串合并为整体
     QString all;
