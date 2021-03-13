@@ -200,18 +200,56 @@ void Parser::parseJs(const Divided &divided) {
     QJSValue jsObjVal = js->engine.newQObject(&js->object);
     js->engine.globalObject().setProperty("lp", jsObjVal);
 
-    //传入符号列表
+    //传入数据
     int symbolCount = mapSymbols.size();
-    QJSValue jsFirstArray = js->engine.newArray(symbolCount);
+    jsObjVal.setProperty("symbolCount", symbolCount);
+    jsObjVal.setProperty("nonterminalMaxIndex", nonterminalMaxIndex);
+    jsObjVal.setProperty("terminalMaxIndex", terminalMaxIndex);
+
+    //传入符号列表
+    QJSValue jsSymbolArray = js->engine.newArray(symbolCount);
     repeat(int, i, symbolCount)
-        jsFirstArray.setProperty(i, mapSymbols.key(i).str);
-    jsObjVal.setProperty("arrSymbols", jsFirstArray);
+        jsSymbolArray.setProperty(i, mapSymbols.key(i).str);
+    jsObjVal.setProperty("arrSymbols", jsSymbolArray);
+
+    //传入产生式
+    QJSValue jsProdsArray = js->engine.newArray(symbolCount);
+    repeat(int, i, symbolCount) {   //遍历所有的符号
+        Prods &prods = mapProds[i];     //该符号的所有产生式
+        int prodsSize = prods.size();   //产生式数量
+        QJSValue jsProdArray = js->engine.newArray(prodsSize);
+        int index = 0;
+        for(auto iter = prods.begin(); iter != prods.end(); ++iter) {   //遍历该符号的所有产生式
+            SymbolVec &symbols = *iter;         //其中一个产生式
+            int symbolsSize = symbols.size();   //产生式右部大小
+            QJSValue jsSymbolArray = js->engine.newArray(symbolsSize);
+            for(int j = 0; j < symbolsSize; j++)    //遍历该产生式右部
+                jsSymbolArray.setProperty(j, symbols[j]);
+            jsProdArray.setProperty(index, jsSymbolArray);
+            
+            index++;
+        }
+        jsProdsArray.setProperty(i, jsProdArray);
+    }
+    jsObjVal.setProperty("arrProds", jsProdsArray);
 
     //传入能否推导出空串
     QJSValue jsNilArray = js->engine.newArray(symbolCount);
     repeat(int, i, symbolCount)
         jsNilArray.setProperty(i, vecNil[i]);
     jsObjVal.setProperty("arrNil", jsNilArray);
+
+    //传入FIRST集
+    QJSValue jsFirstSet = js->engine.newArray(symbolCount);
+    for(int i = 0; i <= nonterminalMaxIndex; i++) {   //遍历所有非终结符
+        SymbolVec &symbols = vecFirstSet[i];        //该符号的FIRST集
+        int count = symbols.size();
+        QJSValue jsSymbols = js->engine.newArray(count);
+        repeat(int, j, count)
+            jsSymbols.setProperty(j, symbols[j]);
+        jsFirstSet.setProperty(i, jsSymbols);
+    }
+    jsObjVal.setProperty("arrFirstSet", jsFirstSet);
 
     //将分割的字符串合并为整体
     QString all;
