@@ -240,28 +240,55 @@ void Parser::parseJs(const Divided &divided) {
     jsObjVal.setProperty("arrNil", jsNilArray);
 
     //传入FIRST集
-    QJSValue jsFirstSet = js->engine.newArray(nonterminalMaxIndex + 1);
+    QJSValue jsFirstSetArray = js->engine.newArray(nonterminalMaxIndex + 1);
     for(int i = 0; i <= nonterminalMaxIndex; i++) {   //遍历所有非终结符
         SymbolVec &symbols = vecFirstSet[i];        //该符号的FIRST集
         int count = symbols.size();
         QJSValue jsSymbols = js->engine.newArray(count);
         repeat(int, j, count)
             jsSymbols.setProperty(j, symbols[j]);
-        jsFirstSet.setProperty(i, jsSymbols);
+        jsFirstSetArray.setProperty(i, jsSymbols);
     }
-    jsObjVal.setProperty("arrFirstSet", jsFirstSet);
+    jsObjVal.setProperty("arrFirstSet", jsFirstSetArray);
 
     //传入FOLLOW集
-    QJSValue jsFollowSet = js->engine.newArray(nonterminalMaxIndex + 1);
+    QJSValue jsFollowSetArray = js->engine.newArray(nonterminalMaxIndex + 1);
     for(int i = 0; i <= nonterminalMaxIndex; i++) {     //遍历所有非终结符
-        SymbolVec &symbols = vecFollowSet[i];
+        SymbolVec &symbols = vecFollowSet[i];   //该符号的FOLLOW集
         int count = symbols.size();
         QJSValue jsSymbols = js->engine.newArray(count);
         repeat(int, j, count)
             jsSymbols.setProperty(j, symbols[j]);
-        jsFollowSet.setProperty(i, jsSymbols);
+        jsFollowSetArray.setProperty(i, jsSymbols);
     }
-    jsObjVal.setProperty("arrFollowSet", jsFollowSet);
+    jsObjVal.setProperty("arrFollowSet", jsFollowSetArray);
+
+    //传入SELECT集
+    QJSValue jsSelectSetsArray = js->engine.newArray(nonterminalMaxIndex + 1);
+    for(int i = 0; i <= nonterminalMaxIndex; i++) {     //遍历所有非终结符
+        SelectSets &selectSets = vecSelectSets[i];  //该符号的所有SELECT集
+        int selectSetCount = selectSets.size();     //该符号的SELECT集数量
+        QJSValue jsSelectSets = js->engine.newArray(selectSetCount);
+        repeat(int, j, selectSetCount) {    //遍历该符号的所有SELECT集
+            SelectSet &selectSet = selectSets[j];           //当前SELECT集
+            int prodSize = selectSet.prod.size();           //产生式符号数量
+            int symbolsSize = selectSet.symbols.size();     //SELECT集符号数量
+
+            QJSValue jsSelectSet = js->engine.newObject();
+            QJSValue jsProd = js->engine.newArray(prodSize);
+            QJSValue jsSymbols = js->engine.newArray(symbolsSize);
+            repeat(int, k, prodSize)    //遍历当前产生式
+                jsProd.setProperty(k, selectSet.prod[k]);
+            repeat(int, k, symbolsSize) //遍历当前SELECT集
+                jsSymbols.setProperty(k, selectSet.symbols[k]);
+                
+            jsSelectSet.setProperty("prod", jsProd);
+            jsSelectSet.setProperty("symbols", jsSymbols);
+            jsSelectSets.setProperty(j, jsSelectSet);
+        }
+        jsSelectSetsArray.setProperty(i, jsSelectSets);
+    }
+    jsObjVal.setProperty("arrSelectSets", jsSelectSetsArray);
 
     //将分割的字符串合并为整体
     QString all;
@@ -365,7 +392,8 @@ void Parser::parseNil() {
                     }
                 }
             }
-            issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
+            issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), 
+                -1, -1, { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
             return;
         }
     } while(isContinue);
@@ -582,7 +610,8 @@ void Parser::parseSelectSet() {
     }
     if(hasIntersection) {   //如果出现交叉
         QString text = formatSelectSet(true, &vecIntersectedSymbols);
-        issues << Issue(Issue::Error, tr("SELECT set has intersections"), -1, -1, { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
+        issues << Issue(Issue::Error, tr("SELECT set has intersections"), -1, -1, 
+            { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
     }
 }
 
