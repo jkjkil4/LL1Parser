@@ -59,27 +59,29 @@ void Parser::parse(QTextDocument *doc) {
     if(!hasProd)
         issues << Issue(Issue::Error, tr("Cannot find any production"));
 
-    TRY_PARSE("JS", parseJs);
-
-
-    QString trStr = tr("Unknown tag \"%1\"");
-    for(auto iter = mapDivided.begin(); iter != mapDivided.end(); ++iter) {
-        if(!iter->parsed) {
-            for(int row : iter->rows) {
-                issues << Issue(Issue::Error, trStr.arg(iter.key()), row);
-            }
-        }
-    }
-
-    if(hasError()) return;
+    if(hasError()) goto End;
 
     parseNil();
-    if(hasError()) return;
+    if(hasError()) goto End;
 
     parseFirstSet();
     parseFollowSet();
     parseSelectSet();
 
+    TRY_PARSE("JS", parseJs);
+
+    {//检查是否有未知标记
+        QString trStr = tr("Unknown tag \"%1\"");
+        for(auto iter = mapDivided.begin(); iter != mapDivided.end(); ++iter) {
+            if(!iter->parsed) {
+                for(int row : iter->rows) {
+                    issues << Issue(Issue::Warning, trStr.arg(iter.key()), row);
+                }
+            }
+        }
+    }
+
+    End:
     j::SafeDelete(js);
 }
 #undef TRY_PARSE
@@ -189,8 +191,27 @@ void Parser::parseJs(const Divided &divided) {
     //初始化QJSEngine
     j::SafeDelete(js);
     js = new JS;
+
+    //设置数据
+    js->object.setNonterminalMaxIndex(nonterminalMaxIndex);
+    js->object.setTerminalMaxIndex(terminalMaxIndex);
+
+    //传入对象
     QJSValue jsObjVal = js->engine.newQObject(&js->object);
     js->engine.globalObject().setProperty("lp", jsObjVal);
+
+    //传入符号列表
+    int symbolCount = mapSymbols.size();
+    QJSValue jsFirstArray = js->engine.newArray(symbolCount);
+    repeat(int, i, symbolCount)
+        jsFirstArray.setProperty(i, mapSymbols.key(i).str);
+    jsObjVal.setProperty("arrSymbols", jsFirstArray);
+
+    //传入能否推导出空串
+    QJSValue jsNilArray = js->engine.newArray(symbolCount);
+    repeat(int, i, symbolCount)
+        jsNilArray.setProperty(i, vecNil[i]);
+    jsObjVal.setProperty("arrNil", jsNilArray);
 
     //将分割的字符串合并为整体
     QString all;
