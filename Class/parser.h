@@ -63,9 +63,9 @@ public:
             }
         };
 
+        QString arg;
         QVector<int> rows;
         QList<Part> parts;
-        bool parsed = false;
 
         friend inline QDebug& operator<<(QDebug &de, const Divided &divided) {
             de << "Divided(\n";
@@ -75,6 +75,28 @@ public:
             de << ")";
             return de;
         }
+    };
+    struct Divideds
+    {
+        QList<Divided> listDivided;
+        bool parsed = false;
+
+        const Divided& value(const QString &arg, const Divided &def = Divided()) const {
+            for(const Divided &divided : listDivided)
+                if(divided.arg == arg)
+                    return divided;
+            return def;
+        }
+        Divided& operator[](const QString &arg) {
+            for(Divided &divided : listDivided)
+                if(divided.arg == arg)
+                    return divided;
+            listDivided << Divided();
+            Divided &res = *listDivided.rbegin();
+            res.arg = arg;
+            return res;
+        }
+        const Divided& operator[](const QString &arg) const { return value(arg); }
     };
 
     struct Symbol   //符号
@@ -100,13 +122,15 @@ public:
     typedef QVector<SelectSet> SelectSets;
 
     static void divide(QTextDocument *doc);
+    static bool checkDividedArg(const QString &name, const Divideds &divideds);
+    static int findTrueRowByDividedRow(const Divideds &divideds, int dividedRow);
 
     static void parse(QTextDocument *doc);
 
-    static void parseTerminal(const Divided &divided);      //处理终结符
-    static void parseNonterminal(const Divided &divided);   //处理非终结符
-    static void parseProduction(const Divided &divided);    //处理产生式
-    static void parseJs(const Divided &divided);            //处理js脚本
+    static void parseTerminal(const QString &tag, const Divideds &divideds);      //处理终结符
+    static void parseNonterminal(const QString &tag, const Divideds &divideds);   //处理非终结符
+    static void parseProduction(const QString &tag, const Divideds &divideds);    //处理产生式
+    static void parseJs(const QString &tag, const Divideds &divideds);            //处理js脚本
 
     static void parseNil();         //处理能否推导为空串
     static void parseFirstSet();    //处理FIRST集
@@ -129,7 +153,7 @@ public:
     static QList<Issue> issues;
     static bool hasProd;
 
-    static QMap<QString, Divided> mapDivided;
+    static QMap<QString, Divideds> mapDivideds;
 
     static QMap<Symbol, int> mapSymbols;
     static int symbolsMaxIndex;

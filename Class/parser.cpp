@@ -2,7 +2,7 @@
 
 QList<Parser::Issue> Parser::issues;
 bool Parser::hasProd = false;
-QMap<QString, Parser::Divided> Parser::mapDivided;
+QMap<QString, Parser::Divideds> Parser::mapDivideds;
 QMap<Parser::Symbol, int> Parser::mapSymbols;
 int Parser::symbolsMaxIndex = 0;
 int Parser::nonterminalMaxIndex = -1;
@@ -15,7 +15,7 @@ Parser::JS* Parser::js = nullptr;
 QString Parser::jsDebugMessage;
 
 void Parser::divide(QTextDocument *doc) {
-    QRegularExpression regExp("%\\[(.*?)\\]%");     //正则表达式
+    QRegularExpression regExp("%\\[(.*?)(?:\\:(.*?)){0,1}\\]%");     //正则表达式
     int count = doc->lineCount();
 
     Divided *pDivided = nullptr;     //默认Divided
@@ -28,7 +28,7 @@ void Parser::divide(QTextDocument *doc) {
             if(pDivided) pDivided->parts << Divided::Part{ i, mid };
 
             start = match.capturedEnd();
-            pDivided = &mapDivided[match.captured(1)];
+            pDivided = &mapDivideds[match.captured(1)][match.captured(2)];
             pDivided->rows << i;
             match = regExp.match(line, match.capturedEnd());
         }
@@ -36,11 +36,30 @@ void Parser::divide(QTextDocument *doc) {
         if(pDivided) pDivided->parts.append(Divided::Part{ i, right });
     }
 }
+bool Parser::checkDividedArg(const QString &name, const Divideds &divideds) {
+    bool hasArg = false;
+    for(const Divided &divided : divideds.listDivided) {
+        if(divided.arg != "") {
+            hasArg = true;
+            for(int row : divided.rows)
+                issues << Issue(Issue::Warning, tr("The tag \"%1\" does not need to provide any parameter").arg(name), row);
+        }
+    }
+    return hasArg;
+}
+int Parser::findTrueRowByDividedRow(const Divideds &divideds, int dividedRow) {
+    for(const Divided &divided : divideds.listDivided) {
+        if(dividedRow < divided.parts.size())
+            return divided.parts[dividedRow].row;
+        dividedRow -= divided.parts.size();
+    }
+    return -1;
+}
 
-#define TRY_PARSE(key, fn) {            \
-    auto iter = mapDivided.find(key);   \
-    if(iter != mapDivided.end()) {      \
-        fn(*iter);                      \
+#define TRY_PARSE(_key, fn) {           \
+    auto iter = mapDivideds.find(_key); \
+    if(iter != mapDivideds.end()) {     \
+        fn(iter.key(), *iter);          \
         iter->parsed = true;            \
     }                                   \
 }
@@ -72,10 +91,12 @@ void Parser::parse(QTextDocument *doc) {
 
     {//检查是否有未知标记
         QString trStr = tr("Unknown tag \"%1\"");
-        for(auto iter = mapDivided.begin(); iter != mapDivided.end(); ++iter) {
+        for(auto iter = mapDivideds.begin(); iter != mapDivideds.end(); ++iter) {
             if(!iter->parsed) {
-                for(int row : iter->rows) {
-                    issues << Issue(Issue::Warning, trStr.arg(iter.key()), row);
+                for(const Divided &divided : iter->listDivided) {
+                    for(int row : divided.rows) {
+                        issues << Issue(Issue::Warning, trStr.arg(iter.key()), row);
+                    }
                 }
             }
         }
@@ -86,108 +107,119 @@ void Parser::parse(QTextDocument *doc) {
 }
 #undef TRY_PARSE
 
-void Parser::parseTerminal(const Divided &divided) {
-    for(const Divided::Part &part : divided.parts) {    //遍历所有行
-        QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
-        int phrase = -1;
-        for(QString &str : list) {  //遍历分割的结果
-            phrase++;
+void Parser::parseTerminal(const QString &name, const Divideds &divideds) {
+    checkDividedArg(name, divideds);
+    for(const Divided &divided : divideds.listDivided) {
+        for(const Divided::Part &part : divided.parts) {    //遍历所有行
+            QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
+            int phrase = -1;
+            for(QString &str : list) {  //遍历分割的结果
+                phrase++;
 
-            if(str == 'S' || str == '$') {  //如果与自带符号冲突
-                issues << Issue(Issue::Error, tr("Cannot use \"%1\" as symbol").arg(str), part.row, phrase);
-                continue;
-            }
-
-            auto iter = mapSymbols.find(str);
-            if(iter != mapSymbols.end()) {  //如果该符号已经存在
-                if(iter.key().type == Symbol::Nonterminal) {
-                    issues << Issue(Issue::Error, tr("Symbol \"%1\" is already an nonterminal").arg(str), part.row, phrase);
-                } else {
-                    issues << Issue(Issue::Warning, tr("Redefinition of \"%1\"").arg(str),part.row, phrase);
+                if(str == 'S' || str == '$') {  //如果与自带符号冲突
+                    issues << Issue(Issue::Error, tr("Cannot use \"%1\" as symbol").arg(str), part.row, phrase);
+                    continue;
                 }
-                continue;
+
+                auto iter = mapSymbols.find(str);
+                if(iter != mapSymbols.end()) {  //如果该符号已经存在
+                    if(iter.key().type == Symbol::Nonterminal) {
+                        issues << Issue(Issue::Error, tr("Symbol \"%1\" is already an nonterminal").arg(str), part.row, phrase);
+                    } else {
+                        issues << Issue(Issue::Warning, tr("Redefinition of \"%1\"").arg(str),part.row, phrase);
+                    }
+                    continue;
+                }
+                appendSymbol(Symbol::Terminal, str);
             }
-            appendSymbol(Symbol::Terminal, str);
         }
     }
 }
-void Parser::parseNonterminal(const Divided &divided) {
-    for(const Divided::Part &part : divided.parts) {    //遍历所有行
-        QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
-        int phrase = -1;
-        for(QString &str : list) {  //遍历分割的结果
-            phrase++;
+void Parser::parseNonterminal(const QString &name, const Divideds &divideds) {
+    checkDividedArg(name, divideds);
+    for(const Divided &divided : divideds.listDivided) {
+        for(const Divided::Part &part : divided.parts) {    //遍历所有行
+            QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
+            int phrase = -1;
+            for(QString &str : list) {  //遍历分割的结果
+                phrase++;
 
-            if(str == 'S' || str == '$') {  //如果与自带符号冲突
-                issues << Issue(Issue::Error, tr("Cannot use \"%1\" as symbol").arg(str), part.row, phrase);
-                continue;
-            }
-
-            auto iter = mapSymbols.find(str);
-            if(iter != mapSymbols.end()) {  //如果该符号已经存在
-                if(iter.key().type == Symbol::Terminal) {
-                    issues << Issue(Issue::Error, tr("Symbol \"%1\" is already a terminal").arg(str), part.row, phrase);
-                } else {
-                    issues << Issue(Issue::Warning, tr("Redefinition of \"%1\"").arg(str), part.row, phrase);
+                if(str == 'S' || str == '$') {  //如果与自带符号冲突
+                    issues << Issue(Issue::Error, tr("Cannot use \"%1\" as symbol").arg(str), part.row, phrase);
+                    continue;
                 }
-                continue;
+
+                auto iter = mapSymbols.find(str);
+                if(iter != mapSymbols.end()) {  //如果该符号已经存在
+                    if(iter.key().type == Symbol::Terminal) {
+                        issues << Issue(Issue::Error, tr("Symbol \"%1\" is already a terminal").arg(str), part.row, phrase);
+                    } else {
+                        issues << Issue(Issue::Warning, tr("Redefinition of \"%1\"").arg(str), part.row, phrase);
+                    }
+                    continue;
+                }
+                appendSymbol(Symbol::Nonterminal, str);
             }
-            appendSymbol(Symbol::Nonterminal, str);
         }
     }
 }
-void Parser::parseProduction(const Divided &divided) {
-    for(const Divided::Part &part : divided.parts) {    //遍历所有行
-        QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
-        int size = list.size();
-        if(size == 0)
-            continue;
+void Parser::parseProduction(const QString &name, const Divideds &divideds) {
+    checkDividedArg(name, divideds);
+    for(const Divided &divided : divideds.listDivided) {
+        for(const Divided::Part &part : divided.parts) {    //遍历所有行
+            QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
+            int size = list.size();
+            if(size == 0)
+                continue;
 
-        hasProd = true;
+            hasProd = true;
 
-        if(size == 1) {
-            issues << Issue(Issue::Error, tr("Lack of \"->\" to represent production"), part.row);
-            continue;
-        }
-        if(list[1] != "->") {
-            issues << Issue(Issue::Error, tr("Should be \"->\" instead of \"%1\"").arg(list[1]), part.row, 1);
-            continue;
-        }
+            if(size == 1) {
+                issues << Issue(Issue::Error, tr("Lack of \"->\" to represent production"), part.row);
+                continue;
+            }
+            if(list[1] != "->") {
+                issues << Issue(Issue::Error, tr("Should be \"->\" instead of \"%1\"").arg(list[1]), part.row, 1);
+                continue;
+            }
 
-        bool hasErr = false;
-        SymbolVec prod;
-        //得到产生式的左部
-        int leftDigit = mapSymbols.value(list[0], -1);
-        if(leftDigit == -1) {
-            issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(list[0]), part.row, 0);
-            hasErr = true;
-        } else if(isTerminal(leftDigit)) {
-            issues << Issue(Issue::Error, tr("The left of the production cannot be a terminal"), part.row, 0);
-        }
-        //得到产生式的右部
-        int phrase = 1;
-        for(auto iter = list.begin() + 2; iter != list.end(); ++iter) {     //从第三个开始遍历
-            phrase++;
-            int digit = mapSymbols.value(*iter, -1);
-            if(digit == -1) {
-                issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(*iter), part.row, phrase);
+            bool hasErr = false;
+            SymbolVec prod;
+            //得到产生式的左部
+            int leftDigit = mapSymbols.value(list[0], -1);
+            if(leftDigit == -1) {
+                issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(list[0]), part.row, 0);
                 hasErr = true;
-                continue;
+            } else if(isTerminal(leftDigit)) {
+                issues << Issue(Issue::Error, tr("The left of the production cannot be a terminal"), part.row, 0);
             }
-            if(!hasErr) prod << digit;
-        }
-        //如果没有错误，则将该产生式的右部附加到产生式左部符号的Prods中
-        if(!hasErr) {
-            Prods &prods = mapProds[leftDigit];
-            if(prods.contains(prod)) {
-                issues << Issue(Issue::Warning, tr("Redefinition of the production"), part.row);
-            } else {
-                prods << prod;
+            //得到产生式的右部
+            int phrase = 1;
+            for(auto iter = list.begin() + 2; iter != list.end(); ++iter) {     //从第三个开始遍历
+                phrase++;
+                int digit = mapSymbols.value(*iter, -1);
+                if(digit == -1) {
+                    issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(*iter), part.row, phrase);
+                    hasErr = true;
+                    continue;
+                }
+                if(!hasErr) prod << digit;
+            }
+            //如果没有错误，则将该产生式的右部附加到产生式左部符号的Prods中
+            if(!hasErr) {
+                Prods &prods = mapProds[leftDigit];
+                if(prods.contains(prod)) {
+                    issues << Issue(Issue::Warning, tr("Redefinition of the production"), part.row);
+                } else {
+                    prods << prod;
+                }
             }
         }
     }
 }
-void Parser::parseJs(const Divided &divided) {
+void Parser::parseJs(const QString &name, const Divideds &divideds) {
+    checkDividedArg(name, divideds);
+
     //初始化QJSEngine
     j::SafeDelete(js);
     js = new JS;
@@ -281,7 +313,7 @@ void Parser::parseJs(const Divided &divided) {
                 jsProd.setProperty(k, selectSet.prod[k]);
             repeat(int, k, symbolsSize) //遍历当前SELECT集
                 jsSymbols.setProperty(k, selectSet.symbols[k]);
-                
+
             jsSelectSet.setProperty("prod", jsProd);
             jsSelectSet.setProperty("symbols", jsSymbols);
             jsSelectSets.setProperty(j, jsSelectSet);
@@ -294,14 +326,15 @@ void Parser::parseJs(const Divided &divided) {
     QString all;
     QTextStream ts(&all);
     ts.setCodec("UTF-8");
-    for(const Divided::Part &part : divided.parts)
-        ts << part.text << '\n';
+    for(const Divided &divided : divideds.listDivided)
+        for(const Divided::Part &part : divided.parts)
+            ts << part.text << '\n';
 
     //执行js脚本
     QJSValue result = js->engine.evaluate(all);
     if(result.isError()) {
-        int index = result.property("lineNumber").toInt() - 1;
-        int row = (index >= 0 && index < divided.parts.size()) ? divided.parts[index].row : -1;
+        int dividedRow = result.property("lineNumber").toInt() - 1;
+        int row = findTrueRowByDividedRow(divideds, dividedRow);
         issues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(result.toString()), row, -1);
     }
 
@@ -619,7 +652,7 @@ void Parser::clear() {
     issues.clear();
 
     hasProd = false;
-    mapDivided.clear();
+    mapDivideds.clear();
     mapSymbols.clear();
     symbolsMaxIndex = 0;
     nonterminalMaxIndex = -1;
