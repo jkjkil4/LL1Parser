@@ -127,10 +127,11 @@ public:
 
     static void parse(QTextDocument *doc);
 
-    static void parseTerminal(const QString &tag, const Divideds &divideds);      //处理终结符
-    static void parseNonterminal(const QString &tag, const Divideds &divideds);   //处理非终结符
-    static void parseProduction(const QString &tag, const Divideds &divideds);    //处理产生式
-    static void parseJs(const QString &tag, const Divideds &divideds);            //处理js脚本
+    static void parseTerminal(const QString &tag, const Divideds &divideds);    //处理终结符
+    static void parseNonterminal(const QString &tag, const Divideds &divideds); //处理非终结符
+    static void parseProduction(const QString &tag, const Divideds &divideds);  //处理产生式
+    static void parseJs(const QString &tag, const Divideds &divideds);          //处理js脚本
+    static void parseOutput(const QString &, const Divideds &divideds);      //处理输出  
 
     static void parseNil();         //处理能否推导为空串
     static void parseFirstSet();    //处理FIRST集
@@ -139,9 +140,13 @@ public:
 
     static void clear();
     static bool hasError();
+    static bool hasOutputFile() { return !listOutput.isEmpty(); }
     static void appendSymbol(Symbol::Type type, const QString &str);
     static bool isNonterminal(int digit) { return digit >= 0 && digit <= nonterminalMaxIndex; }
     static bool isTerminal(int digit) { return digit > nonterminalMaxIndex && digit <= terminalMaxIndex; }
+
+    static QString outputDir(const QString &projPath, const QString &projName);
+    static void outputFile(const QString &projPath, const QString &projName);
 
     static QString formatProdsMap();
     static QString formatNilVec();
@@ -173,6 +178,16 @@ public:
     };
     static JS *js;
     static QString jsDebugMessage;
+
+    struct Output {
+        QString fileName;
+        QString text;
+        friend inline QDebug& operator<<(QDebug &de, const Output &output) {
+            de << "Output{" << "FileName:" << output.fileName << "," << "Text:" << output.text << "}";
+            return de;
+        }
+    };
+    static QList<Output> listOutput;
     
 };
 

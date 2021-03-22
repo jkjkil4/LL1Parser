@@ -9,6 +9,7 @@
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QTime>
+#include <QProcess>
 
 #include <Lib/PlainButton/plainbutton.h>
 #include "Widget/Other/colorwidget.h"

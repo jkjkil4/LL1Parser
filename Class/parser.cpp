@@ -13,6 +13,7 @@ QVector<Parser::SymbolVec> Parser::vecFirstSet, Parser::vecFollowSet;
 QVector<Parser::SelectSets> Parser::vecSelectSets;
 Parser::JS* Parser::js = nullptr;
 QString Parser::jsDebugMessage;
+QList<Parser::Output> Parser::listOutput;
 
 void Parser::divide(QTextDocument *doc) {
     QRegularExpression regExp("%\\[(.*?)(?:\\:(.*?)){0,1}\\]%");     //正则表达式
@@ -88,6 +89,7 @@ void Parser::parse(QTextDocument *doc) {
     parseSelectSet();
 
     TRY_PARSE("JS", parseJs);
+    TRY_PARSE("Output", parseOutput);
 
     {//检查是否有未知标记
         QString trStr = tr("Unknown tag \"%1\"");
@@ -341,6 +343,19 @@ void Parser::parseJs(const QString &name, const Divideds &divideds) {
     //调试信息
     if(js->object.hasDebugMessage())
         jsDebugMessage = js->object.debugMessage();
+}
+void Parser::parseOutput(const QString &, const Divideds &divideds) {
+    for(const Divided &divided : divideds.listDivided) {
+        QString text;
+        bool hasPrev = false;
+        for(const Divided::Part &part : divided.parts) {
+            if(hasPrev) {
+                text += '\n';
+            } else hasPrev = true;
+            text += part.text;
+        }
+        listOutput << Output{ divided.arg, text };
+    }
 }
 
 void Parser::parseNil() {
@@ -665,6 +680,8 @@ void Parser::clear() {
     vecSelectSets.clear();
 
     jsDebugMessage.clear();
+
+    listOutput.clear();
 }
 bool Parser::hasError() {
     for(Issue &issue : issues)
@@ -675,6 +692,35 @@ bool Parser::hasError() {
 void Parser::appendSymbol(Symbol::Type type, const QString &str) {
     mapSymbols.insert(Symbol(type, str), symbolsMaxIndex);
     symbolsMaxIndex++;
+}
+
+QString Parser::outputDir(const QString &projPath, const QString &projName) {
+    return QFileInfo(projPath).path() + "/Output_" + projName;
+}
+
+void Parser::outputFile(const QString &projPath, const QString &projName) {
+    //输出文件
+    if(hasOutputFile()) {
+        QString path = QFileInfo(projPath).path();     //项目路径
+        QString outputFolder = "Output_" + projName;   //用于输出的文件夹名称
+        QString outputFolderPath = path + "/" + outputFolder;   //用于输出的文件夹的路径
+        QDir dir(path);     //用于操作文件夹
+        if(!dir.exists(outputFolder)) {  //如果用于输出的文件夹不存在，则创建
+            if(!dir.mkdir(outputFolder)) {
+                issues << Issue(Issue::Error, tr("Cannot create the output directory"));
+                return;
+            }
+        }
+        
+        for(const Output &output : listOutput) {    //遍历所有内容并输出
+            QFile file(outputFolderPath + "/" + output.fileName);
+            if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+                issues << Issue(Issue::Error, tr("Cannot write text to file \"%1\"").arg(output.fileName));
+            
+            QTextStream(&file) << output.text;
+            file.close();
+        }
+    }
 }
 
 QString Parser::formatProdsMap() {

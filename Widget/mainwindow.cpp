@@ -215,7 +215,9 @@ void MainWindow::onRFLMenuRequested(const QPoint &pos) {
         rfManager.remove(item.row);
     } else if(res == menu.mActShowInExplorer) {
 #ifdef Q_OS_WIN
-        QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << QFileInfo(item.filePath).path());
+        QString path = QFileInfo(item.filePath).path();
+        if(QDir().exists(path))
+            QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << path);
 #else
         QMessageBox::information(this, "", tr("This function is not supported in this operating system"));
 #endif

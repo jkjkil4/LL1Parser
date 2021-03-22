@@ -130,6 +130,15 @@ void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
         }
         break;
     }
+    case (int)UserRole::OpenFolder: {
+#ifdef Q_OS_WIN
+        QString path = item->data(Qt::UserRole + 1).toString();
+        if(QDir().exists(path))
+            QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << path);
+#else
+        QMessageBox::information(this, "", tr("This function is not supported in this operating system"));
+#endif
+    }
     }
 }
 
@@ -141,7 +150,11 @@ void ProjWidget::onParse() {
 
     QTime t;
     t.start();
+
     Parser::parse(mEdit->document());
+    if(!Parser::hasError())
+        Parser::outputFile(mProjPath, mProjName);
+
     int ms = t.elapsed();
     QListWidgetItem *item = new QListWidgetItem(tr("Elapsed time: %1ms").arg(ms));
     item->setForeground(Qt::blue);
@@ -182,13 +195,30 @@ void ProjWidget::onParse() {
         errListWidget->addItem(item);
     }
     if(!Parser::hasError()) {
+        QString strDbClick = tr("(Double click to show detail)");
+
+        if(!Parser::jsDebugMessage.isEmpty()) {
+            QString strJSDebugMsg = tr("JS debug message");
+            QListWidgetItem *itemJSDebug = new QListWidgetItem(strJSDebugMsg + strDbClick);
+            itemJSDebug->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
+            itemJSDebug->setData(Qt::UserRole + 1, strJSDebugMsg);
+            itemJSDebug->setData(Qt::UserRole + 2, Parser::jsDebugMessage);
+            outputListWidget->addItem(itemJSDebug);
+        }
+
+        if(Parser::hasOutputFile()) {
+            QString strDir = Parser::outputDir(mProjPath, mProjName);
+            QListWidgetItem *item = new QListWidgetItem(tr("Files has been outputted to the directory \"%1\"").arg(strDir));
+            item->setData(Qt::UserRole, (int)UserRole::OpenFolder);
+            item->setData(Qt::UserRole + 1, strDir);
+            outputListWidget->addItem(item);
+        }
+
         QString strProds = tr("Productions");
         QString strNil = tr("Empty string condition");
         QString strFirstSet = tr("FIRST set");
         QString strFollowSet = tr("FOLLOW set");
         QString strSelectSet = tr("SELECT set");
-        QString strJSDebugMsg = tr("JS debug message");
-        QString strDbClick = tr("(Double click to show detail)");
 
         QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
         itemProds->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
@@ -219,14 +249,6 @@ void ProjWidget::onParse() {
         itemSelectSet->setData(Qt::UserRole + 1, strSelectSet);
         itemSelectSet->setData(Qt::UserRole + 2, Parser::formatSelectSet(true));
         outputListWidget->addItem(itemSelectSet);
-
-        if(!Parser::jsDebugMessage.isEmpty()) {
-            QListWidgetItem *itemJSDebug = new QListWidgetItem(strJSDebugMsg + strDbClick);
-            itemJSDebug->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
-            itemJSDebug->setData(Qt::UserRole + 1, strJSDebugMsg);
-            itemJSDebug->setData(Qt::UserRole + 2, Parser::jsDebugMessage);
-            outputListWidget->addItem(itemJSDebug);
-        }
     }
 }
 
