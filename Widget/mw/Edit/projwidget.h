@@ -18,6 +18,7 @@
 #include "outputwidget.h"
 #include "header.h"
 #include "Class/parser.h"
+#include "Class/texthighlighter.h"
 
 class ProjWidget : public QWidget
 {
@@ -54,6 +55,8 @@ private:
     bool mSaved = true;    //是否保存
 
     PlainTextEdit *mEdit = new PlainTextEdit;
+    TextHighlighter *mHighlighter = new TextHighlighter(mEdit->document());
+
     NoteWidget *mNoteWidget = new NoteWidget;
     PlainButton *mBtnParse = new PlainButton;
     OutputWidget *mOutputWidget = new OutputWidget;
