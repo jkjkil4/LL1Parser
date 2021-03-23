@@ -20,18 +20,20 @@ private:
     QTextCharFormat mFormatTagText;
     QTextCharFormat mFormatTagArg;
 
+    QTextCharFormat mFormatProdArrow;
+    QTextCharFormat mFormatProdWrongArrow;
 
     void highlightProduction(const QString &text, int start, int len);
     void highlightJS(const QString &text, int start, int len);
 
     typedef void(TextHighlighter::*FnHighlight)(const QString &text, int start, int len);
     static constexpr int arrFnHighlightLen = 2;
-    const FnHighlight arrFnHighlight[arrFnHighlightLen] = {
+    const FnHighlight mArrFnHighlight[arrFnHighlightLen] = {
         &TextHighlighter::highlightProduction,
         &TextHighlighter::highlightJS
     };
 
-    const QMap<QString, int> mapTags = {
+    const QMap<QString, int> mMapTags = {
         { "Production", 0 },
         { "JS", 1 }
     };

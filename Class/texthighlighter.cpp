@@ -9,6 +9,9 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     mFormatTagText.setForeground(Qt::magenta);
     mFormatTagArg.setForeground(Qt::darkMagenta);
     mFormatTagArg.setFontWeight(QFont::Bold);
+
+    mFormatProdArrow.setForeground(Qt::green);
+    mFormatProdWrongArrow.setForeground(Qt::red);
 }
 
 void TextHighlighter::highlightBlock(const QString &text) {
@@ -39,20 +42,27 @@ void TextHighlighter::highlightBlock(const QString &text) {
 }
 
 void TextHighlighter::highlightProduction(const QString &text, int start, int len) {
-    setFormat(start, len, Qt::red);
+    int arrowStart = text.indexOf(' ', start);
+    if(arrowStart == -1)
+        return;
+    arrowStart++;
+    int arrowEnd = qMin(start + len, text.indexOf(' ', arrowStart));
+    int arrowLen = (arrowEnd == -1 ? text.length(): arrowEnd) - arrowStart;
+    const QTextCharFormat &format = (text.mid(arrowStart, arrowLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
+    setFormat(arrowStart, arrowLen, format);
 }
 
 void TextHighlighter::highlightJS(const QString &text, int start, int len) {
-    setFormat(start, len, Qt::blue);
+    // setFormat(start, len, Qt::blue);
 }
 
 int TextHighlighter::tagIndex(const QString &tag) {
-    auto iter = mapTags.find(tag);
-    return (iter == mapTags.end() ? -1 : *iter);
+    auto iter = mMapTags.find(tag);
+    return (iter == mMapTags.end() ? -1 : *iter);
 }
 
 void TextHighlighter::highlight(int index, const QString &text, int start, int len) {
     if(index < 0 || index >= arrFnHighlightLen)
         return;
-    (this->*arrFnHighlight[index])(text, start, len);
+    (this->*mArrFnHighlight[index])(text, start, len);
 }
