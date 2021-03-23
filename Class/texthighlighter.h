@@ -20,34 +20,44 @@ private:
         QTextCharFormat format;
         int nth;
     };
-    QList<HighlightRule> mListJSHighlightRules;
+    QList<HighlightRule> mListJSHighlightRules/*, mListOutputHighlightRules*/;
 
-    QRegularExpression mRuleStringWithBracket = QRegularExpression("\\b([A-Za-z]+) *\\(");
+    QRegularExpression mRuleJSStringWithBracket = QRegularExpression("\\b([A-Za-z]+) *\\(");
+    QRegularExpression mRuleJSQObj = QRegularExpression("\\blp\\b");
     QRegularExpression mRuleTag = QRegularExpression("%\\[(.*?)(?:\\:(.*?)){0,1}\\]%");
+    QRegularExpression mRuleOutputFormat = QRegularExpression("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");
 
     QTextCharFormat mFormatTagBracket;
     QTextCharFormat mFormatTagText;
     QTextCharFormat mFormatTagArg;
 
+    QTextCharFormat mFormatOFBracket;
+    QTextCharFormat mFormatOFText;
+    QTextCharFormat mFormatOFArg;
+
     QTextCharFormat mFormatProdArrow;
     QTextCharFormat mFormatProdWrongArrow;
 
-    QTextCharFormat mFormatStringWithBracket;
+    QTextCharFormat mFormatJSStringWithBracket;
     QTextCharFormat mFormatJSKeyword;
+    QTextCharFormat mFormatJSQObj;
 
     void highlightProduction(const QString &text, int start, int len);
     void highlightJS(const QString &text, int start, int len);
+    void highlightOutput(const QString &text, int start, int len);
 
     typedef void(TextHighlighter::*FnHighlight)(const QString &text, int start, int len);
-    static constexpr int arrFnHighlightLen = 2;
+    static constexpr int arrFnHighlightLen = 3;
     const FnHighlight mArrFnHighlight[arrFnHighlightLen] = {
         &TextHighlighter::highlightProduction,
-        &TextHighlighter::highlightJS
+        &TextHighlighter::highlightJS,
+        &TextHighlighter::highlightOutput
     };
 
     const QMap<QString, int> mMapTags = {
         { "Production", 0 },
-        { "JS", 1 }
+        { "JS", 1 },
+        { "Output", 2 }
     };
 
     int tagIndex(const QString &tag);

@@ -12,13 +12,26 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     mFormatTagArg.setForeground(Qt::darkMagenta);
     mFormatTagArg.setFontWeight(QFont::Bold);
 
+    mFormatOFBracket.setForeground(Qt::blue);
+    mFormatOFText.setForeground(Qt::green);
+    mFormatOFArg.setForeground(Qt::darkGreen);
+    mFormatOFArg.setFontWeight(QFont::Bold);
+
     mFormatProdArrow.setForeground(Qt::darkYellow);
     mFormatProdWrongArrow.setForeground(Qt::red);
 
-    mFormatStringWithBracket.setForeground(Qt::darkMagenta);
-    rule.pattern = mRuleStringWithBracket;
-    rule.format = mFormatStringWithBracket;
+    //JS函数
+    mFormatJSStringWithBracket.setForeground(Qt::darkMagenta);
+    rule.pattern = mRuleJSStringWithBracket;
+    rule.format = mFormatJSStringWithBracket;
     rule.nth = 1;
+    mListJSHighlightRules << rule;
+
+    //JS lp
+    mFormatJSQObj.setForeground(QColor(255, 128, 128));
+    rule.pattern = mRuleJSQObj;
+    rule.format = mFormatJSQObj;
+    rule.nth = 0;
     mListJSHighlightRules << rule;
 
     //JS关键字高亮
@@ -94,6 +107,23 @@ void TextHighlighter::highlightJS(const QString &text, int start, int len) {
                 break;
             setFormat(match.capturedStart(rule.nth), match.capturedLength(rule.nth), rule.format);
         }
+    }
+}
+
+void TextHighlighter::highlightOutput(const QString &text, int start, int len) {
+    int end = start + len;
+    //匹配
+    QRegularExpressionMatchIterator matchIter = mRuleOutputFormat.globalMatch(text);
+    while(matchIter.hasNext()) {
+        QRegularExpressionMatch match = matchIter.next();
+        if(match.capturedEnd() > end)
+            break;
+        //高亮
+        setFormat(match.capturedStart(), 2, mFormatOFBracket);     //左侧"#["
+        setFormat(match.capturedStart(1), match.capturedLength(1), mFormatOFText); //名称
+        setFormat(match.capturedEnd(1), match.capturedEnd() - 2 - match.capturedLength(2) - match.capturedEnd(1), mFormatOFBracket);   //标记和参数间的":"
+        setFormat(match.capturedStart(2), match.capturedLength(2), mFormatOFArg);  //参数
+        setFormat(match.capturedEnd() - 2, 2, mFormatOFBracket);   //右侧"]#"
     }
 }
 
