@@ -5,13 +5,45 @@
 TextHighlighter::TextHighlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
+    HighlightRule rule;
+
     mFormatTagBracket.setForeground(Qt::blue);
     mFormatTagText.setForeground(Qt::magenta);
     mFormatTagArg.setForeground(Qt::darkMagenta);
     mFormatTagArg.setFontWeight(QFont::Bold);
 
-    mFormatProdArrow.setForeground(Qt::green);
+    mFormatProdArrow.setForeground(Qt::darkYellow);
     mFormatProdWrongArrow.setForeground(Qt::red);
+
+    mFormatStringWithBracket.setForeground(Qt::darkMagenta);
+    rule.pattern = mRuleStringWithBracket;
+    rule.format = mFormatStringWithBracket;
+    rule.nth = 1;
+    mListJSHighlightRules << rule;
+
+    //JS关键字高亮
+    mFormatJSKeyword.setForeground(Qt::darkYellow);
+    const QString keywordPatterns[] = {
+        QStringLiteral("\\babstract\\b"), QStringLiteral("\\bboolean\\b"), QStringLiteral("\\bbreak\\b"), QStringLiteral("\\bbyte\\b"),
+        QStringLiteral("\\bcase\\b"), QStringLiteral("\\bcatch\\b"), QStringLiteral("\\bchar\\b"), QStringLiteral("\\bconst\\b"),
+        QStringLiteral("\\bcontinue\\b"), QStringLiteral("\\bdebugger\\b"), QStringLiteral("\\bdefault\\b"), QStringLiteral("\\bdelete\\b"),
+        QStringLiteral("\\bdelete\\b"), QStringLiteral("\\bdo\\b"), QStringLiteral("\\bdouble\\b"), QStringLiteral("\\belse\\b"),
+        QStringLiteral("\\beval\\b"), QStringLiteral("\\bfalse\\b"), QStringLiteral("\\bfinal\\b"), QStringLiteral("\\bfinally\\b"),
+        QStringLiteral("\\bfloat\\b"), QStringLiteral("\\bfor\\b"), QStringLiteral("\\bfunction\\b"), QStringLiteral("\\bgoto\\b"),
+        QStringLiteral("\\bif\\b"), QStringLiteral("\\bimplements\\b"), QStringLiteral("\\bin\\b"), QStringLiteral("\\binstanceof\\b"),
+        QStringLiteral("\\bint\\b"),QStringLiteral("\\binterface\\b"), QStringLiteral("\\blet\\b"), QStringLiteral("\\blong\\b"),
+        QStringLiteral("\\bnative\\b"), QStringLiteral("\\bnew\\b"), QStringLiteral("\\bnull\\b"), QStringLiteral("\\bpackage\\b"),
+        QStringLiteral("\\bprivate\\b"), QStringLiteral("\\bprotected\\b"), QStringLiteral("\\bpublic\\b"), QStringLiteral("\\breturn\\b"),
+        QStringLiteral("\\bshort\\b"), QStringLiteral("\\bstatic\\b"), QStringLiteral("\\bswitch\\b"), QStringLiteral("\\bsynchronized\\b"),
+        QStringLiteral("\\btry\\b"), QStringLiteral("\\btypeof\\b"), QStringLiteral("\\bvar\\b"), QStringLiteral("\\bvoid\\b"),
+        QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bwhile\\b"), QStringLiteral("\\bwith\\b"), QStringLiteral("\\byield\\b")
+    };
+    rule.nth = 0;
+    for(const QString &pattern : keywordPatterns) {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = mFormatJSKeyword;
+        mListJSHighlightRules << rule;
+    }
 }
 
 void TextHighlighter::highlightBlock(const QString &text) {
@@ -53,7 +85,16 @@ void TextHighlighter::highlightProduction(const QString &text, int start, int le
 }
 
 void TextHighlighter::highlightJS(const QString &text, int start, int len) {
-    // setFormat(start, len, Qt::blue);
+    int end = start + len;
+    for(const HighlightRule &rule : mListJSHighlightRules) {
+        QRegularExpressionMatchIterator matchIter = rule.pattern.globalMatch(text, start);
+        while(matchIter.hasNext()) {
+            QRegularExpressionMatch match = matchIter.next();
+            if(match.capturedEnd() > end)
+                break;
+            setFormat(match.capturedStart(rule.nth), match.capturedLength(rule.nth), rule.format);
+        }
+    }
 }
 
 int TextHighlighter::tagIndex(const QString &tag) {

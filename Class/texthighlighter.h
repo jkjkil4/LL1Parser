@@ -14,6 +14,15 @@ protected:
     void highlightBlock(const QString &text) override;
 
 private:
+    struct HighlightRule
+    {
+        QRegularExpression pattern;
+        QTextCharFormat format;
+        int nth;
+    };
+    QList<HighlightRule> mListJSHighlightRules;
+
+    QRegularExpression mRuleStringWithBracket = QRegularExpression("\\b([A-Za-z]+) *\\(");
     QRegularExpression mRuleTag = QRegularExpression("%\\[(.*?)(?:\\:(.*?)){0,1}\\]%");
 
     QTextCharFormat mFormatTagBracket;
@@ -22,6 +31,9 @@ private:
 
     QTextCharFormat mFormatProdArrow;
     QTextCharFormat mFormatProdWrongArrow;
+
+    QTextCharFormat mFormatStringWithBracket;
+    QTextCharFormat mFormatJSKeyword;
 
     void highlightProduction(const QString &text, int start, int len);
     void highlightJS(const QString &text, int start, int len);
