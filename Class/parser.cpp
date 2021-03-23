@@ -37,13 +37,13 @@ void Parser::divide(QTextDocument *doc) {
         if(pDivided) pDivided->parts.append(Divided::Part{ i, right });
     }
 }
-bool Parser::checkDividedArg(const QString &name, const Divideds &divideds) {
+bool Parser::checkDividedArg(const QString &tag, const Divideds &divideds) {
     bool hasArg = false;
     for(const Divided &divided : divideds.listDivided) {
         if(divided.arg != "") {
             hasArg = true;
             for(int row : divided.rows)
-                issues << Issue(Issue::Warning, tr("The tag \"%1\" does not need to provide any parameter").arg(name), row);
+                issues << Issue(Issue::Warning, tr("The tag \"%1\" does not need to provide any parameter").arg(tag), row);
         }
     }
     return hasArg;
@@ -109,8 +109,8 @@ void Parser::parse(QTextDocument *doc) {
 }
 #undef TRY_PARSE
 
-void Parser::parseTerminal(const QString &name, const Divideds &divideds) {
-    checkDividedArg(name, divideds);
+void Parser::parseTerminal(const QString &tag, const Divideds &divideds) {
+    checkDividedArg(tag, divideds);
     for(const Divided &divided : divideds.listDivided) {
         for(const Divided::Part &part : divided.parts) {    //遍历所有行
             QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
@@ -137,8 +137,8 @@ void Parser::parseTerminal(const QString &name, const Divideds &divideds) {
         }
     }
 }
-void Parser::parseNonterminal(const QString &name, const Divideds &divideds) {
-    checkDividedArg(name, divideds);
+void Parser::parseNonterminal(const QString &tag, const Divideds &divideds) {
+    checkDividedArg(tag, divideds);
     for(const Divided &divided : divideds.listDivided) {
         for(const Divided::Part &part : divided.parts) {    //遍历所有行
             QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
@@ -165,8 +165,8 @@ void Parser::parseNonterminal(const QString &name, const Divideds &divideds) {
         }
     }
 }
-void Parser::parseProduction(const QString &name, const Divideds &divideds) {
-    checkDividedArg(name, divideds);
+void Parser::parseProduction(const QString &tag, const Divideds &divideds) {
+    checkDividedArg(tag, divideds);
     for(const Divided &divided : divideds.listDivided) {
         for(const Divided::Part &part : divided.parts) {    //遍历所有行
             QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
@@ -219,8 +219,8 @@ void Parser::parseProduction(const QString &name, const Divideds &divideds) {
         }
     }
 }
-void Parser::parseJs(const QString &name, const Divideds &divideds) {
-    checkDividedArg(name, divideds);
+void Parser::parseJs(const QString &tag, const Divideds &divideds) {
+    checkDividedArg(tag, divideds);
 
     //初始化QJSEngine
     j::SafeDelete(js);

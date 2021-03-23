@@ -131,7 +131,7 @@ public:
     static void parseNonterminal(const QString &tag, const Divideds &divideds); //处理非终结符
     static void parseProduction(const QString &tag, const Divideds &divideds);  //处理产生式
     static void parseJs(const QString &tag, const Divideds &divideds);          //处理js脚本
-    static void parseOutput(const QString &, const Divideds &divideds);      //处理输出  
+    static void parseOutput(const QString &, const Divideds &divideds);      //处理输出
 
     static void parseNil();         //处理能否推导为空串
     static void parseFirstSet();    //处理FIRST集
