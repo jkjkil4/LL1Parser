@@ -10,12 +10,10 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     mFormatTagBracket.setForeground(Qt::blue);
     mFormatTagText.setForeground(Qt::magenta);
     mFormatTagArg.setForeground(Qt::darkMagenta);
-    // mFormatTagArg.setFontWeight(QFont::Bold);
 
     mFormatOFBracket.setForeground(Qt::blue);
-    mFormatOFText.setForeground(Qt::green);
+    mFormatOFText.setForeground(QColor(5, 215, 5));
     mFormatOFArg.setForeground(Qt::darkGreen);
-    // mFormatOFArg.setFontWeight(QFont::Bold);
 
     mFormatProdArrow.setForeground(Qt::darkYellow);
     mFormatProdWrongArrow.setForeground(Qt::red);

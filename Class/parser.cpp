@@ -91,6 +91,7 @@ void Parser::parse(QTextDocument *doc) {
     parseSelectSet();
 
     TRY_PARSE("JS", parseJs);
+    if(hasError()) goto End;
     TRY_PARSE("Output", parseOutput);
 
     {//检查是否有未知标记
@@ -348,6 +349,7 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
         jsDebugMessage = js->object.debugMessage();
 }
 void Parser::parseOutput(const QString &, const Divideds &divideds) {
+    QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式
     for(const Divided &divided : divideds.listDivided) {
         QString text;
         bool hasPrev = false;
@@ -355,7 +357,38 @@ void Parser::parseOutput(const QString &, const Divideds &divideds) {
             if(hasPrev) {
                 text += '\n';
             } else hasPrev = true;
-            text += part.text;
+            QString res;
+            int start = 0;
+            QRegularExpressionMatchIterator matchIter = ruleOutputFormat.globalMatch(part.text);
+            while(matchIter.hasNext()) {
+                QRegularExpressionMatch match = matchIter.next();
+                res += part.text.mid(start, match.capturedStart() - start);
+                start = match.capturedEnd();
+                QString name = match.captured(1);
+                QString arg = match.captured(2);
+                if(name == "js") {
+                    bool hasFn = false;
+                    if(js) {
+                        QJSValue jsValueFn = js->engine.globalObject().property(arg);
+                        if(jsValueFn.isCallable()) {
+                            hasFn = true;
+                            res += jsValueFn.call().toString();
+                        }
+                    }
+                    if(!hasFn) {
+                        issues << Issue(Issue::Error, tr("Unknown js function \"%1\"").arg(arg));
+                    }
+                } else if(name == "symbol") {
+                    int symbol = mapSymbols.value(arg, -1);
+                    if(symbol != -1) {
+                        res += QString::number(symbol);
+                    } else issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(arg));
+                } else {
+                    issues << Issue(Issue::Error, tr("Unknown \"%1\"").arg(name), part.row);
+                }
+            }
+            res += part.text.mid(start, part.text.length() - start);
+            text += res;
         }
         listOutput << Output{ divided.arg, text };
     }
