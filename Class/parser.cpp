@@ -26,7 +26,7 @@ void Parser::divide(QTextDocument *doc) {
         QRegularExpressionMatch match = regExp.match(line);     //使用正则表达式获取内容
         while(match.hasMatch()) {   //重复直到正则表达式获取不到内容
             QString mid = line.mid(start, match.capturedStart() - start);
-            if(!mid.isEmpty() && pDivided)
+            if(pDivided && !mid.isEmpty())
                 pDivided->parts << Divided::Part{ i, mid };
 
             start = match.capturedEnd();
@@ -35,7 +35,7 @@ void Parser::divide(QTextDocument *doc) {
             match = regExp.match(line, match.capturedEnd());
         }
         QString right = line.right(line.length() - start);
-        if(!right.isEmpty() && pDivided)
+        if(pDivided && (!right.isEmpty() || start == 0))
             pDivided->parts.append(Divided::Part{ i, right });
     }
 }
