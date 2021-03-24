@@ -70,10 +70,10 @@ void Parser::parse(QTextDocument *doc) {
     clear();
     divide(doc);
 
-    appendSymbol(Symbol::Nonterminal, "S");
+    appendSymbol(Symbol::Nonterminal, "S");     //开始符号
     TRY_PARSE("Nonterminal", parseNonterminal);
     nonterminalMaxIndex = symbolsMaxIndex - 1;
-    appendSymbol(Symbol::Terminal, "$");
+    appendSymbol(Symbol::Terminal, "$");        //结束符号
     TRY_PARSE("Terminal", parseTerminal);
     terminalMaxIndex = symbolsMaxIndex - 1;
 
@@ -349,42 +349,42 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
         jsDebugMessage = js->object.debugMessage();
 }
 void Parser::parseOutput(const QString &, const Divideds &divideds) {
-    QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式
-    for(const Divided &divided : divideds.listDivided) {
-        QString text;
+    QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式，用于匹配格式化操作
+    for(const Divided &divided : divideds.listDivided) {    //遍历所有Divided，得到所有要输出的内容
+        QString text;   //用于得到当前内容
         bool hasPrev = false;
         for(const Divided::Part &part : divided.parts) {
             if(hasPrev) {
                 text += '\n';
             } else hasPrev = true;
-            QString res;
+            QString res;    //用于得到当前行的结果
             int start = 0;
-            QRegularExpressionMatchIterator matchIter = ruleOutputFormat.globalMatch(part.text);
-            while(matchIter.hasNext()) {
+            QRegularExpressionMatchIterator matchIter = ruleOutputFormat.globalMatch(part.text);    //使用正则表达式匹配改行
+            while(matchIter.hasNext()) {    //遍历所有匹配
                 QRegularExpressionMatch match = matchIter.next();
                 res += part.text.mid(start, match.capturedStart() - start);
                 start = match.capturedEnd();
                 QString name = match.captured(1);
                 QString arg = match.captured(2);
-                if(name == "js") {
-                    bool hasFn = false;
+                if(name == "js") {  //如果是调用js
+                    bool hasFn = false;     //标记在js中是否有该函数
                     if(js) {
-                        QJSValue jsValueFn = js->engine.globalObject().property(arg);
-                        if(jsValueFn.isCallable()) {
+                        QJSValue jsValueFn = js->engine.globalObject().property(arg);   //得到arg在js中对应的内容
+                        if(jsValueFn.isCallable()) {    //如果可以作为函数调用
                             hasFn = true;
-                            res += jsValueFn.call().toString();
+                            res += jsValueFn.call().toString(); //将调用的结果附加到res中
                         }
                     }
-                    if(!hasFn) {
+                    if(!hasFn) {    //如果没有对应函数，则报错
                         issues << Issue(Issue::Error, tr("Unknown js function \"%1\"").arg(arg));
                     }
-                } else if(name == "symbol") {
-                    int symbol = mapSymbols.value(arg, -1);
-                    if(symbol != -1) {
+                } else if(name == "symbol") {   //如果是以符号数字替换
+                    int symbol = mapSymbols.value(arg, -1); //查找arg对应的数字
+                    if(symbol != -1) {  //如果有对应的数字，则附加到res中，否则报错
                         res += QString::number(symbol);
                     } else issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(arg));
                 } else {
-                    issues << Issue(Issue::Error, tr("Unknown \"%1\"").arg(name), part.row);
+                    issues << Issue(Issue::Error, tr("Unknown \"%1\"").arg(name), part.row);    //如果name未知，则报错
                 }
             }
             res += part.text.mid(start, part.text.length() - start);
