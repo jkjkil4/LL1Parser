@@ -26,7 +26,8 @@ void Parser::divide(QTextDocument *doc) {
         QRegularExpressionMatch match = regExp.match(line);     //使用正则表达式获取内容
         while(match.hasMatch()) {   //重复直到正则表达式获取不到内容
             QString mid = line.mid(start, match.capturedStart() - start);
-            if(pDivided) pDivided->parts << Divided::Part{ i, mid };
+            if(!mid.isEmpty() && pDivided)
+                pDivided->parts << Divided::Part{ i, mid };
 
             start = match.capturedEnd();
             pDivided = &mapDivideds[match.captured(1)][match.captured(2)];
@@ -34,7 +35,8 @@ void Parser::divide(QTextDocument *doc) {
             match = regExp.match(line, match.capturedEnd());
         }
         QString right = line.right(line.length() - start);
-        if(pDivided) pDivided->parts.append(Divided::Part{ i, right });
+        if(!right.isEmpty() && pDivided)
+            pDivided->parts.append(Divided::Part{ i, right });
     }
 }
 bool Parser::checkDividedArg(const QString &tag, const Divideds &divideds) {
@@ -169,7 +171,8 @@ void Parser::parseProduction(const QString &tag, const Divideds &divideds) {
     checkDividedArg(tag, divideds);
     for(const Divided &divided : divideds.listDivided) {
         for(const Divided::Part &part : divided.parts) {    //遍历所有行
-            QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
+            QString text = part.text;
+            QStringList list = text.replace('\t', ' ').split(' ', QString::SkipEmptyParts);   //分割字符串
             int size = list.size();
             if(size == 0)
                 continue;

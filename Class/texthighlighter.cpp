@@ -87,14 +87,29 @@ void TextHighlighter::highlightBlock(const QString &text) {
 }
 
 void TextHighlighter::highlightProduction(const QString &text, int start, int len) {
-    int arrowStart = text.indexOf(' ', start);
-    if(arrowStart == -1)
-        return;
-    arrowStart++;
-    int arrowEnd = qMin(start + len, text.indexOf(' ', arrowStart));
-    int arrowLen = (arrowEnd == -1 ? text.length(): arrowEnd) - arrowStart;
-    const QTextCharFormat &format = (text.mid(arrowStart, arrowLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
-    setFormat(arrowStart, arrowLen, format);
+    int nonspcCount = 0;
+    bool isInSpc = true;
+    for(int i = 0; i < len; i++) {
+        QChar ch = text[start + i];
+        if(ch != '\t' && ch != ' ') {
+            if(!isInSpc)
+                continue;
+            isInSpc = false;
+            nonspcCount++;
+            if(nonspcCount == 2) {
+                int midLen = 1;
+                for(int j = i + 1; j < len; j++) {
+                    QChar ch2 = text[start + j];
+                    if(ch2 != '\t' && ch2 != ' ') {
+                        midLen++;
+                    } else break;
+                }
+                const QTextCharFormat &format = (text.mid(start + i, midLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
+                setFormat(start + i, midLen, format);
+                break;
+            }
+        } else isInSpc = true;
+    }
 }
 
 void TextHighlighter::highlightJS(const QString &text, int start, int len) {
