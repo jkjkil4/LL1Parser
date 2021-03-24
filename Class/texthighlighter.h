@@ -24,6 +24,8 @@ private:
 
     QRegularExpression mRuleJSStringWithBracket = QRegularExpression("\\b([A-Za-z]+) *\\(");
     QRegularExpression mRuleJSQObj = QRegularExpression("\\blp\\b");
+    QRegularExpression mRuleJSNumber = QRegularExpression("\\b[0-9]*(?:\\.[0-9]+){0,1}(?:e\\-{0,1}[0-9]+){0,1}\\b");
+    QRegularExpression mRuleJSHexNumber = QRegularExpression("\\b0x[0-9A-Fa-f]+\\b");
     QRegularExpression mRuleTag = QRegularExpression("%\\[(.*?)(?:\\:(.*?)){0,1}\\]%");
     QRegularExpression mRuleOutputFormat = QRegularExpression("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");
 
@@ -41,6 +43,7 @@ private:
     QTextCharFormat mFormatJSStringWithBracket;
     QTextCharFormat mFormatJSKeyword;
     QTextCharFormat mFormatJSQObj;
+    QTextCharFormat mFormatJSNumber;
 
     void highlightProduction(const QString &text, int start, int len);
     void highlightJS(const QString &text, int start, int len);

@@ -5,8 +5,6 @@
 TextHighlighter::TextHighlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
-    HighlightRule rule;
-
     mFormatTagBracket.setForeground(Qt::blue);
     mFormatTagText.setForeground(Qt::magenta);
     mFormatTagArg.setForeground(Qt::darkMagenta);
@@ -20,17 +18,16 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
 
     //JS函数
     mFormatJSStringWithBracket.setForeground(Qt::darkMagenta);
-    rule.pattern = mRuleJSStringWithBracket;
-    rule.format = mFormatJSStringWithBracket;
-    rule.nth = 1;
-    mListJSHighlightRules << rule;
+    mListJSHighlightRules << HighlightRule{ mRuleJSStringWithBracket, mFormatJSStringWithBracket, 1 };
 
     //JS lp
     mFormatJSQObj.setForeground(QColor(255, 128, 128));
-    rule.pattern = mRuleJSQObj;
-    rule.format = mFormatJSQObj;
-    rule.nth = 0;
-    mListJSHighlightRules << rule;
+    mListJSHighlightRules << HighlightRule{ mRuleJSQObj, mFormatJSQObj, 0 };
+
+    //JS数字
+    mFormatJSNumber.setForeground(Qt::blue);
+    mListJSHighlightRules << HighlightRule{ mRuleJSNumber, mFormatJSNumber, 0 };
+    mListJSHighlightRules << HighlightRule{ mRuleJSHexNumber, mFormatJSNumber, 0 };
 
     //JS关键字高亮
     mFormatJSKeyword.setForeground(Qt::darkYellow);
@@ -49,12 +46,8 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
         QStringLiteral("\\btry\\b"), QStringLiteral("\\btypeof\\b"), QStringLiteral("\\bvar\\b"), QStringLiteral("\\bvoid\\b"),
         QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bwhile\\b"), QStringLiteral("\\bwith\\b"), QStringLiteral("\\byield\\b")
     };
-    rule.nth = 0;
-    for(const QString &pattern : keywordPatterns) {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = mFormatJSKeyword;
-        mListJSHighlightRules << rule;
-    }
+    for(const QString &pattern : keywordPatterns)
+        mListJSHighlightRules << HighlightRule{ QRegularExpression(pattern), mFormatJSKeyword, 0 };
 }
 
 void TextHighlighter::highlightBlock(const QString &text) {
