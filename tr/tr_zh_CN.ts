@@ -113,7 +113,7 @@
         <translation>或</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.cpp" line="220"/>
+        <location filename="../Widget/mainwindow.cpp" line="222"/>
         <source>This function is not supported in this operating system</source>
         <translation>当前操作系统不支持该功能</translation>
     </message>
@@ -197,101 +197,112 @@
 <context>
     <name>Parser</name>
     <message>
-        <location filename="../Class/parser.cpp" line="180"/>
+        <location filename="../Class/parser.cpp" line="184"/>
         <source>Lack of &quot;-&gt;&quot; to represent production</source>
         <translation>缺少 &quot;-&gt;&quot; 来表示产生式</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="184"/>
+        <location filename="../Class/parser.cpp" line="188"/>
         <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
         <translation>应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="95"/>
+        <location filename="../Class/parser.cpp" line="98"/>
         <source>Unknown tag &quot;%1&quot;</source>
         <translation>未知的标记 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="46"/>
+        <location filename="../Class/parser.cpp" line="48"/>
         <source>The tag &quot;%1&quot; does not need to provide any parameter</source>
         <translation>标记 &quot;%1&quot; 不需要提供任何参数</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="80"/>
+        <location filename="../Class/parser.cpp" line="82"/>
         <source>Cannot find any production</source>
         <translation>无法找到任何产生式</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="122"/>
-        <location filename="../Class/parser.cpp" line="150"/>
+        <location filename="../Class/parser.cpp" line="125"/>
+        <location filename="../Class/parser.cpp" line="153"/>
         <source>Cannot use &quot;%1&quot; as symbol</source>
         <translation>不能使用 &quot;%1&quot; 作为符号</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="129"/>
+        <location filename="../Class/parser.cpp" line="132"/>
         <source>Symbol &quot;%1&quot; is already an nonterminal</source>
         <translation>符号 &quot;%1&quot; 已经是非终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="131"/>
-        <location filename="../Class/parser.cpp" line="159"/>
+        <location filename="../Class/parser.cpp" line="134"/>
+        <location filename="../Class/parser.cpp" line="162"/>
         <source>Redefinition of &quot;%1&quot;</source>
         <translation>重复定义 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="157"/>
+        <location filename="../Class/parser.cpp" line="160"/>
         <source>Symbol &quot;%1&quot; is already a terminal</source>
         <translation>符号 &quot;%1&quot; 已经是终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="193"/>
-        <location filename="../Class/parser.cpp" line="204"/>
+        <location filename="../Class/parser.cpp" line="197"/>
+        <location filename="../Class/parser.cpp" line="208"/>
+        <location filename="../Class/parser.cpp" line="385"/>
         <source>Unknown symbol &quot;%1&quot;</source>
         <translation>未知的符号 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="196"/>
+        <location filename="../Class/parser.cpp" line="200"/>
         <source>The left of the production cannot be a terminal</source>
         <translation>产生式左部不能为终结符</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="214"/>
+        <location filename="../Class/parser.cpp" line="218"/>
         <source>Redefinition of the production</source>
         <translation>产生式重复定义</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="340"/>
+        <location filename="../Class/parser.cpp" line="344"/>
         <source>JS error: &quot; %1 &quot;</source>
         <translation>JS错误: &quot; %1 &quot;</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="443"/>
+        <location filename="../Class/parser.cpp" line="379"/>
+        <source>Unknown js function &quot;%1&quot;</source>
+        <translation>未知js函数 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="387"/>
+        <source>Unknown &quot;%1&quot;</source>
+        <translation>未知的 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/parser.cpp" line="479"/>
         <source>Appear left recursive</source>
         <translation>出现左递归</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="443"/>
+        <location filename="../Class/parser.cpp" line="479"/>
         <source>(Double click to show detail)</source>
         <translation>（双击以显示详细信息）</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="444"/>
-        <location filename="../Class/parser.cpp" line="662"/>
+        <location filename="../Class/parser.cpp" line="480"/>
+        <location filename="../Class/parser.cpp" line="698"/>
         <source>Error infomation</source>
         <translation>错误信息</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="661"/>
+        <location filename="../Class/parser.cpp" line="697"/>
         <source>SELECT set has intersections</source>
         <translation>SELECT集有交叉</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="710"/>
+        <location filename="../Class/parser.cpp" line="746"/>
         <source>Cannot create the output directory</source>
         <translation>无法创建输出目录</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="718"/>
+        <location filename="../Class/parser.cpp" line="754"/>
         <source>Cannot write text to file &quot;%1&quot;</source>
         <translation>无法将文字写入文件 &quot;%1&quot;</translation>
     </message>
@@ -304,12 +315,12 @@
         <translation type="obsolete">信息</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="758"/>
+        <location filename="../Class/parser.cpp" line="794"/>
         <source>Can be empty string</source>
         <translation>可以为空串</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="762"/>
+        <location filename="../Class/parser.cpp" line="798"/>
         <source>Cannot be empty string</source>
         <translation>不能为空串</translation>
     </message>
@@ -327,57 +338,62 @@
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="149"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="139"/>
+        <source>This function is not supported in this operating system</source>
+        <translation>当前操作系统不支持该功能</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="159"/>
         <source>Elapsed time: %1ms</source>
         <translation>用时: %1毫秒</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="156"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="166"/>
         <source>Row</source>
         <translation>行</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="157"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="167"/>
         <source>Phrase</source>
         <translation>词</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="200"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="211"/>
         <source>Files has been outputted to the directory &quot;%1&quot;</source>
         <translation>文件已被输出至目录 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="206"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="217"/>
         <source>Productions</source>
         <translation>产生式</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="207"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="218"/>
         <source>Empty string condition</source>
         <translation>空串情况</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="208"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="219"/>
         <source>FIRST set</source>
         <translation>FIRST集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="209"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="220"/>
         <source>FOLLOW set</source>
         <translation>FOLLOW集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="210"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="221"/>
         <source>SELECT set</source>
         <translation>SELECT集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="191"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="201"/>
         <source>JS debug message</source>
         <translation>JS调试信息</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="188"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="198"/>
         <source>(Double click to show detail)</source>
         <translation>（双击以显示详细信息）</translation>
     </message>
