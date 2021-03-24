@@ -22,7 +22,7 @@ private:
     };
     QList<HighlightRule> mListJSHighlightRules/*, mListOutputHighlightRules*/;
 
-    QRegularExpression mRuleJSStringWithBracket = QRegularExpression("\\b([A-Za-z]+) *\\(");
+    QRegularExpression mRuleJSStringWithBracket = QRegularExpression("\\b([A-Za-z_]{1}[A-Za-z_0-9]*) *\\(");
     QRegularExpression mRuleJSQObj = QRegularExpression("\\blp\\b");
     QRegularExpression mRuleJSNumber = QRegularExpression("\\b[0-9]*(?:\\.[0-9]+){0,1}(?:e\\-{0,1}[0-9]+){0,1}\\b");
     QRegularExpression mRuleJSHexNumber = QRegularExpression("\\b0x[0-9A-Fa-f]+\\b");
