@@ -752,8 +752,9 @@ void Parser::outputFile(const QString &projPath, const QString &projName) {
             QFile file(outputFolderPath + "/" + output.fileName);
             if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
                 issues << Issue(Issue::Error, tr("Cannot write text to file \"%1\"").arg(output.fileName));
-            
-            QTextStream(&file) << output.text;
+            QTextStream out(&file);
+            out.setCodec("UTF-8");
+            out << output.text;
             file.close();
         }
     }
