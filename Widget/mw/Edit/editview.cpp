@@ -104,6 +104,7 @@ void EditView::onTabCloseRequested(int index) {
         return;
 
     mTabWidget->removeTab(index);    //从tabWidget中移除该控件
+    delete widget;
 
     if(mTabWidget->count() == 0) {
         emit changeView("HomePage");

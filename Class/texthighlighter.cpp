@@ -2,6 +2,12 @@
 
 #include <QDebug>
 
+#define ADD_HIGHLIGHT_TAGFN(tag, fn) \
+    mMapTags[tag] = mVecFn.size();\
+    mVecFn << fn
+#define ADD_HIGHLIGHT_FN(fn) \
+    mVecFn << fn
+
 TextHighlighter::TextHighlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
@@ -29,6 +35,9 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     mListJSHighlightRules << HighlightRule{ mRuleJSNumber, mFormatJSNumber, 0 };
     mListJSHighlightRules << HighlightRule{ mRuleJSHexNumber, mFormatJSNumber, 0 };
 
+    //JS注释
+    mFormatJSCommit.setForeground(Qt::darkGreen);
+
     //JS关键字高亮
     mFormatJSKeyword.setForeground(Qt::darkYellow);
     const QString keywordPatterns[] = {
@@ -48,10 +57,19 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     };
     for(const QString &pattern : keywordPatterns)
         mListJSHighlightRules << HighlightRule{ QRegularExpression(pattern), mFormatJSKeyword, 0 };
+
+    //添加处理函数
+    ADD_HIGHLIGHT_TAGFN("Production", &TextHighlighter::highlightProduction);
+    ADD_HIGHLIGHT_TAGFN("JS", &TextHighlighter::highlightJS);
+    ADD_HIGHLIGHT_TAGFN("Output", &TextHighlighter::highlightOutput);
+    ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSCommit);
+    ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSMultiLineCommit);
 }
+#undef ADD_HIGHLIGHT_TAGFN
+#undef ADD_HIGHLIGHT_FN
 
 void TextHighlighter::highlightBlock(const QString &text) {
-    int highlightIndex = previousBlockState();
+    HighlightConfig hc(text, indexFn(previousBlockState()));
     int highlightStart = 0;
 
     //匹配标记
@@ -67,21 +85,31 @@ void TextHighlighter::highlightBlock(const QString &text) {
         setFormat(match.capturedEnd() - 2, 2, mFormatTagBracket);   //右侧"]%"
 
         //分割进行高亮
-        highlight(highlightIndex, text, highlightStart, match.capturedStart() - highlightStart);
-        highlightIndex = tagIndex(match.captured(1));
-        highlightStart = match.capturedEnd();
+        do {
+            hc.prepare(highlightStart, match.capturedStart() - highlightStart);
+            highlight(hc);
+            highlightStart = (hc.offset == -1 ? match.capturedEnd() : highlightStart + hc.offset);
+        } while(hc.offset != -1);
+        hc.fn = indexFn(tagIndex(match.captured(1)));
     }
 
     //高亮尾部
-    highlight(highlightIndex, text, highlightStart, text.length() - highlightStart);
-    setCurrentBlockState(highlightIndex);
+    do {
+        hc.prepare(highlightStart, text.length() - highlightStart);
+        highlight(hc);
+        if(hc.offset != -1)
+            highlightStart += hc.offset;
+    } while(hc.offset != -1);
+    if(hc.fn == &TextHighlighter::highlightJSCommit)
+        hc.fn = &TextHighlighter::highlightJS;
+    setCurrentBlockState(mVecFn.indexOf(hc.fn));
 }
 
-void TextHighlighter::highlightProduction(const QString &text, int start, int len) {
+void TextHighlighter::highlightProduction(HighlightConfig &hc) {
     int nonspcCount = 0;
     bool isInSpc = true;
-    for(int i = 0; i < len; i++) {
-        QChar ch = text[start + i];
+    for(int i = 0; i < hc.len; i++) {
+        QChar ch = hc.text[hc.start + i];
         if(ch != '\t' && ch != ' ') {
             if(!isInSpc)
                 continue;
@@ -89,24 +117,33 @@ void TextHighlighter::highlightProduction(const QString &text, int start, int le
             nonspcCount++;
             if(nonspcCount == 2) {
                 int midLen = 1;
-                for(int j = i + 1; j < len; j++) {
-                    QChar ch2 = text[start + j];
+                for(int j = i + 1; j < hc.len; j++) {
+                    QChar ch2 = hc.text[hc.start + j];
                     if(ch2 != '\t' && ch2 != ' ') {
                         midLen++;
                     } else break;
                 }
-                const QTextCharFormat &format = (text.mid(start + i, midLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
-                setFormat(start + i, midLen, format);
+                const QTextCharFormat &format = (hc.text.mid(hc.start + i, midLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
+                setFormat(hc.start + i, midLen, format);
                 break;
             }
         } else isInSpc = true;
     }
 }
 
-void TextHighlighter::highlightJS(const QString &text, int start, int len) {
-    int end = start + len;
+void TextHighlighter::highlightJS(HighlightConfig &hc) {
+    int end = hc.start + hc.len;
+    QRegularExpressionMatch match = mRuleJSInnerHighlight.match(hc.text, hc.start);
+    if(match.hasMatch() && match.capturedEnd() <= end) {
+        auto iter = mMapJSFn.find(match.captured());
+        if(iter != mMapJSFn.end()) {
+            hc.fn = *iter;
+            hc.offset = match.capturedStart() - hc.start;
+            end = hc.start + hc.offset;
+        }
+    }
     for(const HighlightRule &rule : mListJSHighlightRules) {
-        QRegularExpressionMatchIterator matchIter = rule.pattern.globalMatch(text, start);
+        QRegularExpressionMatchIterator matchIter = rule.pattern.globalMatch(hc.text, hc.start);
         while(matchIter.hasNext()) {
             QRegularExpressionMatch match = matchIter.next();
             if(match.capturedEnd() > end)
@@ -116,10 +153,10 @@ void TextHighlighter::highlightJS(const QString &text, int start, int len) {
     }
 }
 
-void TextHighlighter::highlightOutput(const QString &text, int start, int len) {
-    int end = start + len;
+void TextHighlighter::highlightOutput(HighlightConfig &hc) {
+    int end = hc.start + hc.len;
     //匹配
-    QRegularExpressionMatchIterator matchIter = mRuleOutputFormat.globalMatch(text);
+    QRegularExpressionMatchIterator matchIter = mRuleOutputFormat.globalMatch(hc.text);
     while(matchIter.hasNext()) {
         QRegularExpressionMatch match = matchIter.next();
         if(match.capturedEnd() > end)
@@ -133,13 +170,33 @@ void TextHighlighter::highlightOutput(const QString &text, int start, int len) {
     }
 }
 
+void TextHighlighter::highlightJSCommit(HighlightConfig &hc) {
+    setFormat(hc.start, hc.len, mFormatJSCommit);
+}
+void TextHighlighter::highlightJSMultiLineCommit(HighlightConfig &hc) {
+    int len = hc.len;
+    QRegularExpressionMatch match = mRuleJSMultiLineCommitEnd.match(hc.text, hc.start);
+    if(match.hasMatch() && match.capturedEnd() <= hc.start + hc.len) {
+        int left = match.capturedStart() - 1;
+        if(left < 0 || hc.text[left] != '/') {
+            len = hc.offset = match.capturedEnd() - hc.start;
+            hc.fn = &TextHighlighter::highlightJS;
+        }
+    }
+    setFormat(hc.start, len, mFormatJSCommit);
+}
+
 int TextHighlighter::tagIndex(const QString &tag) {
     auto iter = mMapTags.find(tag);
     return (iter == mMapTags.end() ? -1 : *iter);
 }
+TextHighlighter::FnHighlight TextHighlighter::indexFn(int index) {
+    if(index < 0 || index >= mVecFn.size())
+        return nullptr;
+    return mVecFn[index];
+}
 
-void TextHighlighter::highlight(int index, const QString &text, int start, int len) {
-    if(index < 0 || index >= arrFnHighlightLen)
-        return;
-    (this->*mArrFnHighlight[index])(text, start, len);
+void TextHighlighter::highlight(HighlightConfig &hc) {
+    if(!hc.fn) return;
+    (this->*hc.fn)(hc);
 }
