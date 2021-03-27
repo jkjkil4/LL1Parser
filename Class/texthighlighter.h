@@ -26,8 +26,9 @@ private:
     QRegularExpression mRuleJSQObj = QRegularExpression("\\blp\\b");
     QRegularExpression mRuleJSNumber = QRegularExpression("\\b[0-9]*(?:\\.[0-9]+){0,1}(?:e\\-{0,1}[0-9]+){0,1}\\b");
     QRegularExpression mRuleJSHexNumber = QRegularExpression("\\b0x[0-9A-Fa-f]+\\b");
-    QRegularExpression mRuleJSInnerHighlight = QRegularExpression("((?://)|(?:/\\*))");
+    QRegularExpression mRuleJSInnerHighlight = QRegularExpression("((?://)|(?:/\\*)|\")");
     QRegularExpression mRuleJSMultiLineCommitEnd = QRegularExpression("\\*/");
+    QRegularExpression mRuleJSStringQuoteOrEnd = QRegularExpression("\\\\|\"");
     QRegularExpression mRuleTag = QRegularExpression("%\\[(.*?)(?:\\:(.*?)){0,1}\\]%");
     QRegularExpression mRuleOutputFormat = QRegularExpression("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");
 
@@ -47,6 +48,8 @@ private:
     QTextCharFormat mFormatJSQObj;
     QTextCharFormat mFormatJSNumber;
     QTextCharFormat mFormatJSCommit;
+    QTextCharFormat mFormatJSString;
+    QTextCharFormat mFormatJSStrQuote;
 
     struct HighlightConfig;
     void highlightProduction(HighlightConfig &hc);
@@ -54,6 +57,7 @@ private:
     void highlightOutput(HighlightConfig &hc);
     void highlightJSCommit(HighlightConfig &hc);
     void highlightJSMultiLineCommit(HighlightConfig &hc);
+    void highlightJSString(HighlightConfig &hc);
 
     typedef void(TextHighlighter::*FnHighlight)(HighlightConfig &hc);
     QVector<FnHighlight> mVecFn;
@@ -62,18 +66,19 @@ private:
     QMap<QString, FnHighlight> mMapJSFn = {
         { "//", &TextHighlighter::highlightJSCommit },
         { "/*", &TextHighlighter::highlightJSMultiLineCommit },
+        { "\"", &TextHighlighter::highlightJSString }
     };
 
     struct HighlightConfig
     {
-        HighlightConfig(const QString &text, FnHighlight fn) : text(text), fn(fn) {}
+        HighlightConfig(const QString &text, FnHighlight fn) : text(text), fn(fn), prevFn(fn) {}
         void prepare(int _start, int _len) {
             start = _start;
             len = _len;
             offset = -1;
         }
         const QString &text;
-        FnHighlight fn;
+        FnHighlight fn, prevFn;
         int start = -1;
         int len = -1;
         int offset = -1;

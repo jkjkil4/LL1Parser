@@ -22,21 +22,19 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     mFormatProdArrow.setForeground(Qt::darkYellow);
     mFormatProdWrongArrow.setForeground(Qt::red);
 
-    //JS函数
-    mFormatJSStringWithBracket.setForeground(Qt::darkMagenta);
+    mFormatJSStringWithBracket.setForeground(Qt::darkMagenta);  //JS函数
     mListJSHighlightRules << HighlightRule{ mRuleJSStringWithBracket, mFormatJSStringWithBracket, 1 };
 
-    //JS lp
-    mFormatJSQObj.setForeground(QColor(255, 128, 128));
+    mFormatJSQObj.setForeground(Qt::magenta);   //JS lp
     mListJSHighlightRules << HighlightRule{ mRuleJSQObj, mFormatJSQObj, 0 };
 
-    //JS数字
-    mFormatJSNumber.setForeground(Qt::blue);
+    mFormatJSNumber.setForeground(Qt::blue);    //JS数字
     mListJSHighlightRules << HighlightRule{ mRuleJSNumber, mFormatJSNumber, 0 };
     mListJSHighlightRules << HighlightRule{ mRuleJSHexNumber, mFormatJSNumber, 0 };
 
-    //JS注释
-    mFormatJSCommit.setForeground(Qt::darkGreen);
+    mFormatJSCommit.setForeground(Qt::darkGreen);   //JS注释
+    mFormatJSString.setForeground(QColor(160, 85, 60));     //JS字符串
+    mFormatJSStrQuote.setForeground(QColor(255, 128, 128)); //JS字符转义
 
     //JS关键字高亮
     mFormatJSKeyword.setForeground(Qt::darkYellow);
@@ -64,6 +62,7 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     ADD_HIGHLIGHT_TAGFN("Output", &TextHighlighter::highlightOutput);
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSCommit);
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSMultiLineCommit);
+    ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSString);
 }
 #undef ADD_HIGHLIGHT_TAGFN
 #undef ADD_HIGHLIGHT_FN
@@ -87,21 +86,32 @@ void TextHighlighter::highlightBlock(const QString &text) {
         //分割进行高亮
         do {
             hc.prepare(highlightStart, match.capturedStart() - highlightStart);
+            FnHighlight prevFn = hc.fn;
             highlight(hc);
+            hc.prevFn = prevFn;
             highlightStart = (hc.offset == -1 ? match.capturedEnd() : highlightStart + hc.offset);
         } while(hc.offset != -1);
+        hc.prevFn = hc.fn;
         hc.fn = indexFn(tagIndex(match.captured(1)));
     }
 
     //高亮尾部
     do {
         hc.prepare(highlightStart, text.length() - highlightStart);
+        FnHighlight prevFn = hc.fn;
         highlight(hc);
+        hc.prevFn = prevFn;
         if(hc.offset != -1)
             highlightStart += hc.offset;
     } while(hc.offset != -1);
+
+    //对特定情况判断是否让fn变回highlightJS
     if(hc.fn == &TextHighlighter::highlightJSCommit)
         hc.fn = &TextHighlighter::highlightJS;
+    else if(hc.fn == &TextHighlighter::highlightJSString) {
+        if(text.right(1) != '\\') 
+            hc.fn = &TextHighlighter::highlightJS;
+    }
     setCurrentBlockState(mVecFn.indexOf(hc.fn));
 }
 
@@ -133,6 +143,8 @@ void TextHighlighter::highlightProduction(HighlightConfig &hc) {
 
 void TextHighlighter::highlightJS(HighlightConfig &hc) {
     int end = hc.start + hc.len;
+
+    //匹配子高亮
     QRegularExpressionMatch match = mRuleJSInnerHighlight.match(hc.text, hc.start);
     if(match.hasMatch() && match.capturedEnd() <= end) {
         auto iter = mMapJSFn.find(match.captured());
@@ -142,6 +154,8 @@ void TextHighlighter::highlightJS(HighlightConfig &hc) {
             end = hc.start + hc.offset;
         }
     }
+
+    //JS高亮
     for(const HighlightRule &rule : mListJSHighlightRules) {
         QRegularExpressionMatchIterator matchIter = rule.pattern.globalMatch(hc.text, hc.start);
         while(matchIter.hasNext()) {
@@ -178,12 +192,31 @@ void TextHighlighter::highlightJSMultiLineCommit(HighlightConfig &hc) {
     QRegularExpressionMatch match = mRuleJSMultiLineCommitEnd.match(hc.text, hc.start);
     if(match.hasMatch() && match.capturedEnd() <= hc.start + hc.len) {
         int left = match.capturedStart() - 1;
-        if(left < 0 || hc.text[left] != '/') {
+        if(left < 0 || hc.text[left] != '/') {  //判断前一个是否为'/'，以避免"/*/"判断为注释终止
             len = hc.offset = match.capturedEnd() - hc.start;
             hc.fn = &TextHighlighter::highlightJS;
         }
     }
     setFormat(hc.start, len, mFormatJSCommit);
+}
+
+void TextHighlighter::highlightJSString(HighlightConfig &hc) {
+    int start = hc.start;
+    int end = hc.start + hc.len;
+    QRegularExpressionMatch match = mRuleJSStringQuoteOrEnd.match(hc.text, hc.fn == hc.prevFn ? hc.start : hc.start + 1);
+    while(match.hasMatch() && match.capturedEnd() <= end) {
+        setFormat(start, match.capturedStart() - start, mFormatJSString);
+        if(match.captured() == '\"') {  //判断是否为字符串结束
+            setFormat(match.capturedStart(), match.capturedLength(), mFormatJSString);
+            hc.offset = match.capturedEnd() - hc.start;
+            hc.fn = &TextHighlighter::highlightJS;
+            return;
+        }
+        setFormat(match.capturedStart(), 2, mFormatJSStrQuote);
+        start = match.capturedEnd() + 1;    //"+1"是为了忽略转义后的符号
+        match = mRuleJSStringQuoteOrEnd.match(hc.text, start);
+    }
+    setFormat(start, end - start, mFormatJSString);
 }
 
 int TextHighlighter::tagIndex(const QString &tag) {
