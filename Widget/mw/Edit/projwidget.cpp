@@ -16,6 +16,7 @@ ProjWidget::ProjWidget(const QString &projPath, QWidget *parent)
     connect(mEdit, &PlainTextEdit::textChanged, [this]{ setSaved(false); });
     connect(mEdit, &PlainTextEdit::pointSizeChanged, [this](int cur){
         mNoteWidget->setText(tr("Pointsize changed: %1 (Default: %2)").arg(QString::number(cur), "10"));
+        mNoteWidget->setColor(qRgb(0, 0, 255));
     });
     connect(mOutputWidget->errListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListWidgetDoubleClicked(QListWidgetItem*)));
     connect(mOutputWidget->outputListWidget(), SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onListWidgetDoubleClicked(QListWidgetItem*)));
@@ -250,6 +251,9 @@ void ProjWidget::onParse() {
         itemSelectSet->setData(Qt::UserRole + 2, Parser::formatSelectSet(true));
         outputListWidget->addItem(itemSelectSet);
     }
+
+    mNoteWidget->setText(tr("Analysis completed"));
+    mNoteWidget->setColor(qRgb(0, 128, 0));
 }
 
 void ProjWidget::changeEvent(QEvent *ev) {

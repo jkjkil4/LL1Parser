@@ -15,7 +15,7 @@ void NoteWidget::onTimer() {
 }
 
 void NoteWidget::start() {
-    mAph = 400;
+    mAph = 600;
     mTimer->start(16);
     update();
 }

@@ -315,12 +315,12 @@
         <translation type="obsolete">信息</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="794"/>
+        <location filename="../Class/parser.cpp" line="795"/>
         <source>Can be empty string</source>
         <translation>可以为空串</translation>
     </message>
     <message>
-        <location filename="../Class/parser.cpp" line="798"/>
+        <location filename="../Class/parser.cpp" line="799"/>
         <source>Cannot be empty string</source>
         <translation>不能为空串</translation>
     </message>
@@ -333,67 +333,72 @@
         <translation>点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="91"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="92"/>
         <source>Parse</source>
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="139"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="140"/>
         <source>This function is not supported in this operating system</source>
         <translation>当前操作系统不支持该功能</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="159"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="160"/>
         <source>Elapsed time: %1ms</source>
         <translation>用时: %1毫秒</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="166"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="167"/>
         <source>Row</source>
         <translation>行</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="167"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="168"/>
         <source>Phrase</source>
         <translation>词</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="211"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="212"/>
         <source>Files has been outputted to the directory &quot;%1&quot;</source>
         <translation>文件已被输出至目录 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="217"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="218"/>
         <source>Productions</source>
         <translation>产生式</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="218"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="219"/>
         <source>Empty string condition</source>
         <translation>空串情况</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="219"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="220"/>
         <source>FIRST set</source>
         <translation>FIRST集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="220"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="221"/>
         <source>FOLLOW set</source>
         <translation>FOLLOW集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="221"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="222"/>
         <source>SELECT set</source>
         <translation>SELECT集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="201"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="255"/>
+        <source>Analysis completed</source>
+        <translation>分析已完成</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="202"/>
         <source>JS debug message</source>
         <translation>JS调试信息</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="198"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="199"/>
         <source>(Double click to show detail)</source>
         <translation>（双击以显示详细信息）</translation>
     </message>
