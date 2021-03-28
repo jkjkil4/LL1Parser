@@ -189,13 +189,10 @@ void TextHighlighter::highlightJSCommit(HighlightConfig &hc) {
 }
 void TextHighlighter::highlightJSMultiLineCommit(HighlightConfig &hc) {
     int len = hc.len;
-    QRegularExpressionMatch match = mRuleJSMultiLineCommitEnd.match(hc.text, hc.start);
+    QRegularExpressionMatch match = mRuleJSMultiLineCommitEnd.match(hc.text, hc.fn == hc.prevFn ? hc.start : hc.start + 2);
     if(match.hasMatch() && match.capturedEnd() <= hc.start + hc.len) {
-        int left = match.capturedStart() - 1;
-        if(left < 0 || hc.text[left] != '/') {  //判断前一个是否为'/'，以避免"/*/"判断为注释终止
-            len = hc.offset = match.capturedEnd() - hc.start;
-            hc.fn = &TextHighlighter::highlightJS;
-        }
+        len = hc.offset = match.capturedEnd() - hc.start;
+        hc.fn = &TextHighlighter::highlightJS;
     }
     setFormat(hc.start, len, mFormatJSCommit);
 }
