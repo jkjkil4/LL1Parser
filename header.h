@@ -7,6 +7,9 @@
 
 #define SUFFIX "lpp"
 
+#define IsLetter(ch) ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
+#define IsDigit(ch) (ch >= '0' && ch <= '9')
+
 enum class UserRole : int {
     NoRole,
     ShowPlainText,          //显示纯文本    (QString windowTitle, QString text)

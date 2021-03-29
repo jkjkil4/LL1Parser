@@ -4,6 +4,8 @@
 #include <QTextCharFormat>
 #include <QRegularExpression>
 
+#include "header.h"
+
 class TextHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
@@ -26,7 +28,7 @@ private:
     QRegularExpression mRuleJSQObj = QRegularExpression("\\blp\\b");
     QRegularExpression mRuleJSNumber = QRegularExpression("\\b(?:(?:[0-9]*\\.[0-9]+)|(?:[0-9+]))(?:e\\-?[0-9]+)?\\b");
     QRegularExpression mRuleJSHexNumber = QRegularExpression("\\b0x[0-9A-Fa-f]+\\b");
-    QRegularExpression mRuleJSInnerHighlight = QRegularExpression("((?://)|(?:/\\*)|\")");
+    QRegularExpression mRuleJSInnerHighlight = QRegularExpression("((?://)|(?:/\\*)|\"|(?:/[^*/]{1}))");
     QRegularExpression mRuleJSMultiLineCommitEnd = QRegularExpression("\\*/");
     QRegularExpression mRuleJSStringQuoteOrEnd = QRegularExpression("\\\\|\"");
     QRegularExpression mRuleTag = QRegularExpression("%\\[(.*?)(?:\\:(.*?))?\\]%");
@@ -50,6 +52,7 @@ private:
     QTextCharFormat mFormatJSCommit;
     QTextCharFormat mFormatJSString;
     QTextCharFormat mFormatJSStrQuote;
+    QTextCharFormat mFormatJSRegex;
 
     struct HighlightConfig;
     void highlightProduction(HighlightConfig &hc);
@@ -58,6 +61,7 @@ private:
     void highlightJSCommit(HighlightConfig &hc);
     void highlightJSMultiLineCommit(HighlightConfig &hc);
     void highlightJSString(HighlightConfig &hc);
+    void highlightJSRegex(HighlightConfig &hc);
 
     typedef void(TextHighlighter::*FnHighlight)(HighlightConfig &hc);
     QVector<FnHighlight> mVecFn;
@@ -67,6 +71,7 @@ private:
         { "//", &TextHighlighter::highlightJSCommit },
         { "/*", &TextHighlighter::highlightJSMultiLineCommit },
         { "\"", &TextHighlighter::highlightJSString }
+        //正则表达式使用if判断
     };
 
     struct HighlightConfig

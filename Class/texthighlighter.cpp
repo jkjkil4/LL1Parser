@@ -35,6 +35,7 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     mFormatJSCommit.setForeground(Qt::darkGreen);   //JS注释
     mFormatJSString.setForeground(QColor(160, 85, 60));     //JS字符串
     mFormatJSStrQuote.setForeground(QColor(255, 128, 128)); //JS字符转义
+    mFormatJSRegex.setForeground(QColor(220, 75, 50));
 
     //JS关键字高亮
     mFormatJSKeyword.setForeground(Qt::darkYellow);
@@ -63,6 +64,7 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSCommit);
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSMultiLineCommit);
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSString);
+    ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSRegex);
 }
 #undef ADD_HIGHLIGHT_TAGFN
 #undef ADD_HIGHLIGHT_FN
@@ -147,11 +149,20 @@ void TextHighlighter::highlightJS(HighlightConfig &hc) {
     //匹配子高亮
     QRegularExpressionMatch match = mRuleJSInnerHighlight.match(hc.text, hc.start);
     if(match.hasMatch() && match.capturedEnd() <= end) {
-        auto iter = mMapJSFn.find(match.captured());
-        if(iter != mMapJSFn.end()) {
-            hc.fn = *iter;
+        QString captured = match.captured();
+        if(captured.length() == 2 && captured[0] == '/' && captured[1] != '*' && captured[1] != '/') {  //如果满足正则表达式的开头
+            //高亮正则表达式
+            hc.fn = &TextHighlighter::highlightJSRegex;
             hc.offset = match.capturedStart() - hc.start;
             end = hc.start + hc.offset;
+        } else {
+            //根据mMapJSFn查找的结果进行高亮
+            auto iter = mMapJSFn.find(captured);
+            if(iter != mMapJSFn.end()) {
+                hc.fn = *iter;
+                hc.offset = match.capturedStart() - hc.start;
+                end = hc.start + hc.offset;
+            }
         }
     }
 
@@ -214,6 +225,74 @@ void TextHighlighter::highlightJSString(HighlightConfig &hc) {
         match = mRuleJSStringQuoteOrEnd.match(hc.text, start);
     }
     setFormat(start, end - start, mFormatJSString);
+}
+
+void TextHighlighter::highlightJSRegex(HighlightConfig &hc) {
+    hc.offset = 1;
+    hc.fn = &TextHighlighter::highlightJS;
+
+    //从hc.start的前一个字符向前遍历，找到第一个不为'\t'或' '的字符，若该字符不能在正则表达式前存在，则结束
+    bool checkLeft = true;
+    for(int i = hc.start - 1; i >= 0; i++) {
+        QChar ch = hc.text[i];  //该位置的字符
+        if(ch != '\t' && ch != ' ') {
+            if(IsLetter(ch) || IsDigit(ch) || ch == ']')
+                checkLeft = false;
+            break;
+        }
+    }
+    if(!checkLeft) return;
+
+    //从hc.start的后一个字符向后遍历，进行相应判断
+    int end = hc.start + hc.len;
+    bool hasEnd = false;
+    bool optionEnded = false;
+    QVector<int> vecQuote;
+    int lastPos = -1;
+    for(int i = hc.start + 1; i < end; i++) {
+        QChar ch = hc.text[i];
+        if(hasEnd) {
+            if(optionEnded) {
+                if(ch != '\t' && ch != ' ') {   //如果该字符串不为'\t'或' '
+                    if(IsLetter(ch) || IsDigit(ch))     //如果该字符不能在正则表达式后存在，则结束
+                        return;
+                    break;
+                }
+            } else {
+                if(ch == '\t' || ch == ' ') {   //如果该字符为'\t'或' '
+                    optionEnded = true; //标记结束了对正则表达式选项的分析
+                } else if(ch == 'g' || ch == 'i' || ch == 'm') { //如果该字符为正则表达式的选项
+                    lastPos = i;
+                } else if(IsLetter(ch) || IsDigit(ch)) {  //如果该字符为其他字母或数字，则结束
+                    return;
+                } else break;
+            }
+        } else {
+            switch(ch.toLatin1()) {
+            case '\\':  //转义
+                vecQuote << i;
+                i++;    //自增以跳过转义符号后的一个字符
+                break;
+            case '/':   //结尾符号或注释
+                if(i != end - 1 && hc.text[i + 1] == '/') return; //如果找不到结尾符号或者找到"//"，则结束
+                hasEnd = true;
+                lastPos = i;
+                break;
+            }
+        }
+    }
+    if(!hasEnd) return;   //如果没有结尾，则结束
+
+    //遍历转义并高亮
+    int start = hc.start;
+    int regexEnd = lastPos + 1;
+    for(int index : vecQuote) {
+        setFormat(start, index - start, mFormatJSRegex);
+        setFormat(index, 2, mFormatJSStrQuote);
+        start = index + 2;
+    }
+    setFormat(start, regexEnd - start, mFormatJSRegex);
+    hc.offset = regexEnd - hc.start;
 }
 
 int TextHighlighter::tagIndex(const QString &tag) {
