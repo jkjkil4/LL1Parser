@@ -63,7 +63,8 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     ADD_HIGHLIGHT_TAGFN("Output", &TextHighlighter::highlightOutput);
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSCommit);
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSMultiLineCommit);
-    ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSString);
+    ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSMqString);
+    ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSSqString);
     ADD_HIGHLIGHT_FN(&TextHighlighter::highlightJSRegex);
 }
 #undef ADD_HIGHLIGHT_TAGFN
@@ -110,7 +111,7 @@ void TextHighlighter::highlightBlock(const QString &text) {
     //对特定情况判断是否让fn变回highlightJS
     if(hc.fn == &TextHighlighter::highlightJSCommit)
         hc.fn = &TextHighlighter::highlightJS;
-    else if(hc.fn == &TextHighlighter::highlightJSString) {
+    else if(hc.fn == &TextHighlighter::highlightJSMqString || hc.fn == &TextHighlighter::highlightJSSqString) {
         if(text.right(1) != '\\') 
             hc.fn = &TextHighlighter::highlightJS;
     }
@@ -208,13 +209,13 @@ void TextHighlighter::highlightJSMultiLineCommit(HighlightConfig &hc) {
     setFormat(hc.start, len, mFormatJSCommit);
 }
 
-void TextHighlighter::highlightJSString(HighlightConfig &hc) {
+void TextHighlighter::highlightJSString(HighlightConfig &hc, const QRegularExpression &regexQuoteOrEnd, QChar chEnd) {
     int start = hc.start;
     int end = hc.start + hc.len;
-    QRegularExpressionMatch match = mRuleJSStringQuoteOrEnd.match(hc.text, hc.fn == hc.prevFn ? hc.start : hc.start + 1);
+    QRegularExpressionMatch match = regexQuoteOrEnd.match(hc.text, hc.fn == hc.prevFn ? hc.start : hc.start + 1);
     while(match.hasMatch() && match.capturedEnd() <= end) {
         setFormat(start, match.capturedStart() - start, mFormatJSString);
-        if(match.captured() == '\"') {  //判断是否为字符串结束
+        if(match.captured() == chEnd) {  //判断是否为字符串结束
             setFormat(match.capturedStart(), match.capturedLength(), mFormatJSString);
             hc.offset = match.capturedEnd() - hc.start;
             hc.fn = &TextHighlighter::highlightJS;
@@ -222,7 +223,7 @@ void TextHighlighter::highlightJSString(HighlightConfig &hc) {
         }
         setFormat(match.capturedStart(), 2, mFormatJSStrQuote);
         start = match.capturedEnd() + 1;    //"+1"是为了忽略转义后的符号
-        match = mRuleJSStringQuoteOrEnd.match(hc.text, start);
+        match = mRuleJSMqStringQuoteOrEnd.match(hc.text, start);
     }
     setFormat(start, end - start, mFormatJSString);
 }

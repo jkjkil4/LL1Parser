@@ -28,9 +28,10 @@ private:
     QRegularExpression mRuleJSQObj = QRegularExpression("\\blp\\b");
     QRegularExpression mRuleJSNumber = QRegularExpression("\\b(?:(?:[0-9]*\\.[0-9]+)|(?:[0-9]+))(?:e\\-?[0-9]+)?\\b");
     QRegularExpression mRuleJSHexNumber = QRegularExpression("\\b0x[0-9A-Fa-f]+\\b");
-    QRegularExpression mRuleJSInnerHighlight = QRegularExpression("((?://)|(?:/\\*)|\"|(?:/[^*/]{1}))");
+    QRegularExpression mRuleJSInnerHighlight = QRegularExpression("((?://)|(?:/\\*)|\"|'|(?:/[^*/]{1}))");
     QRegularExpression mRuleJSMultiLineCommitEnd = QRegularExpression("\\*/");
-    QRegularExpression mRuleJSStringQuoteOrEnd = QRegularExpression("\\\\|\"");
+    QRegularExpression mRuleJSMqStringQuoteOrEnd = QRegularExpression("\\\\|\"");
+    QRegularExpression mRuleJSSqStringQuoteOrEnd = QRegularExpression("\\\\|'");
     QRegularExpression mRuleTag = QRegularExpression("%\\[(.*?)(?:\\:(.*?))?\\]%");
     QRegularExpression mRuleOutputFormat = QRegularExpression("#\\[(.*?)(?:\\:(.*?))?\\]#");
 
@@ -60,7 +61,9 @@ private:
     void highlightOutput(HighlightConfig &hc);
     void highlightJSCommit(HighlightConfig &hc);
     void highlightJSMultiLineCommit(HighlightConfig &hc);
-    void highlightJSString(HighlightConfig &hc);
+    void highlightJSString(HighlightConfig &hc, const QRegularExpression &regexQuoteOrEnd, QChar chEnd);
+    void highlightJSMqString(HighlightConfig &hc) { highlightJSString(hc, mRuleJSMqStringQuoteOrEnd, '"'); }   //双引号字符串
+    void highlightJSSqString(HighlightConfig &hc) { highlightJSString(hc, mRuleJSSqStringQuoteOrEnd, '\''); }  //单引号字符串
     void highlightJSRegex(HighlightConfig &hc);
 
     typedef void(TextHighlighter::*FnHighlight)(HighlightConfig &hc);
@@ -70,7 +73,8 @@ private:
     QMap<QString, FnHighlight> mMapJSFn = {
         { "//", &TextHighlighter::highlightJSCommit },
         { "/*", &TextHighlighter::highlightJSMultiLineCommit },
-        { "\"", &TextHighlighter::highlightJSString }
+        { "\"", &TextHighlighter::highlightJSMqString },
+        { "'", &TextHighlighter::highlightJSSqString }
         //正则表达式使用if判断
     };
 
