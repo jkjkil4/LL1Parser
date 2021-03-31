@@ -215,17 +215,17 @@ void ProjWidget::onParse() {
             outputListWidget->addItem(item);
         }
 
-        QString strProds = tr("Productions");
+        // QString strProds = tr("Productions");
         QString strNil = tr("Empty string condition");
         QString strFirstSet = tr("FIRST set");
         QString strFollowSet = tr("FOLLOW set");
         QString strSelectSet = tr("SELECT set");
 
-        QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
-        itemProds->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
-        itemProds->setData(Qt::UserRole + 1, strProds);
-        itemProds->setData(Qt::UserRole + 2, Parser::formatProdsMap());
-        outputListWidget->addItem(itemProds);
+        // QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
+        // itemProds->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
+        // itemProds->setData(Qt::UserRole + 1, strProds);
+        // itemProds->setData(Qt::UserRole + 2, Parser::formatProdsMap());
+        // outputListWidget->addItem(itemProds);
 
         QListWidgetItem *itemNils = new QListWidgetItem(strNil + strDbClick);
         itemNils->setData(Qt::UserRole, (int)UserRole::ShowPlainText);

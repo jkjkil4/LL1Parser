@@ -14,6 +14,7 @@
 #include <Lib/header.h>
 #include "header.h"
 
+//#define DEBUG_PARSER
 
 class Parser : QObject
 {
@@ -37,6 +38,7 @@ public:
             return QApplication::style()->standardIcon((QStyle::StandardPixmap)type);
         }
 
+#ifdef DEBUG_PARSER
         friend inline QDebug& operator<<(QDebug &de, const Issue &err) {    //用于qDebug调试
             de << QString("Issue-") + (err.type == Warning ? "Warning" : "Error") + "(" << err.what;
             if(err.row != -1) {
@@ -48,6 +50,7 @@ public:
             de << ")";
             return de;
         }
+#endif
     };
 
     struct Divided  //分割后的文档(不同参数算作不同的Divided)
@@ -57,16 +60,19 @@ public:
             int row;        //该行在原文档中的行数
             QString text;   //该行文字
 
+#ifdef DEBUG_PARSER
             friend inline QDebug& operator<<(QDebug &de, const Part &part) {    //用于qDebug调试
                 de << QString::number(part.row) + "  " + part.text;
                 return de;
             }
+#endif
         };
 
         QString arg;        //该分隔部分的参数
         QVector<int> rows;  //该分隔部分所有标记所在原文档的行数
         QList<Part> parts;  //该分隔部分的所有行
 
+#ifdef DEBUG_PARSER
         friend inline QDebug& operator<<(QDebug &de, const Divided &divided) {  //用于qDebug调试
             de << "Divided(\n";
             for(const Part &part : divided.parts) {
@@ -75,6 +81,7 @@ public:
             de << ")";
             return de;
         }
+#endif
     };
     struct Divideds //标记相同但参数不同的所有Divided
     {
@@ -120,7 +127,46 @@ public:
 
     //产生式相关
     typedef QVector<int> SymbolVec;     //符号列表
-    typedef QList<SymbolVec> Prods;     //某个非终结符可以推导出的所有产生式
+    struct ProdAction {     //语义动作
+        int pos;
+        QString str; 
+    };
+    struct Prod {   //产生式
+        Prod() = default;
+        // Prod(const SymbolVec &symbols) : symbols(symbols) {}
+        SymbolVec symbols; 
+        QList<ProdAction> actions;
+        inline bool operator==(const Prod &other) { return symbols == other.symbols; }
+
+#ifdef DEBUG_PARSER
+        friend inline QDebug& operator<<(QDebug &de, const Prod &prod) {    //用于qDebug调试
+            de << "Prod{";
+            int start = 0;
+            bool hasPrev = false;
+            for(const ProdAction &action : prod.actions) {
+                if(hasPrev) {
+                    de << ',';
+                } else hasPrev = true;
+                for(int i = start; i < action.pos; i++)
+                    de << "\033[34m" + QString::number(prod.symbols[i]) + "\033[0m";
+                if(hasPrev) {
+                    de << ',';
+                } else hasPrev = true;
+                de << "\033[35m" + action.str + "\033[0m";
+                start = action.pos;
+            }
+            for(int i = start; i < prod.symbols.size(); i++) {
+                if(hasPrev) {
+                    de << ',';
+                } else hasPrev = true;
+                de << "\033[34m" + QString::number(prod.symbols[i]) + "\033[0m";
+            }
+            de << "}";
+            return de;
+        }
+#endif
+    };
+    typedef QList<Prod> Prods;     //某个非终结符可以推导出的所有产生式
     typedef QMap<int, Prods> ProdsMap;  //将非终结符和Prods相对应
 
     //SELECT集
@@ -135,6 +181,7 @@ public:
 
     static void parseTerminal(const QString &tag, const Divideds &divideds);    //处理终结符
     static void parseNonterminal(const QString &tag, const Divideds &divideds); //处理非终结符
+    static void parseAction(const QString &tag, const Divideds &divideds);
     static void parseProduction(const QString &tag, const Divideds &divideds);  //处理产生式
     static void parseJs(const QString &tag, const Divideds &divideds);          //处理js脚本
     static void parseOutput(const QString &, const Divideds &divideds);      //处理输出
@@ -154,7 +201,7 @@ public:
     static QString outputDir(const QString &projPath, const QString &projName);     //返回要输出到的文件夹
     static void outputFile(const QString &projPath, const QString &projName);       //输出文件
 
-    static QString formatProdsMap();    //返回 所有的产生式格式化为字符串的结果
+    // static QString formatProdsMap();    //返回 所有的产生式格式化为字符串的结果
     static QString formatNilVec();      //返回 空串情况格式化为字符串的结果
     static QString formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool showNil);     //用于以下两个format
     static QString formatFirstSet(bool useHtml) { return formatSet(vecFirstSet, useHtml, true); }       //返回 所有FIRST集格式化为字符串的结果
@@ -171,6 +218,7 @@ public:
     static int nonterminalMaxIndex;
     static int terminalMaxIndex;
 
+    static QMap<QString, QString> mapActions;   //将语义动作与其内容对应
     static ProdsMap mapProds;       //所有产生式
     static QVector<bool> vecNil;    //空串情况
 
@@ -188,10 +236,13 @@ public:
     struct Output { //输出的文件
         QString fileName;   //文件名
         QString text;       //文字
+
+#ifdef DEBUG_PARSER
         friend inline QDebug& operator<<(QDebug &de, const Output &output) {    //用于qDebug调试
             de << "Output{" << "FileName:" << output.fileName << "," << "Text:" << output.text << "}";
             return de;
         }
+#endif
     };
     static QList<Output> listOutput;    //所有要输出的文件
     
