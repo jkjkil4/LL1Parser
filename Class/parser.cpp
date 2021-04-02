@@ -7,7 +7,8 @@ QMap<Parser::Symbol, int> Parser::mapSymbols;
 int Parser::symbolsMaxIndex = 0;
 int Parser::nonterminalMaxIndex = -1;
 int Parser::terminalMaxIndex = -1;
-QMap<QString, QString> Parser::mapActions;
+QMap<QString, int> Parser::mapActions;
+QStringList Parser::listActions;
 Parser::ProdsMap Parser::mapProds;
 QVector<bool> Parser::vecNil;
 QVector<Parser::SymbolVec> Parser::vecFirstSet, Parser::vecFollowSet;
@@ -200,7 +201,10 @@ void Parser::parseAction(const QString &tag, const Divideds &divideds) {
             QString val = match.captured(2);
             if(mapActions.contains(key)) {
                 issues << Issue(Issue::Error, tr("Redefinition of \"%1\"").arg(key), part.row);
-            } else mapActions[key] = val;
+            } else { 
+                mapActions[key] = listActions.size();
+                listActions << val;
+            }
         }
     }
 }
@@ -296,6 +300,16 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
     repeat(int, i, symbolCount)
         jsSymbolArray.setProperty(i, mapSymbols.key(i).str);
     jsObjVal.setProperty("arrSymbols", jsSymbolArray);
+    
+    //传入语义动作
+    QJSValue jsActionArray = js->engine.newArray(mapActions.size());
+    for(auto iter = mapActions.begin(); iter != mapActions.end(); ++iter) {
+        QJSValue jsAction = js->engine.newObject();
+        jsAction.setProperty("name", iter.key());
+        jsAction.setProperty("text", listActions[iter.value()]);
+        jsActionArray.setProperty(iter.value(), jsAction);
+    }
+    jsObjVal.setProperty("arrActions", jsActionArray);
 
     //传入产生式
     QJSValue jsProdsArray = js->engine.newArray(symbolCount);
@@ -306,11 +320,28 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
         int index = 0;
         for(auto iter = prods.begin(); iter != prods.end(); ++iter) {   //遍历该符号的所有产生式
             const Prod &prod = *iter;   //其中一个产生式
-            const SymbolVec &symbols = prod.symbols;         
-            int symbolsSize = symbols.size();   //产生式右部大小
-            QJSValue jsSymbolArray = js->engine.newArray(symbolsSize);
-            for(int j = 0; j < symbolsSize; j++)    //遍历该产生式右部
-                jsSymbolArray.setProperty(j, symbols[j]);
+            int size = prod.symbols.size() + prod.actions.size();   //结果大小
+            QJSValue jsSymbolArray = js->engine.newArray(size);
+
+            //将产生式符号和语义动作加入到jsSymbolArray中
+            int start = 0;
+            int pos = 0;
+            auto addElement = [&jsSymbolArray, &pos](int value, bool isSymbol) {    //lambda，用于添加元素
+                QJSValue jsElement = Parser::js->engine.newObject();
+                jsElement.setProperty("value", value);
+                jsElement.setProperty("isSymbol", isSymbol);
+                jsSymbolArray.setProperty(pos, jsElement);
+                pos++;
+            };
+            for(const ProdAction &action : prod.actions) {
+                for(int i = start; i < action.pos; i++)
+                    addElement(prod.symbols[i], true);
+                addElement(action.id, false);
+                start = action.pos;
+            }
+            for(int i = start; i < prod.symbols.size(); i++)
+                addElement(prod.symbols[i], true);
+
             jsProdArray.setProperty(index, jsSymbolArray);
             
             index++;
@@ -761,6 +792,7 @@ void Parser::clear() {
     nonterminalMaxIndex = -1;
     terminalMaxIndex = -1;
     mapActions.clear();
+    listActions.clear();
     mapProds.clear();
 
     vecNil.clear();

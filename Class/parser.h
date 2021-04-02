@@ -129,7 +129,7 @@ public:
     typedef QVector<int> SymbolVec;     //符号列表
     struct ProdAction {     //语义动作
         int pos;
-        QString str; 
+        int id;
     };
     struct Prod {   //产生式
         Prod() = default;
@@ -152,7 +152,7 @@ public:
                 if(hasPrev) {
                     de << ',';
                 } else hasPrev = true;
-                de << "\033[35m" + action.str + "\033[0m";
+                de << "\033[35m" + QString::number(action.id) + "\033[0m";
                 start = action.pos;
             }
             for(int i = start; i < prod.symbols.size(); i++) {
@@ -218,7 +218,8 @@ public:
     static int nonterminalMaxIndex;
     static int terminalMaxIndex;
 
-    static QMap<QString, QString> mapActions;   //将语义动作与其内容对应
+    static QMap<QString, int> mapActions;   //将语义动作与其内容对应
+    static QStringList listActions;
     static ProdsMap mapProds;       //所有产生式
     static QVector<bool> vecNil;    //空串情况
 
