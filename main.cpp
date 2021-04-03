@@ -23,6 +23,11 @@ int main(int argc, char *argv[])
     fontSourceCodePro.load(":/qrc/SourceCodePro-Medium.ttf");
 
     MainWindow w;
+
+    QStringList args = a.arguments();
+    if(args.length() == 2 && QDir().exists(args[1]))
+        w.onOpenProj(args[1]);
+
     w.show();
 
     int res = a.exec();

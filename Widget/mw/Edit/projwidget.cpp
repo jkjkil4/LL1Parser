@@ -154,7 +154,7 @@ void ProjWidget::onParse() {
 
     Parser::parse(mEdit->document());
     if(!Parser::hasError())
-        Parser::outputFile(mProjPath, mProjName);
+        Parser::outputFile(mProjPath);
 
     int ms = t.elapsed();
     QListWidgetItem *item = new QListWidgetItem(tr("Elapsed time: %1ms").arg(ms));
@@ -208,7 +208,7 @@ void ProjWidget::onParse() {
         }
 
         if(Parser::hasOutputFile()) {
-            QString strDir = Parser::outputDir(mProjPath, mProjName);
+            QString strDir = Parser::outputDir(mProjPath);
             QListWidgetItem *item = new QListWidgetItem(tr("Files has been outputted to the directory \"%1\"").arg(strDir));
             item->setData(Qt::UserRole, (int)UserRole::OpenFolder);
             item->setData(Qt::UserRole + 1, strDir);

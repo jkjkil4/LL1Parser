@@ -198,8 +198,8 @@ public:
     static bool isNonterminal(int digit) { return digit >= 0 && digit <= nonterminalMaxIndex; }     //返回是否是非终结符
     static bool isTerminal(int digit) { return digit > nonterminalMaxIndex && digit <= terminalMaxIndex; }  //返回是否是终结符
 
-    static QString outputDir(const QString &projPath, const QString &projName);     //返回要输出到的文件夹
-    static void outputFile(const QString &projPath, const QString &projName);       //输出文件
+    static QString outputDir(const QString &projPath);     //返回要输出到的文件夹
+    static void outputFile(const QString &projPath/*, const QString &projName*/);       //输出文件
 
     // static QString formatProdsMap();    //返回 所有的产生式格式化为字符串的结果
     static QString formatNilVec();      //返回 空串情况格式化为字符串的结果
@@ -235,7 +235,7 @@ public:
     static QString jsDebugMessage;  //js输出的调试信息
 
     struct Output { //输出的文件
-        QString fileName;   //文件名
+        QString filePath;   //文件名
         QString text;       //文字
 
 #ifdef DEBUG_PARSER

@@ -40,7 +40,7 @@ public:
 
     void updateTr();
 
-private slots:
+public slots:
     void onNewProj();
     void onOpenProj();
     void onOpenProj(const QString &filePath);

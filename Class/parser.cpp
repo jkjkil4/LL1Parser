@@ -815,28 +815,27 @@ void Parser::appendSymbol(Symbol::Type type, const QString &str) {
     symbolsMaxIndex++;
 }
 
-QString Parser::outputDir(const QString &projPath, const QString &projName) {
-    return QFileInfo(projPath).path() + "/Output_" + projName;
+QString Parser::outputDir(const QString &projPath) {
+    return QFileInfo(projPath).path();
 }
 
-void Parser::outputFile(const QString &projPath, const QString &projName) {
+void Parser::outputFile(const QString &projPath/*, const QString &projName*/) {
     //输出文件
     if(hasOutputFile()) {
-        QString path = QFileInfo(projPath).path();     //项目路径
-        QString outputFolder = "Output_" + projName;   //用于输出的文件夹名称
-        QString outputFolderPath = path + "/" + outputFolder;   //用于输出的文件夹的路径
-        QDir dir(path);     //用于操作文件夹
-        if(!dir.exists(outputFolder)) {  //如果用于输出的文件夹不存在，则创建
-            if(!dir.mkdir(outputFolder)) {
-                issues << Issue(Issue::Error, tr("Cannot create the output directory"));
-                return;
-            }
-        }
+        QString path = outputDir(projPath);
         
         for(const Output &output : listOutput) {    //遍历所有内容并输出
-            QFile file(outputFolderPath + "/" + output.fileName);
-            if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-                issues << Issue(Issue::Error, tr("Cannot write text to file \"%1\"").arg(output.fileName));
+            QFileInfo info(output.filePath);
+            QDir dir(path);
+            if(!dir.cd(info.path())) {
+                issues << Issue(Issue::Error, tr("Cannot write text to file \"%1\"").arg(output.filePath));
+                continue;
+            }
+            QFile file(dir.canonicalPath() + "/" + info.fileName());
+            if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                issues << Issue(Issue::Error, tr("Cannot write text to file \"%1\"").arg(output.filePath));
+                continue;
+            }
             QTextStream out(&file);
             out.setCodec("UTF-8");
             out << output.text;
