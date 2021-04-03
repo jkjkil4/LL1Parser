@@ -26,7 +26,7 @@ public:
         QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
         config.setValue("Config/TrLocale", mLocale);
     }
-    QString locale() { return mLocale; }
+    QString locale() const { return mLocale; }
 
 private:
     QString mLocale;

@@ -11,7 +11,7 @@ public:
     void clear();   //清空内容
 
     bool hasDebugMessage() { return !mDebugMessage.isEmpty(); }     //返回是否有调试信息
-    QString debugMessage() { return mDebugMessage; }    //返回调试信息文本
+    QString debugMessage() const { return mDebugMessage; }    //返回调试信息文本
 
     VAR_FUNC(nonterminalMaxIndex, setNonterminalMaxIndex, mNonterminalMaxIndex, int, , )
     VAR_FUNC(terminalMaxIndex, setTerminalMaxIndex, mTerminalMaxIndex, int, , )

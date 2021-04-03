@@ -19,6 +19,7 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
     mFormatOFText.setForeground(QColor(5, 215, 5));
     mFormatOFArg.setForeground(Qt::darkGreen);
 
+    mFormatActionName.setForeground(Qt::darkMagenta);
     mFormatProdArrow.setForeground(Qt::darkYellow);
     mFormatProdWrongArrow.setForeground(Qt::red);
 
@@ -58,6 +59,7 @@ TextHighlighter::TextHighlighter(QTextDocument *parent)
         mListJSHighlightRules << HighlightRule{ QRegularExpression(pattern), mFormatJSKeyword, 0 };
 
     //添加处理函数
+    ADD_HIGHLIGHT_TAGFN("Action", &TextHighlighter::highlightAction);
     ADD_HIGHLIGHT_TAGFN("Production", &TextHighlighter::highlightProduction);
     ADD_HIGHLIGHT_TAGFN("JS", &TextHighlighter::highlightJS);
     ADD_HIGHLIGHT_TAGFN("Output", &TextHighlighter::highlightOutput);
@@ -118,29 +120,42 @@ void TextHighlighter::highlightBlock(const QString &text) {
     setCurrentBlockState(mVecFn.indexOf(hc.fn));
 }
 
+template<typename Fn>
+int TextHighlighter::searchText(const QString &text, int start, int end, Fn fn) {
+    for(int i = start; i < end; i++) {
+        if(fn(text[i])) 
+            return i;
+    }
+    return -1;
+}
+
+void TextHighlighter::highlightAction(HighlightConfig &hc) {
+    int end = hc.start + hc.len;
+    int nameStart = searchText(hc.text, hc.start, end, searchNonspcFn);
+    if(nameStart == -1) return;
+    int nameEnd = searchText(hc.text, nameStart + 1, end, searchSpcFn);
+    setFormat(nameStart, (nameEnd == -1 ? end : nameEnd) - nameStart, mFormatActionName);
+}
+
 void TextHighlighter::highlightProduction(HighlightConfig &hc) {
-    int nonspcCount = 0;
-    bool isInSpc = true;
-    for(int i = 0; i < hc.len; i++) {
-        QChar ch = hc.text[hc.start + i];
-        if(ch != '\t' && ch != ' ') {
-            if(!isInSpc)
-                continue;
-            isInSpc = false;
-            nonspcCount++;
-            if(nonspcCount == 2) {
-                int midLen = 1;
-                for(int j = i + 1; j < hc.len; j++) {
-                    QChar ch2 = hc.text[hc.start + j];
-                    if(ch2 != '\t' && ch2 != ' ') {
-                        midLen++;
-                    } else break;
-                }
-                const QTextCharFormat &format = (hc.text.mid(hc.start + i, midLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
-                setFormat(hc.start + i, midLen, format);
-                break;
-            }
-        } else isInSpc = true;
+    int end = hc.start + hc.len;
+    int midStart = searchText(hc.text, hc.start, end, searchNonspcFn);
+    int midEnd = searchText(hc.text, midStart + 1, end, searchSpcFn);
+    int index = 0;
+    while(midStart != -1) {
+        int midLen = (midEnd == -1 ? end : midEnd) - midStart;
+
+        if(index == 1) {
+            const QTextCharFormat &format = (hc.text.mid(midStart, midLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
+            setFormat(midStart, midLen, format);
+        } else if(midLen >= 4 && hc.text.mid(midStart, 2) == "__" && hc.text.mid(midEnd - 2, 2) == "__") {
+            setFormat(midStart, midLen, mFormatActionName);
+        }
+
+        if(midEnd == -1) break;
+        midStart = searchText(hc.text, midEnd + 1, end, searchNonspcFn);
+        midEnd = searchText(hc.text, midStart + 1, end, searchSpcFn);
+        index++;
     }
 }
 
@@ -234,7 +249,7 @@ void TextHighlighter::highlightJSRegex(HighlightConfig &hc) {
 
     //从hc.start的前一个字符向前遍历，找到第一个不为'\t'或' '的字符，若该字符不能在正则表达式前存在，则结束
     bool checkLeft = true;
-    for(int i = hc.start - 1; i >= 0; i++) {
+    for(int i = hc.start - 1; i >= 0; i--) {
         QChar ch = hc.text[i];  //该位置的字符
         if(ch != '\t' && ch != ' ') {
             if(IsLetter(ch) || IsDigit(ch) || ch == ']')
@@ -296,11 +311,11 @@ void TextHighlighter::highlightJSRegex(HighlightConfig &hc) {
     hc.offset = regexEnd - hc.start;
 }
 
-int TextHighlighter::tagIndex(const QString &tag) {
+int TextHighlighter::tagIndex(const QString &tag) const {
     auto iter = mMapTags.find(tag);
     return (iter == mMapTags.end() ? -1 : *iter);
 }
-TextHighlighter::FnHighlight TextHighlighter::indexFn(int index) {
+TextHighlighter::FnHighlight TextHighlighter::indexFn(int index) const {
     if(index < 0 || index >= mVecFn.size())
         return nullptr;
     return mVecFn[index];

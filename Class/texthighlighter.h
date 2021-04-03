@@ -43,6 +43,7 @@ private:
     QTextCharFormat mFormatOFText;
     QTextCharFormat mFormatOFArg;
 
+    QTextCharFormat mFormatActionName;
     QTextCharFormat mFormatProdArrow;
     QTextCharFormat mFormatProdWrongArrow;
 
@@ -55,7 +56,13 @@ private:
     QTextCharFormat mFormatJSStrQuote;
     QTextCharFormat mFormatJSRegex;
 
+    template<typename Fn>
+    static int searchText(const QString &text, int start, int end, Fn fn);
+    static bool searchSpcFn(QChar ch) { return ch == '\t' || ch == ' '; }
+    static bool searchNonspcFn(QChar ch) { return ch != '\t' && ch != ' '; }
+
     struct HighlightConfig;
+    void highlightAction(HighlightConfig &hc);
     void highlightProduction(HighlightConfig &hc);
     void highlightJS(HighlightConfig &hc);
     void highlightOutput(HighlightConfig &hc);
@@ -93,8 +100,8 @@ private:
         int offset = -1;
     };
 
-    int tagIndex(const QString &tag);
-    FnHighlight indexFn(int index);
+    int tagIndex(const QString &tag) const;
+    FnHighlight indexFn(int index) const;
 
     void highlight(HighlightConfig &hc);
 };

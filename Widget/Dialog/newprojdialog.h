@@ -28,8 +28,8 @@ class NewProjDialog : public QDialog
 public:
     explicit NewProjDialog(QWidget *parent = nullptr);
 
-    QString projPath() { return mEditPath->text(); }
-    QString projName() { return mEditName->text(); }
+    QString projPath() const { return mEditPath->text(); }
+    QString projName() const { return mEditName->text(); }
 
 private slots:
     void onBrowse();	//浏览文件

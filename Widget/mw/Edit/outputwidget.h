@@ -16,8 +16,8 @@ public:
 
     void setCurrentWidget(QWidget *widget);
 
-    QListWidget* errListWidget() { return mErrListWidget; }
-    QListWidget* outputListWidget() { return mOutputListWidget; }
+    QListWidget* errListWidget() const { return mErrListWidget; }
+    QListWidget* outputListWidget() const { return mOutputListWidget; }
 
 private:
     QTabWidget *tabWidget = new QTabWidget;

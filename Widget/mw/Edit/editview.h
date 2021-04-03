@@ -15,8 +15,8 @@ public:
     explicit EditView(QWidget *parent = nullptr);
 
     bool open(const QString &projPath);     //打开项目
-    int count() { return mTabWidget->count(); }      //得到项目数量
-    ProjWidget* current() { return (ProjWidget*)mTabWidget->currentWidget(); }   //得到当前项目
+    int count() const { return mTabWidget->count(); }      //得到项目数量
+    ProjWidget* current() const { return (ProjWidget*)mTabWidget->currentWidget(); }   //得到当前项目
 
     bool confirmClose(int index);    //对指定项目的关闭进行提示和确认，返回值为是否处理
     bool closeAll();    //当要关闭程序时，检查所有以打开的项目，返回值为是否全部处理
