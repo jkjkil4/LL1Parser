@@ -8,7 +8,6 @@ PlainTextEdit::PlainTextEdit(QWidget *parent) : QPlainTextEdit(parent)
 
     updateTabStopDistance();    //更新tab距离
     setLineWrapMode(LineWrapMode::NoWrap);  //不自动换行
-    setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);  //总是隐藏横向滑动条
     setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);     //总是显示横向滑动条
 }
 

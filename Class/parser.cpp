@@ -111,6 +111,9 @@ void Parser::parse(QTextDocument *doc) {
     }
 
     End:
+    //调试信息
+    if(js && js->object.hasDebugMessage())
+        jsDebugMessage = js->object.debugMessage(); 
     j::SafeDelete(js);
 }
 #undef TRY_PARSE
@@ -388,14 +391,32 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
         QJSValue jsSelectSets = js->engine.newArray(selectSetCount);
         repeat(int, j, selectSetCount) {    //遍历该符号的所有SELECT集
             const SelectSet &selectSet = selectSets[j];           //当前SELECT集
-            int prodSize = selectSet.prod.size();           //产生式符号数量
+            int prodSize = selectSet.prod.symbols.size() + selectSet.prod.actions.size();   //产生式元素数量
             int symbolsSize = selectSet.symbols.size();     //SELECT集符号数量
 
             QJSValue jsSelectSet = js->engine.newObject();
             QJSValue jsProd = js->engine.newArray(prodSize);
             QJSValue jsSymbols = js->engine.newArray(symbolsSize);
-            repeat(int, k, prodSize)    //遍历当前产生式
-                jsProd.setProperty(k, selectSet.prod[k]);
+
+            //将产生式的所有元素添加到jsProd中
+            int index = 0;
+            int start = 0;
+            auto fnAddElement = [&selectSet, &jsProd, &index](int value, bool isSymbol) {   //lambda，用于添加元素
+                QJSValue jsElement = Parser::js->engine.newObject();
+                jsElement.setProperty("value", value);
+                jsElement.setProperty("isSymbol", isSymbol);
+                jsProd.setProperty(index, jsElement);
+                index++;
+            };
+            for(const ProdAction &action : selectSet.prod.actions) {
+                for(int k = start; k < action.pos; k++)
+                    fnAddElement(selectSet.prod.symbols[k], true);
+                fnAddElement(action.id, false);
+                start = action.pos;
+            }
+            for(int k = start; k < selectSet.prod.symbols.size(); k++)
+                fnAddElement(selectSet.prod.symbols[k], true);
+
             repeat(int, k, symbolsSize) //遍历当前SELECT集
                 jsSymbols.setProperty(k, selectSet.symbols[k]);
 
@@ -422,10 +443,6 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
         int row = findTrueRowByDividedRow(divideds, dividedRow);
         issues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(result.toString()), row, -1);
     }
-
-    //调试信息
-    if(js->object.hasDebugMessage())
-        jsDebugMessage = js->object.debugMessage();
 }
 void Parser::parseOutput(const QString &, const Divideds &divideds) {
     QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式，用于匹配格式化操作
@@ -451,7 +468,12 @@ void Parser::parseOutput(const QString &, const Divideds &divideds) {
                         QJSValue jsValueFn = js->engine.globalObject().property(arg);   //得到arg在js中对应的内容
                         if(jsValueFn.isCallable()) {    //如果可以作为函数调用
                             hasFn = true;
-                            res += jsValueFn.call().toString(); //将调用的结果附加到res中
+                            QJSValue jsRes = jsValueFn.call();
+                            if(jsRes.isError()) {   //如果有错，则输出错误信息
+                                int dividedRow = jsRes.property("lineNumber").toInt() - 1;
+                                int row = findTrueRowByDividedRow(mapDivideds.value("JS"), dividedRow);
+                                issues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(jsRes.toString()), row, -1);
+                            } else res += jsValueFn.call().toString(); //将调用的结果附加到res中
                         }
                     }
                     if(!hasFn) {    //如果没有对应函数，则报错
@@ -753,7 +775,7 @@ void Parser::parseSelectSet() {
                         firstSet << symbol;
                 }
             }
-            vecSelectSets[iter.key()] << SelectSet{ firstSet, prodSymbols };
+            vecSelectSets[iter.key()] << SelectSet{ firstSet, prod };
         }
     }
 
@@ -934,10 +956,22 @@ QString Parser::formatSelectSet(bool useHtml, QVector<SymbolVec> *pVecIntersecte
 
             useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(i).str << "</font>") : (ts << mapSymbols.key(i).str);
             ts << " -> ";
-            if(selectSet.prod.isEmpty()) {
+            if(selectSet.prod.symbols.isEmpty() && selectSet.prod.actions.isEmpty()) {
                 ts << (useHtml ? "<font color=\"magenta\">nil</font> " : "nil ");
             } else {
-                for(int symbol : selectSet.prod) {  //遍历该SELECT集对应的产生式右部
+                int start = 0;
+                for(const ProdAction &action : selectSet.prod.actions) {
+                    for(int j = start; j < action.pos; j++) {
+                        int symbol = selectSet.prod.symbols[j];
+                        useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
+                        ts << " ";
+                    }
+                    useHtml ? (ts << "<font color=\"magenta\">" << mapActions.key(action.id) << "</font>") : (ts << mapActions.key(action.id));
+                    ts << " ";
+                    start = action.pos;
+                }
+                for(int j = start; j < selectSet.prod.symbols.length(); j++) {
+                    int symbol = selectSet.prod.symbols[j];
                     useHtml ? (ts << "<font color=\"blue\">" << mapSymbols.key(symbol).str << "</font>") : (ts << mapSymbols.key(symbol).str);
                     ts << " ";
                 }

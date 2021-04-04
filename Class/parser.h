@@ -170,7 +170,7 @@ public:
     typedef QMap<int, Prods> ProdsMap;  //将非终结符和Prods相对应
 
     //SELECT集
-    struct SelectSet { SymbolVec symbols, prod; };
+    struct SelectSet { SymbolVec symbols; Prod prod; };
     typedef QVector<SelectSet> SelectSets;
 
     static void divide(QTextDocument *doc);     //分隔文档

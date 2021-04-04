@@ -195,17 +195,18 @@ void ProjWidget::onParse() {
         item->setIcon(issue.icon());
         errListWidget->addItem(item);
     }
+
+    if(!Parser::jsDebugMessage.isEmpty()) {
+        QString strJSDebugMsg = tr("JS debug message");
+        QListWidgetItem *itemJSDebug = new QListWidgetItem(strJSDebugMsg + tr("(Double click to show detail)"));
+        itemJSDebug->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
+        itemJSDebug->setData(Qt::UserRole + 1, strJSDebugMsg);
+        itemJSDebug->setData(Qt::UserRole + 2, Parser::jsDebugMessage);
+        outputListWidget->addItem(itemJSDebug);
+    }
+
     if(!Parser::hasError()) {
         QString strDbClick = tr("(Double click to show detail)");
-
-        if(!Parser::jsDebugMessage.isEmpty()) {
-            QString strJSDebugMsg = tr("JS debug message");
-            QListWidgetItem *itemJSDebug = new QListWidgetItem(strJSDebugMsg + strDbClick);
-            itemJSDebug->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
-            itemJSDebug->setData(Qt::UserRole + 1, strJSDebugMsg);
-            itemJSDebug->setData(Qt::UserRole + 2, Parser::jsDebugMessage);
-            outputListWidget->addItem(itemJSDebug);
-        }
 
         if(Parser::hasOutputFile()) {
             QString strDir = Parser::outputDir(mProjPath);
