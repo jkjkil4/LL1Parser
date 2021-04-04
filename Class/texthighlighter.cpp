@@ -144,11 +144,11 @@ void TextHighlighter::highlightProduction(HighlightConfig &hc) {
     int index = 0;
     while(midStart != -1) {
         int midLen = (midEnd == -1 ? end : midEnd) - midStart;
-
+        qDebug() << hc.text.mid(midStart, midLen);
         if(index == 1) {
             const QTextCharFormat &format = (hc.text.mid(midStart, midLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
             setFormat(midStart, midLen, format);
-        } else if(midLen >= 4 && hc.text.mid(midStart, 2) == "__" && hc.text.mid(midEnd - 2, 2) == "__") {
+        } else if(midLen >= 4 && hc.text.mid(midStart, 2) == "__" && hc.text.mid(midStart + midLen - 2, 2) == "__") {
             setFormat(midStart, midLen, mFormatActionName);
         }
 
