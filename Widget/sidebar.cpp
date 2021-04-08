@@ -23,7 +23,7 @@ void SideBar::setText(int index, const QString &text) {
 
 void SideBar::setCurrent(MainWindowView *view) {
     int index = 0;
-    for(Data &data : lDatas) {
+    for(const Data &data : lDatas) {
         if(data.view == view) {
             mCheckedIndex = index;
             update();
@@ -85,7 +85,7 @@ void SideBar::paintEvent(QPaintEvent *) {
     int iconX = (width() - mIconSize.width()) / 2;  //图标的x
     int iconY = _itemHeight - fmHeight - mSpacing - mIconSize.height(); //图标相对当前位置的y
     int index = 0;
-    for(Data &data : lDatas) {  //遍历所有的内容
+    for(const Data &data : lDatas) {  //遍历所有的内容
         QRect rect(0, index * _itemHeight, width(), _itemHeight); //全范围
         QRect clipRect(mMargin, mMargin + index * _itemHeight, width() - 2 * mMargin, _itemHeight - 2 * mMargin);  //裁剪范围
 

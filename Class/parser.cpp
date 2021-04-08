@@ -124,7 +124,7 @@ void Parser::parseTerminal(const QString &tag, const Divideds &divideds) {
         for(const Divided::Part &part : divided.parts) {    //遍历所有行
             QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
             int phrase = -1;
-            for(const QString &str : list) {  //遍历分割的结果
+            for(const QString &str : qAsConst(list)) {  //遍历分割的结果
                 phrase++;
 
                 if(str == 'S' || str == '$') {  //如果与自带符号冲突
@@ -152,7 +152,7 @@ void Parser::parseNonterminal(const QString &tag, const Divideds &divideds) {
         for(const Divided::Part &part : divided.parts) {    //遍历所有行
             QStringList list = part.text.split(' ', QString::SkipEmptyParts);   //分割字符串
             int phrase = -1;
-            for(const QString &str : list) {  //遍历分割的结果
+            for(const QString &str : qAsConst(list)) {  //遍历分割的结果
                 phrase++;
 
                 if(str == 'S' || str == '$') {  //如果与自带符号冲突
@@ -244,7 +244,7 @@ void Parser::parseProduction(const QString &tag, const Divideds &divideds) {
             }
             //得到产生式的右部
             int phrase = 1;
-            for(auto iter = list.begin() + 2; iter != list.end(); ++iter) {     //从第三个开始遍历
+            for(auto iter = list.cbegin() + 2; iter != list.cend(); ++iter) {     //从第三个开始遍历
                 phrase++;
                 const QString &str = *iter;
                 if(str.length() >= 4 && str.left(2) == "__" && str.right(2) == "__") {  //如果是语义动作
@@ -299,32 +299,32 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
     jsObjVal.setProperty("terminalMaxIndex", terminalMaxIndex);
 
     //传入符号列表
-    QJSValue jsSymbolArray = js->engine.newArray(symbolCount);
+    QJSValue jsSymbolArray = js->engine.newArray((uint)symbolCount);
     repeat(int, i, symbolCount)
-        jsSymbolArray.setProperty(i, mapSymbols.key(i).str);
+        jsSymbolArray.setProperty((uint)i, mapSymbols.key(i).str);
     jsObjVal.setProperty("arrSymbols", jsSymbolArray);
     
     //传入语义动作
-    QJSValue jsActionArray = js->engine.newArray(mapActions.size());
+    QJSValue jsActionArray = js->engine.newArray((uint)mapActions.size());
     for(auto iter = mapActions.begin(); iter != mapActions.end(); ++iter) {
         QJSValue jsAction = js->engine.newObject();
         jsAction.setProperty("name", iter.key());
         jsAction.setProperty("text", listActions[iter.value()]);
-        jsActionArray.setProperty(iter.value(), jsAction);
+        jsActionArray.setProperty((uint)iter.value(), jsAction);
     }
     jsObjVal.setProperty("arrActions", jsActionArray);
 
     //传入产生式
-    QJSValue jsProdsArray = js->engine.newArray(symbolCount);
+    QJSValue jsProdsArray = js->engine.newArray((uint)symbolCount);
     repeat(int, i, symbolCount) {   //遍历所有的符号
         Prods &prods = mapProds[i];     //该符号的所有产生式
         int prodsSize = prods.size();   //产生式数量
-        QJSValue jsProdArray = js->engine.newArray(prodsSize);
+        QJSValue jsProdArray = js->engine.newArray((uint)prodsSize);
         int index = 0;
         for(auto iter = prods.begin(); iter != prods.end(); ++iter) {   //遍历该符号的所有产生式
             const Prod &prod = *iter;   //其中一个产生式
             int size = prod.symbols.size() + prod.actions.size();   //结果大小
-            QJSValue jsSymbolArray = js->engine.newArray(size);
+            QJSValue jsSymbolArray = js->engine.newArray((uint)size);
 
             //将产生式符号和语义动作加入到jsSymbolArray中
             int start = 0;
@@ -333,7 +333,7 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
                 QJSValue jsElement = Parser::js->engine.newObject();
                 jsElement.setProperty("value", value);
                 jsElement.setProperty("isSymbol", isSymbol);
-                jsSymbolArray.setProperty(pos, jsElement);
+                jsSymbolArray.setProperty((uint)pos, jsElement);
                 pos++;
             };
             for(const ProdAction &action : prod.actions) {
@@ -345,67 +345,67 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
             for(int i = start; i < prod.symbols.size(); i++)
                 addElement(prod.symbols[i], true);
 
-            jsProdArray.setProperty(index, jsSymbolArray);
+            jsProdArray.setProperty((uint)index, jsSymbolArray);
             
             index++;
         }
-        jsProdsArray.setProperty(i, jsProdArray);
+        jsProdsArray.setProperty((uint)i, jsProdArray);
     }
     jsObjVal.setProperty("arrProds", jsProdsArray);
 
     //传入能否推导出空串
-    QJSValue jsNilArray = js->engine.newArray(symbolCount);
+    QJSValue jsNilArray = js->engine.newArray((uint)symbolCount);
     repeat(int, i, symbolCount)
-        jsNilArray.setProperty(i, vecNil[i]);
+        jsNilArray.setProperty((uint)i, vecNil[i]);
     jsObjVal.setProperty("arrNil", jsNilArray);
 
     //传入FIRST集
-    QJSValue jsFirstSetArray = js->engine.newArray(nonterminalMaxIndex + 1);
+    QJSValue jsFirstSetArray = js->engine.newArray((uint)(nonterminalMaxIndex + 1));
     for(int i = 0; i <= nonterminalMaxIndex; i++) {   //遍历所有非终结符
         const SymbolVec &symbols = vecFirstSet[i];        //该符号的FIRST集
         int count = symbols.size();
-        QJSValue jsSymbols = js->engine.newArray(count);
+        QJSValue jsSymbols = js->engine.newArray((uint)count);
         repeat(int, j, count)
-            jsSymbols.setProperty(j, symbols[j]);
-        jsFirstSetArray.setProperty(i, jsSymbols);
+            jsSymbols.setProperty((uint)j, symbols[j]);
+        jsFirstSetArray.setProperty((uint)i, jsSymbols);
     }
     jsObjVal.setProperty("arrFirstSet", jsFirstSetArray);
 
     //传入FOLLOW集
-    QJSValue jsFollowSetArray = js->engine.newArray(nonterminalMaxIndex + 1);
+    QJSValue jsFollowSetArray = js->engine.newArray((uint)(nonterminalMaxIndex + 1));
     for(int i = 0; i <= nonterminalMaxIndex; i++) {     //遍历所有非终结符
         const SymbolVec &symbols = vecFollowSet[i];   //该符号的FOLLOW集
         int count = symbols.size();
-        QJSValue jsSymbols = js->engine.newArray(count);
+        QJSValue jsSymbols = js->engine.newArray((uint)count);
         repeat(int, j, count)
-            jsSymbols.setProperty(j, symbols[j]);
-        jsFollowSetArray.setProperty(i, jsSymbols);
+            jsSymbols.setProperty((uint)j, symbols[j]);
+        jsFollowSetArray.setProperty((uint)i, jsSymbols);
     }
     jsObjVal.setProperty("arrFollowSet", jsFollowSetArray);
 
     //传入SELECT集
-    QJSValue jsSelectSetsArray = js->engine.newArray(nonterminalMaxIndex + 1);
+    QJSValue jsSelectSetsArray = js->engine.newArray((uint)(nonterminalMaxIndex + 1));
     for(int i = 0; i <= nonterminalMaxIndex; i++) {     //遍历所有非终结符
         const SelectSets &selectSets = vecSelectSets[i];  //该符号的所有SELECT集
         int selectSetCount = selectSets.size();     //该符号的SELECT集数量
-        QJSValue jsSelectSets = js->engine.newArray(selectSetCount);
+        QJSValue jsSelectSets = js->engine.newArray((uint)selectSetCount);
         repeat(int, j, selectSetCount) {    //遍历该符号的所有SELECT集
             const SelectSet &selectSet = selectSets[j];           //当前SELECT集
             int prodSize = selectSet.prod.symbols.size() + selectSet.prod.actions.size();   //产生式元素数量
             int symbolsSize = selectSet.symbols.size();     //SELECT集符号数量
 
             QJSValue jsSelectSet = js->engine.newObject();
-            QJSValue jsProd = js->engine.newArray(prodSize);
-            QJSValue jsSymbols = js->engine.newArray(symbolsSize);
+            QJSValue jsProd = js->engine.newArray((uint)prodSize);
+            QJSValue jsSymbols = js->engine.newArray((uint)symbolsSize);
 
             //将产生式的所有元素添加到jsProd中
             int index = 0;
             int start = 0;
-            auto fnAddElement = [&selectSet, &jsProd, &index](int value, bool isSymbol) {   //lambda，用于添加元素
+            auto fnAddElement = [&jsProd, &index](int value, bool isSymbol) {   //lambda，用于添加元素
                 QJSValue jsElement = Parser::js->engine.newObject();
                 jsElement.setProperty("value", value);
                 jsElement.setProperty("isSymbol", isSymbol);
-                jsProd.setProperty(index, jsElement);
+                jsProd.setProperty((uint)index, jsElement);
                 index++;
             };
             for(const ProdAction &action : selectSet.prod.actions) {
@@ -418,13 +418,13 @@ void Parser::parseJs(const QString &tag, const Divideds &divideds) {
                 fnAddElement(selectSet.prod.symbols[k], true);
 
             repeat(int, k, symbolsSize) //遍历当前SELECT集
-                jsSymbols.setProperty(k, selectSet.symbols[k]);
+                jsSymbols.setProperty((uint)k, selectSet.symbols[k]);
 
             jsSelectSet.setProperty("prod", jsProd);
             jsSelectSet.setProperty("symbols", jsSymbols);
-            jsSelectSets.setProperty(j, jsSelectSet);
+            jsSelectSets.setProperty((uint)j, jsSelectSet);
         }
-        jsSelectSetsArray.setProperty(i, jsSelectSets);
+        jsSelectSetsArray.setProperty((uint)i, jsSelectSets);
     }
     jsObjVal.setProperty("arrSelectSets", jsSelectSetsArray);
 
@@ -507,7 +507,7 @@ void Parser::parseNil() {
         isContinue = false;
         isChanged = false;
 
-        for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {  //遍历所有产生式
+        for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) {  //遍历所有产生式
             if(tmpVecNil[iter.key()] == Unknown) {  //如果没有判断完成，则将isContinue设置为true，否则跳过本次循环
                 isContinue = true;
             } else continue;
@@ -559,7 +559,7 @@ void Parser::parseNil() {
             QTextStream ts(&text);
             ts.setCodec("UTF-8");
             bool hasPrev = false;
-            for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {  //遍历所有产生式
+            for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) {  //遍历所有产生式
                 const QString &symbolStr = mapSymbols.key(iter.key()).str;
                 for(const Prod &prod : iter.value()) {   //遍历所有的产生式右部
                     const SymbolVec &prodSymbols = prod.symbols;
@@ -607,7 +607,7 @@ void Parser::parseFirstSet() {
     vecTmpFirstSet.resize(size);
 
     //初始化解析
-    for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) { //遍历所有产生式
+    for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) { //遍历所有产生式
         TmpFirstSet &tmpSet = vecTmpFirstSet[iter.key()];
         for(const Prod &prod : iter.value()) {    //遍历所有的产生式右部
             for(int symbol : prod.symbols) {    //遍历产生式右部的所有符号
@@ -675,12 +675,12 @@ void Parser::parseFollowSet() {
 
     //初始化解析
     vecTmpFollowSet[0] << TmpSymbol(TmpSymbol::Symbol, nonterminalMaxIndex + 1);    //向"S"的FOLLOW集中加入"$"
-    for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) { //遍历所有产生式
+    for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) { //遍历所有产生式
         for(const Prod &prod : iter.value()) {    //遍历所有的产生式右部
             const SymbolVec &prodSymbols = prod.symbols;
             QVector<TmpSymbol> vec;
             vec << TmpSymbol(TmpSymbol::FollowSet, iter.key());     //将产生式左部以FOLLOW集的形式添加到vec中
-            for(auto prodIter = prodSymbols.rbegin(); prodIter != prodSymbols.rend(); ++prodIter) {   //反向遍历产生式右部
+            for(auto prodIter = prodSymbols.crbegin(); prodIter != prodSymbols.crend(); ++prodIter) {   //反向遍历产生式右部
                 //如果该符号是非终结符，则将vec中的所有内容加入到该符号的FOLLOW集中
                 if(isNonterminal(*prodIter)) {
                     TmpFollowSet &tmpFollowSet = vecTmpFollowSet[*prodIter];
@@ -746,7 +746,7 @@ void Parser::parseSelectSet() {
     vecSelectSets.resize(size);
 
     //解析
-    for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {     //遍历所有产生式
+    for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) {     //遍历所有产生式
         for(const Prod &prod : iter.value()) {   //遍历所有的产生式右部
             const SymbolVec &prodSymbols = prod.symbols;
             SymbolVec firstSet;
@@ -872,7 +872,7 @@ void Parser::outputFile(const QString &projPath/*, const QString &projName*/) {
 //     ts.setCodec("UTF-8");
 //
 //     bool hasPrev = false;
-//     for(auto iter = mapProds.begin(); iter != mapProds.end(); ++iter) {     //遍历所有的产生式
+//     for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) {     //遍历所有的产生式
 //         QString keyStr = mapSymbols.key(iter.key()).str;
 //         for(const Prod &prod : *iter) {   //遍历所有的产生式右部
 //             if(hasPrev) {

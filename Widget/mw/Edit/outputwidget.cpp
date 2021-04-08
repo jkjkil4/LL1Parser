@@ -2,7 +2,7 @@
 
 OutputWidget::OutputWidget(QWidget *parent) : QWidget(parent)
 {
-    for(Tab &tab : tabs)
+    for(const Tab &tab : tabs)
         tabWidget->addTab(tab.p, tab.fn());
 
     QHBoxLayout *layMain = new QHBoxLayout;

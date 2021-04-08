@@ -34,7 +34,7 @@ public:
         Issue(Type type, const QString &what, int row = -1, int phrase = -1, const QList<QVariant> &userDataList = QList<QVariant>())
             : type(type), what(what), row(row), phrase(phrase), userDataList(userDataList) {}
 
-        QIcon icon() {  //返回对应的图标
+        QIcon icon() const {  //返回对应的图标
             return QApplication::style()->standardIcon((QStyle::StandardPixmap)type);
         }
 

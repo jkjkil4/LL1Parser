@@ -166,7 +166,7 @@ void ProjWidget::onParse() {
 
     QString strRow = tr("Row");
     QString strPhrase = tr("Phrase");
-    for(Parser::Issue &issue : Parser::issues) {    //遍历所有问题
+    for(const Parser::Issue &issue : Parser::issues) {    //遍历所有问题
         //得到文本
         QString text;
         if(issue.row != -1) {
@@ -187,7 +187,7 @@ void ProjWidget::onParse() {
             }
         } else {
             int offset = 0;
-            for(QVariant &variant : issue.userDataList) {
+            for(const QVariant &variant : qAsConst(issue.userDataList)) {
                 item->setData(Qt::UserRole + offset, variant);
                 offset++;
             }
