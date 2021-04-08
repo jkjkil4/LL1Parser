@@ -3,8 +3,8 @@
 #include <Lib/recentfilemanager.h>
 #include <Lib/fontfamily.h>
 
+//#define DEBUG_DISABLEALL
 #define C_BOTTOM QColor(230, 230, 230)
-
 #define SUFFIX "lpp"
 
 #define IsLetter(ch) ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
