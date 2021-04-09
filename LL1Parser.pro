@@ -30,6 +30,7 @@ CONFIG += c++11 console
 
 SOURCES += \
         Class/parser.cpp \
+        Class/parser_.cpp \
         Class/jsobject.cpp \
         Class/texthighlighter.cpp \
         Widget/Dialog/newprojdialog.cpp \
@@ -49,6 +50,7 @@ SOURCES += \
 
 HEADERS += \
         Class/parser.h \
+        Class/parser_.h \
         Class/jsobject.h \
         Class/texthighlighter.h \
         Widget/Menu/rflmenu.h \

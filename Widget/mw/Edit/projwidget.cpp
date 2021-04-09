@@ -152,6 +152,8 @@ void ProjWidget::onParse() {
     QTime t;
     t.start();
 
+    { Parser_ t(mProjPath); }
+
     Parser::parse(mEdit->document());
     if(!Parser::hasError())
         Parser::outputFile(mProjPath);

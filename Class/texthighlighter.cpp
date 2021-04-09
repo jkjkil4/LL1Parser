@@ -120,31 +120,21 @@ void TextHighlighter::highlightBlock(const QString &text) {
     setCurrentBlockState(mVecFn.indexOf(hc.fn));
 }
 
-template<typename Fn>
-int TextHighlighter::searchText(const QString &text, int start, int end, Fn fn) {
-    for(int i = start; i < end; i++) {
-        if(fn(text[i])) 
-            return i;
-    }
-    return -1;
-}
-
 void TextHighlighter::highlightAction(HighlightConfig &hc) {
     int end = hc.start + hc.len;
-    int nameStart = searchText(hc.text, hc.start, end, searchNonspcFn);
+    int nameStart = SearchText(hc.text, hc.start, end, SearchNonspcFn);
     if(nameStart == -1) return;
-    int nameEnd = searchText(hc.text, nameStart + 1, end, searchSpcFn);
+    int nameEnd = SearchText(hc.text, nameStart + 1, end, SearchSpcFn);
     setFormat(nameStart, (nameEnd == -1 ? end : nameEnd) - nameStart, mFormatActionName);
 }
 
 void TextHighlighter::highlightProduction(HighlightConfig &hc) {
     int end = hc.start + hc.len;
-    int midStart = searchText(hc.text, hc.start, end, searchNonspcFn);
-    int midEnd = searchText(hc.text, midStart + 1, end, searchSpcFn);
+    int midStart = SearchText(hc.text, hc.start, end, SearchNonspcFn);
+    int midEnd = SearchText(hc.text, midStart + 1, end, SearchSpcFn);
     int index = 0;
     while(midStart != -1) {
         int midLen = (midEnd == -1 ? end : midEnd) - midStart;
-        qDebug() << hc.text.mid(midStart, midLen);
         if(index == 1) {
             const QTextCharFormat &format = (hc.text.mid(midStart, midLen) == "->" ? mFormatProdArrow : mFormatProdWrongArrow);
             setFormat(midStart, midLen, format);
@@ -153,8 +143,8 @@ void TextHighlighter::highlightProduction(HighlightConfig &hc) {
         }
 
         if(midEnd == -1) break;
-        midStart = searchText(hc.text, midEnd + 1, end, searchNonspcFn);
-        midEnd = searchText(hc.text, midStart + 1, end, searchSpcFn);
+        midStart = SearchText(hc.text, midEnd + 1, end, SearchNonspcFn);
+        midEnd = SearchText(hc.text, midStart + 1, end, SearchSpcFn);
         index++;
     }
 }

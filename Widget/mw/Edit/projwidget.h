@@ -18,6 +18,7 @@
 #include "outputwidget.h"
 #include "header.h"
 #include "Class/parser.h"
+#include "Class/parser_.h"
 #include "Class/texthighlighter.h"
 
 class ProjWidget : public QWidget

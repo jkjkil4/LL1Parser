@@ -56,11 +56,6 @@ private:
     QTextCharFormat mFormatJSStrQuote;
     QTextCharFormat mFormatJSRegex;
 
-    template<typename Fn>
-    static int searchText(const QString &text, int start, int end, Fn fn);
-    static bool searchSpcFn(QChar ch) { return ch == '\t' || ch == ' '; }
-    static bool searchNonspcFn(QChar ch) { return ch != '\t' && ch != ' '; }
-
     struct HighlightConfig;
     void highlightAction(HighlightConfig &hc);
     void highlightProduction(HighlightConfig &hc);
