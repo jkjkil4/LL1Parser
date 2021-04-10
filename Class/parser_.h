@@ -18,6 +18,7 @@ class Parser_ : QObject
 public:
     typedef QRegularExpression QRegex;
 
+    //用于统一化路径
     class CanonicalFilePath
     {
     public:
@@ -32,24 +33,25 @@ public:
         QString mText;
     };
 
-    /*  用于对涉及到的文件进行标记 */
-    class Files
+    //用于创建对应关系
+    template<typename Key>
+    class ValueMap 
     {
     public:
-        int filePathIndex(const CanonicalFilePath &cFilePath) const { return mFiles.value(cFilePath, -1); }
-        CanonicalFilePath indexFilePath(int index) const { return mFiles.key(index); }
-        bool contains(const CanonicalFilePath &cFilePath) const { return mFiles.contains(cFilePath); }
-        int appendFilePath(const CanonicalFilePath &cFilePath) {
-            if(!mFiles.contains(cFilePath)) {
-                mFiles[cFilePath] = currentIndex;
-                currentIndex++;
-            }
+        int keyIndex(const Key &key) const { return mMap.value(key, -1); }
+        Key indexKey(int index) const { return mMap.key(index); }
+        bool contains(const Key &key) const { return mMap.contains(key); }
+        int appendKey(const Key &key) {
+            if(mMap.contains(key))
+                return keyIndex(key);
+            mMap[key] = currentIndex;
+            currentIndex++;
             return currentIndex - 1;
         }
 
     private:
         int currentIndex = 0;
-        QMap<CanonicalFilePath, int> mFiles;  //涉及的文件列表
+        QMap<Key, int> mMap;
     };
 
     /*  描述在分析过程中遇到的问题
@@ -122,9 +124,22 @@ public:
         bool mParsed = false;
     };
     typedef QMap<QString, Divideds> MapDivideds;        //key是标记的名称
-    typedef QMap<QString, MapDivideds> FilesDivideds;   //key是文件名
+    typedef QMap<CanonicalFilePath, MapDivideds> FilesDivideds;   //key是文件路径
 
-    struct FileSymbol { int fileId; QString str; };
+    //声明位置
+    struct DeclarePos { int row, col; };
+
+    //同时具有文件id和符号id
+    struct FileSymbol
+    { 
+        int fileId, symbolId;
+        inline bool operator==(const FileSymbol &other) const { return fileId == other.fileId && symbolId == other.symbolId; }
+        inline bool operator<(const FileSymbol &other) const {
+            if(fileId != other.fileId)
+                return fileId < other.fileId;
+            return symbolId < other.symbolId;
+        }
+    };
 
     // 用于存储总结果
     class TotalResult
@@ -132,19 +147,18 @@ public:
     public:
         friend class Parser_;
 
-        const Files& files() const { return mFiles; }       //返回所有涉及的文件
+        const ValueMap<CanonicalFilePath>& files() const { return mFiles; } //返回所有涉及的文件
+        const ValueMap<QString>& symbols() const { return mSymbols; }       //返回所有符号
         const Issues& issues() const { return mIssues; }    //返回所有问题
-        const QList<FileSymbol>& symbolsToStr() const { return mSymbolsToStr; }         //返回id至名称的符号列表
-        const QList<QMap<QString, int>>& symbolsToId() const { return mSymbolsToId; }   //返回名称至id的符号列表
 
     private:
-        Files mFiles;   //所有涉及的文件
-        Issues mIssues; //所有问题
+        ValueMap<CanonicalFilePath> mFiles;   //所有涉及的文件
+        Issues mIssues;     //所有问题
 
-        QList<FileSymbol> mSymbolsToStr;        //符号列表( id -> { fileId, str } )
-        QList<QMap<QString, int>> mSymbolsToId; //符号列表( fileId -> { str -> id } )
+        ValueMap<QString> mSymbols;     //所有符号
+        QMap<FileSymbol, DeclarePos> mSymbolsDeclarePos;    //记录符号声明位置
+        QMap<FileSymbol, bool> mSymbolsUsed;    //标记符号是否使用过
     };
-
 
     Parser_(const QString &filePath);
     const TotalResult& result() const { return mResult; }
@@ -155,8 +169,12 @@ signals:
 private:
     bool divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
     void divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath);    //分割并递归分割
-
     bool checkDividedArg(const QString &tag, const Divideds &divideds, const QString &fileName = ""); //判断Divideds是否含有有参数的Divided，若有，则产生警告
+
+    typedef void(Parser_::*ParseFn)(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    void parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    // void parseNonterminal(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    // void parseTerminal(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
 
     TotalResult mResult;
 };

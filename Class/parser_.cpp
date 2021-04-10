@@ -6,12 +6,54 @@ Parser_::Parser_(const QString &filePath) {
     FilesDivideds filesDivideds;
     CanonicalFilePath cFilePath(filePath);
 
+    auto tryParse = [this, &filesDivideds](const QString &tag, ParseFn fn) {    //尝试分析指定标记
+        for(auto fileIter = filesDivideds.begin(); fileIter != filesDivideds.end(); ++fileIter) {   //遍历所有文件
+            const CanonicalFilePath &cFilePath = fileIter.key();   //文件名
+            auto iter = fileIter->find(tag);    //查找标记
+            if(iter != fileIter->end()) {
+                (this->*fn)(cFilePath, tag, *iter);  //分析标记
+            }
+        }
+    };
+
     divideAndImportFile(filesDivideds, cFilePath);
 
+    if(mResult.mIssues.hasError())
+        goto End;
+
+    tryParse("Nonterminal", parseSymbol);
+    // tryParse("Terminal", parseTerminal);
+    
+    {//检查是否有未知标记
+        QString trUnkTag = tr("Unknown tag \"%1\"");
+        for(auto iter = filesDivideds.cbegin(); iter != filesDivideds.cend(); ++iter) {  //遍历所有文件
+            const QString &fileName = QFileInfo(iter.key()).fileName();
+            const MapDivideds &mapDivideds = iter.value();
+            for(auto iter2 = mapDivideds.cbegin(); iter2 != mapDivideds.cend(); ++iter2) {  //遍历该文件的所有分割部分
+                const QString &tag = iter2.key();
+                const Divideds &divideds = iter2.value();
+                if(!divideds.parsed()) {
+                    for(const Divided &divided : divideds.map()) {
+                        for(int row : divided.rows) {
+                            mResult.mIssues << Issue(Issue::Warning, trUnkTag.arg(tag), fileName, row);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    End:
     for(const Issue &issue : mResult.mIssues.list()) {
-        qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m") 
+        qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m")
             << (issue.type == Issue::Error ? "Error" : "Warning")
             << "\033[0m    "
+            << issue.fileName
+            << "  "
+            << issue.row
+            << "  "
+            << issue.col
+            << "  "
             << issue.what;
     }
 }
@@ -19,7 +61,7 @@ Parser_::Parser_(const QString &filePath) {
 bool Parser_::divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath) {
     if(mResult.mFiles.contains(cFilePath))  //如果处理过该文件，则return
         return false;
-    mResult.mFiles.appendFilePath(cFilePath);    //标记处理过该文件
+    mResult.mFiles.appendKey(cFilePath);    //标记处理过该文件
     emit beforeReadFile(cFilePath);  //在读取文件之前发出信号
 
     QFile file(cFilePath);   //文件
@@ -58,7 +100,6 @@ bool Parser_::divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath) 
 
     return true;
 }
-
 void Parser_::divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath) {
     if(!divideFile(fd, cFilePath))    //尝试分割，若返回值为false则return
         return;
@@ -104,7 +145,6 @@ void Parser_::divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cF
         }
     }
 }
-
 bool Parser_::checkDividedArg(const QString &tag, const Divideds &divideds, const QString &fileName) {
     bool hasArg = false;
     const QMap<QString, Divided>& map = divideds.map();
@@ -117,4 +157,43 @@ bool Parser_::checkDividedArg(const QString &tag, const Divideds &divideds, cons
         }
     }
     return hasArg;
+}
+
+void Parser_::parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
+    QString fileName = QFileInfo(cFilePath).fileName();
+    int fileId = mResult.mFiles.keyIndex(cFilePath);
+    checkDividedArg(tag, divideds, fileName);
+    for(const Divided &divided : divideds.map()) {
+        for(const Divided::Part &part : divided.parts) {    //遍历所有行
+            int len = part.text.length();
+            int symbolStart = SearchText(part.text, 0, len, SearchNonspcFn);
+            while(symbolStart != -1) {  //循环分割符号
+                int symbolEnd = SearchText(part.text, symbolStart + 1, len, SearchSpcFn);
+                int trueSymbolEnd = (symbolEnd == -1 ? len : symbolEnd);
+                QString strSymbol = part.text.mid(symbolStart, trueSymbolEnd - symbolStart);    //符号名称
+                
+                if(strSymbol.contains(':')) {   //检查是否包含":"
+                    mResult.mIssues << Issue(Issue::Error, tr("Symbol name cannot contains \":\""), 
+                        fileName, part.row, part.col + symbolStart);
+                } else {
+                    FileSymbol fileSymbol{ fileId, mResult.mSymbols.appendKey(strSymbol) };
+
+                    //检查是否声明过
+                    auto declareIter = mResult.mSymbolsDeclarePos.constFind(fileSymbol);
+                    if(declareIter != mResult.mSymbolsDeclarePos.cend()) {
+                        DeclarePos dp = *declareIter;
+                        mResult.mIssues << Issue(Issue::Warning, tr("Redefintition of \"%1\" (First definition is at row %2, col %3)")
+                            .arg(strSymbol, QString::number(dp.row + 1), QString::number(dp.col + 1)),
+                            fileName, part.row, part.col + symbolStart);
+                    } else {
+                        //记录声明位置
+                        mResult.mSymbolsDeclarePos[fileSymbol] = DeclarePos{ part.row, part.col + symbolStart };
+                    
+                        //TODO: ......
+                    }
+                }
+                symbolStart = SearchText(part.text, trueSymbolEnd + 1, len, SearchNonspcFn);
+            }
+        }
+    }
 }
