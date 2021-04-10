@@ -12,17 +12,26 @@ Parser_::Parser_(const QString &filePath) {
             auto iter = fileIter->find(tag);    //查找标记
             if(iter != fileIter->end()) {
                 (this->*fn)(cFilePath, tag, *iter);  //分析标记
+                iter->setParsed(true);
             }
         }
     };
 
     divideAndImportFile(filesDivideds, cFilePath);
+    int fileId = mResult.mFiles.keyIndex(cFilePath);
 
     if(mResult.mIssues.hasError())
         goto End;
 
+    mResult.mSymbols.appendKey(FileSymbol{ fileId, "S" });  //开始符号
+    mResult.mSymbolsInfo.append(SymbolInfo{ DeclarePos(), true });
     tryParse("Nonterminal", parseSymbol);
-    // tryParse("Terminal", parseTerminal);
+    mResult.mNonterminalMaxIndex = mResult.mSymbolsInfo.size() - 1;
+
+    mResult.mSymbols.appendKey(FileSymbol{ fileId, "$" });  //结束符号
+    mResult.mSymbolsInfo.append(SymbolInfo{ DeclarePos(), true });
+    tryParse("Terminal", parseSymbol);
+    mResult.mTerminalMaxIndex = mResult.mSymbolsInfo.size() - 1;
     
     {//检查是否有未知标记
         QString trUnkTag = tr("Unknown tag \"%1\"");
@@ -170,26 +179,27 @@ void Parser_::parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag
             while(symbolStart != -1) {  //循环分割符号
                 int symbolEnd = SearchText(part.text, symbolStart + 1, len, SearchSpcFn);
                 int trueSymbolEnd = (symbolEnd == -1 ? len : symbolEnd);
-                QString strSymbol = part.text.mid(symbolStart, trueSymbolEnd - symbolStart);    //符号名称
+                QString symbolStr = part.text.mid(symbolStart, trueSymbolEnd - symbolStart);    //符号名称
                 
-                if(strSymbol.contains(':')) {   //检查是否包含":"
-                    mResult.mIssues << Issue(Issue::Error, tr("Symbol name cannot contains \":\""), 
+                if(symbolStr == 'S' || symbolStr == '$') {  //检查是否和自带符号冲突
+                    mResult.mIssues << Issue(Issue::Error, tr("Cannot use \"%1\" as symbol").arg(symbolStr), 
+                        fileName, part.row, part.col + symbolStart);
+                } else if(symbolStr.contains(':')) {   //检查是否包含":"
+                    mResult.mIssues << Issue(Issue::Error, tr("Symbol name \"%1\" cannot contain \":\"").arg(symbolStr), 
                         fileName, part.row, part.col + symbolStart);
                 } else {
-                    FileSymbol fileSymbol{ fileId, mResult.mSymbols.appendKey(strSymbol) };
+                    FileSymbol fileSymbol{ fileId, symbolStr };
 
                     //检查是否声明过
-                    auto declareIter = mResult.mSymbolsDeclarePos.constFind(fileSymbol);
-                    if(declareIter != mResult.mSymbolsDeclarePos.cend()) {
-                        DeclarePos dp = *declareIter;
+                    if(mResult.mSymbols.contains(fileSymbol)) {
+                        const DeclarePos &dp = mResult.mSymbolsInfo[mResult.mSymbols.keyIndex(fileSymbol)].declarePos;
                         mResult.mIssues << Issue(Issue::Warning, tr("Redefintition of \"%1\" (First definition is at row %2, col %3)")
-                            .arg(strSymbol, QString::number(dp.row + 1), QString::number(dp.col + 1)),
+                            .arg(symbolStr, QString::number(dp.row + 1), QString::number(dp.col + 1)),
                             fileName, part.row, part.col + symbolStart);
                     } else {
-                        //记录声明位置
-                        mResult.mSymbolsDeclarePos[fileSymbol] = DeclarePos{ part.row, part.col + symbolStart };
-                    
-                        //TODO: ......
+                        //记录该符号
+                        mResult.mSymbols.appendKey(fileSymbol);
+                        mResult.mSymbolsInfo.append(SymbolInfo{ DeclarePos{ part.row, part.col + symbolStart }, false });
                     }
                 }
                 symbolStart = SearchText(part.text, trueSymbolEnd + 1, len, SearchNonspcFn);

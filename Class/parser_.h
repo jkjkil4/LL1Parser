@@ -10,15 +10,14 @@
 #include <Lib/header.h>
 
 
-/*  用于进行LL1语法分析
-*/
+// 用于进行LL1语法分析
 class Parser_ : QObject
 {
     Q_OBJECT
 public:
     typedef QRegularExpression QRegex;
 
-    //用于统一化路径
+    // 用于统一化路径
     class CanonicalFilePath
     {
     public:
@@ -33,7 +32,7 @@ public:
         QString mText;
     };
 
-    //用于创建对应关系
+    // 用于创建对应关系
     template<typename Key>
     class ValueMap 
     {
@@ -95,7 +94,7 @@ public:
         bool mHasError = false; //是否有错误
     };
 
-    //分割后的文档(不同参数算作不同的Divided)
+    // 分割后的文档(不同参数算作不同的Divided)
     struct Divided
     {
         struct Part     //单独一行
@@ -105,12 +104,11 @@ public:
             QString text;   //该行文字
         };
 
-        // QString arg;        //该分割部分的参数
         QVector<int> rows;  //该分割部分所有标记所在原文档的行数
         QList<Part> parts;  //该分割部分的所有行
     };
 
-    //标记相同但参数不同的所有Divided
+    // 标记相同但参数不同的所有Divided
     class Divideds
     {
     public:
@@ -126,20 +124,20 @@ public:
     typedef QMap<QString, Divideds> MapDivideds;        //key是标记的名称
     typedef QMap<CanonicalFilePath, MapDivideds> FilesDivideds;   //key是文件路径
 
-    //声明位置
+    // 声明位置
     struct DeclarePos { int row, col; };
-
-    //同时具有文件id和符号id
-    struct FileSymbol
+    // 文件-符号
+    struct FileSymbol 
     { 
-        int fileId, symbolId;
-        inline bool operator==(const FileSymbol &other) const { return fileId == other.fileId && symbolId == other.symbolId; }
-        inline bool operator<(const FileSymbol &other) const {
+        int fileId; QString symbolStr;
+        inline bool operator<(const FileSymbol &other) const { 
             if(fileId != other.fileId)
                 return fileId < other.fileId;
-            return symbolId < other.symbolId;
+            return symbolStr < other.symbolStr;
         }
     };
+    // 符号信息
+    struct SymbolInfo { DeclarePos declarePos; bool used; };
 
     // 用于存储总结果
     class TotalResult
@@ -148,16 +146,21 @@ public:
         friend class Parser_;
 
         const ValueMap<CanonicalFilePath>& files() const { return mFiles; } //返回所有涉及的文件
-        const ValueMap<QString>& symbols() const { return mSymbols; }       //返回所有符号
         const Issues& issues() const { return mIssues; }    //返回所有问题
+
+        const ValueMap<FileSymbol>& symbols() const { return mSymbols; }    //返回所有符号
+        const QList<SymbolInfo> symbolsInfo() const { return mSymbolsInfo; }    //返回符号信息
+        int nonterminalMaxIndex() const { return mNonterminalMaxIndex; }
+        int terminalMaxIndex() const { return mTerminalMaxIndex; }
 
     private:
         ValueMap<CanonicalFilePath> mFiles;   //所有涉及的文件
         Issues mIssues;     //所有问题
 
-        ValueMap<QString> mSymbols;     //所有符号
-        QMap<FileSymbol, DeclarePos> mSymbolsDeclarePos;    //记录符号声明位置
-        QMap<FileSymbol, bool> mSymbolsUsed;    //标记符号是否使用过
+        ValueMap<FileSymbol> mSymbols;     //所有符号
+        QList<SymbolInfo> mSymbolsInfo; //符号的信息
+        int mNonterminalMaxIndex = 0;
+        int mTerminalMaxIndex = 0;
     };
 
     Parser_(const QString &filePath);
