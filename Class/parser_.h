@@ -43,10 +43,11 @@ public:
         int appendKey(const Key &key) {
             if(mMap.contains(key))
                 return keyIndex(key);
-            mMap[key] = currentIndex;
-            currentIndex++;
-            return currentIndex - 1;
+            int size = mMap.size();
+            mMap[key] = size;
+            return size;
         }
+        const QMap<Key, int> map() const { return mMap; }
 
     private:
         int currentIndex = 0;
@@ -126,18 +127,47 @@ public:
 
     // 声明位置
     struct DeclarePos { int row, col; };
-    // 文件-符号
-    struct FileSymbol 
+
+    // 记录Import关系的key
+    struct ImportKey 
     { 
-        int fileId; QString symbolStr;
-        inline bool operator<(const FileSymbol &other) const { 
+        int fileId; QString abbre;
+        inline bool operator<(const ImportKey &other) const {
             if(fileId != other.fileId)
                 return fileId < other.fileId;
-            return symbolStr < other.symbolStr;
+            return abbre < other.abbre;
         }
     };
+    // 记录Import关系的Value
+    struct ImportValue { int fileId; DeclarePos declarePos; };
+
+    // 文件-元素
+    struct FileElement
+    { 
+        int fileId; QString str;
+        inline bool operator<(const FileElement &other) const { 
+            if(fileId != other.fileId)
+                return fileId < other.fileId;
+            return str < other.str;
+        }
+    };
+    typedef FileElement FileSymbol, FileAction;
     // 符号信息
     struct SymbolInfo { DeclarePos declarePos; bool used; };
+    // 语义动作信息
+    struct ActionInfo { DeclarePos declarePos; QString val; bool used; };
+
+    //产生式相关
+    typedef QVector<int> SymbolVec;         //符号列表
+    struct ProdAction { int pos, id; };     //语义动作
+    struct Prod     //产生式
+    {
+        SymbolVec symbols;
+        QList<ProdAction> actions;
+        inline bool operator==(const Prod &other) { return symbols == other.symbols; }
+    };
+    typedef QList<Prod> Prods;
+    typedef QMap<int, Prods> MapProds;
 
     // 用于存储总结果
     class TotalResult
@@ -145,22 +175,33 @@ public:
     public:
         friend class Parser_;
 
-        const ValueMap<CanonicalFilePath>& files() const { return mFiles; } //返回所有涉及的文件
-        const Issues& issues() const { return mIssues; }    //返回所有问题
+        const ValueMap<CanonicalFilePath>& files() const { return mFiles; }
+        const QMap<ImportKey, ImportValue>& fileRels() const { return mFileRels; }
+        const Issues& issues() const { return mIssues; }
 
-        const ValueMap<FileSymbol>& symbols() const { return mSymbols; }    //返回所有符号
-        const QList<SymbolInfo> symbolsInfo() const { return mSymbolsInfo; }    //返回符号信息
+        const ValueMap<FileSymbol>& symbols() const { return mSymbols; }
+        const QList<SymbolInfo>& symbolsInfo() const { return mSymbolsInfo; }
         int nonterminalMaxIndex() const { return mNonterminalMaxIndex; }
         int terminalMaxIndex() const { return mTerminalMaxIndex; }
 
+        bool hasProd() const { return mHasProd; }
+        const MapProds& prods() const { return mProds; }
+
     private:
-        ValueMap<CanonicalFilePath> mFiles;   //所有涉及的文件
+        ValueMap<CanonicalFilePath> mFiles;     //所有涉及的文件
+        QMap<ImportKey, ImportValue> mFileRels; //文件Import关系
         Issues mIssues;     //所有问题
 
-        ValueMap<FileSymbol> mSymbols;     //所有符号
-        QList<SymbolInfo> mSymbolsInfo; //符号的信息
-        int mNonterminalMaxIndex = 0;
-        int mTerminalMaxIndex = 0;
+        ValueMap<FileSymbol> mSymbols;      //所有符号
+        QList<SymbolInfo> mSymbolsInfo;     //符号的信息
+        int mNonterminalMaxIndex = -1;
+        int mTerminalMaxIndex = -1;
+
+        ValueMap<FileAction> mActions;     //所有语义动作
+        QList<ActionInfo> mActionsInfo; //语义动作的信息
+
+        bool mHasProd = false;
+        MapProds mProds;      //所有产生式
     };
 
     Parser_(const QString &filePath);
@@ -168,16 +209,20 @@ public:
 
 signals:
     void beforeReadFile(const QString &filePath);
+
+public slots:
+    bool isNonterminal(int id);
+    bool isTerminal(int id);
     
 private:
-    bool divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
-    void divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath);    //分割并递归分割
-    bool checkDividedArg(const QString &tag, const Divideds &divideds, const QString &fileName = ""); //判断Divideds是否含有有参数的Divided，若有，则产生警告
+    bool divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath = ""); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
+    void divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath = "");    //分割并递归分割
+    bool checkDividedArg(const QString &tag, const Divideds &divideds, const QString &filePath = ""); //判断Divideds是否含有有参数的Divided，若有，则产生警告
 
     typedef void(Parser_::*ParseFn)(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
-    // void parseNonterminal(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
-    // void parseTerminal(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    void parseAction(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    void parseProd(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
 
     TotalResult mResult;
 };
