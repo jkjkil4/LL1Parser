@@ -164,10 +164,15 @@ public:
     {
         SymbolVec symbols;
         QList<ProdAction> actions;
+        DeclarePos declarePos;
         inline bool operator==(const Prod &other) { return symbols == other.symbols; }
     };
     typedef QList<Prod> Prods;
     typedef QMap<int, Prods> MapProds;
+
+    //SELECT集
+    struct SelectSet { SymbolVec symbols; const Prod &prod; };
+    typedef QVector<SelectSet> SelectSets;
 
     // 用于存储总结果
     class TotalResult
@@ -187,6 +192,11 @@ public:
         bool hasProd() const { return mHasProd; }
         const MapProds& prods() const { return mProds; }
 
+        const QVector<bool>& symbolNil() const { return mSymbolsNil; }
+        const QVector<SymbolVec>& firstSet() const { return mFirstSet; }
+        const QVector<SymbolVec>& followSet() const { return mFollowSet; }
+        const QVector<SelectSets>& selectSets() const { return mSelectSets; }
+
     private:
         ValueMap<CanonicalFilePath> mFiles;     //所有涉及的文件
         QMap<ImportKey, ImportValue> mFileRels; //文件Import关系
@@ -202,6 +212,11 @@ public:
 
         bool mHasProd = false;
         MapProds mProds;      //所有产生式
+
+        QVector<bool> mSymbolsNil;    //空串情况
+        QVector<SymbolVec> mFirstSet;       //所有FIRST集
+        QVector<SymbolVec> mFollowSet;      //所有FOLLOW集
+        QVector<SelectSets> mSelectSets;    //所有SELECT集
     };
 
     Parser_(const QString &filePath);
@@ -223,6 +238,10 @@ private:
     void parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseAction(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseProd(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    void parseSymbolsNil();
+    void parseFirstSet();
+    void parseFollowSet();
+    void parseSelectSets();
 
     TotalResult mResult;
 };

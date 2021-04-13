@@ -60,6 +60,16 @@ Parser_::Parser_(const QString &filePath) {
     if(mResult.mIssues.hasError())
         goto End;
 
+    parseSymbolsNil();
+    if(mResult.mIssues.hasError())
+        goto End;
+    
+    parseFirstSet();
+    parseFollowSet();
+    parseSelectSets();
+    if(mResult.mIssues.hasError())
+        goto End;
+
     {//检查是否有未知标记
         QString trUnkTag = tr("Unknown tag \"%1\"");
         for(auto iter = filesDivideds.cbegin(); iter != filesDivideds.cend(); ++iter) {  //遍历所有文件
@@ -80,15 +90,7 @@ Parser_::Parser_(const QString &filePath) {
     }
     
     End:
-    for(auto iter = mResult.mProds.cbegin(); iter != mResult.mProds.cend(); ++iter) {
-        for(const Prod &prod : iter.value()) {
-            QDebug de = qDebug().noquote();
-            de << mResult.mSymbols.indexKey(iter.key()).str;
-            for(int symbol : prod.symbols) {
-                de << "  " << mResult.mSymbols.indexKey(symbol).str;
-            }           
-        }
-    }
+    qDebug() << "=============================";
     for(const Issue &issue : mResult.mIssues.list()) {
         qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m")
             << (issue.type == Issue::Error ? "Error" : "Warning")
@@ -286,7 +288,7 @@ void Parser_::parseAction(const CanonicalFilePath &cFilePath, const QString &tag
                 continue;
             }
             mResult.mActions.appendKey(key);
-            mResult.mActionsInfo << ActionInfo{ DeclarePos{ part.row, part.col }, val };
+            mResult.mActionsInfo << ActionInfo{ DeclarePos{ part.row, part.col }, val, false };
         }
     }
 }
@@ -328,6 +330,7 @@ void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, 
 
             bool hasErr = false;
             Prod prod;
+            prod.declarePos = DeclarePos{ part.row, part.col };
             //得到产生式的左部
             const SplitElement &leftElement = list[0];
             int leftDigit = mResult.mSymbols.keyIndex({ fileId, leftElement.str });
@@ -373,13 +376,326 @@ void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, 
             //如果没有错误，则将该产生式的右部附加到产生式左部符号的Prods中
             if(!hasErr) {
                 Prods &prods = mResult.mProds[leftDigit];
-                if(prods.contains(prod)) {
-                    mResult.mIssues << Issue(Issue::Warning, tr("Redefinition of the production"), 
+                int indexProd = prods.indexOf(prod);
+                if(indexProd != -1) {  //检查是否重复
+                    const DeclarePos &dp = prods[indexProd].declarePos;
+                    mResult.mIssues << Issue(Issue::Warning, tr("Redefinition of the production (First definition is at row %1, col %2)")
+                        .arg(QString::number(dp.row + 1), QString::number(dp.col + 1)), 
                         cFilePath, part.row, part.col);
                 } else {
                     prods << prod;
                 }
             }
         }
+    }
+}
+
+void Parser_::parseSymbolsNil() {
+    enum NilState { Cannot = 0, Unknown = 1, Can = 2 };
+    QVector<NilState> tmpVecNil;
+    int size = mResult.mNonterminalMaxIndex + 1;
+    tmpVecNil.resize(size);
+    tmpVecNil.fill(Unknown);
+
+    bool isContinue, isChanged;
+    do {
+        isContinue = false;
+        isChanged = false;
+
+        for(auto iter = mResult.mProds.cbegin(); iter != mResult.mProds.cend(); ++iter) {  //遍历所有产生式
+            if(tmpVecNil[iter.key()] == Unknown) {  //如果没有判断完成，则将isContinue设置为true，否则跳过本次循环
+                isContinue = true;
+            } else continue;
+
+            NilState totalState = Cannot;  //对于所有产生式右部的结果
+            for(const Prod &prod : iter.value()) {   //遍历所有产生式右部
+                const SymbolVec &prodSymbols = prod.symbols;
+                if(prodSymbols.isEmpty()) {    //如果产生式可以直接推导出空串
+                    totalState = Can;    //标记为Can
+                    isChanged = true;               //标记发生变化
+                    break;
+                }
+
+                NilState state = Can;   //对于当前产生式右部的结果
+                for(int symbol : prodSymbols) {     //遍历该产生式右部的所有符号
+                    //如果当前位置的符号 不是非终结符 或者 是非终结符但是不能推导出空串
+                    if(!isNonterminal(symbol) || tmpVecNil[symbol] == Cannot) {
+                        state = Cannot;     //标记为Cannot
+                        break;
+                    }
+
+                    //如果不知道当前位置的符号能否推导出空串
+                    if(tmpVecNil[symbol] == Unknown) {
+                        state = Unknown;    //标记为Unknown
+                        break;
+                    }
+                }
+
+                if(state > totalState) totalState = state;  //对是否覆盖总结果进行判断
+                if(totalState == Can) break;    //对是结束该内部循环进行判断
+            }
+
+            if(totalState != Unknown) {     //如果判断出结果，则进行设置
+                tmpVecNil[iter.key()] = totalState;
+                isChanged = true;
+            }
+        }
+
+        if(isContinue && !isChanged) {  //当出现死循环时结束分析
+            // struct Format
+            // {
+            //     QString color;
+            //     QString lighterColor;
+            // };
+            // QStringList formats = { "#dd3333", "#3333dd", "#33dd33" };
+            // QString formatTerminal = "#000000";
+
+            // QString text;
+            // QTextStream ts(&text);
+            // ts.setCodec("UTF-8");
+            // bool hasPrev = false;
+            // for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) {  //遍历所有产生式
+            //     const QString &symbolStr = mapSymbols.key(iter.key()).str;
+            //     for(const Prod &prod : iter.value()) {   //遍历所有的产生式右部
+            //         const SymbolVec &prodSymbols = prod.symbols;
+            //         //换行
+            //         if(hasPrev) {
+            //             ts << "<br>";
+            //         } else hasPrev = true;
+
+            //         //产生式左侧
+            //         ts << "<font color=\"" << formats[tmpVecNil[iter.key()]] << "\">" << symbolStr << "</font> ->";
+
+            //         for(int symbol : prodSymbols) {    //遍历该产生式右部
+            //             QString &format = (isNonterminal(symbol) ? formats[tmpVecNil[symbol]] : formatTerminal);
+            //             ts << " <font color=\"" << format << "\">";
+            //             ts << mapSymbols.key(symbol).str;
+            //             ts << "</font>";
+            //         }
+            //     }
+            // }
+            // issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), 
+            //     -1, -1, { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
+            mResult.mIssues << Issue(Issue::Error, tr("Appear left recursive"));
+            return;
+        }
+    } while(isContinue);
+
+    mResult.mSymbolsNil.resize(size);
+    repeat(int, i, size)
+        mResult.mSymbolsNil[i] = (tmpVecNil[i] == Can);
+}
+void Parser_::parseFirstSet() {
+    struct TmpSymbol
+    {
+        TmpSymbol(int digit) : digit(digit), isQuote(false) {}
+        TmpSymbol(int digit, bool isQuote) : digit(digit), isQuote(isQuote) {}
+        int digit;
+        bool isQuote;
+
+        //在QVector<>::contains中使用
+        inline bool operator==(const TmpSymbol &other) const { return digit == other.digit && isQuote == other.isQuote; }
+    };
+    typedef QVector<TmpSymbol> TmpFirstSet;
+    QVector<TmpFirstSet> vecTmpFirstSet;
+    int size = mResult.mNonterminalMaxIndex + 1;
+    vecTmpFirstSet.resize(size);
+
+    //初始化解析
+    for(auto iter = mResult.mProds.cbegin(); iter != mResult.mProds.cend(); ++iter) { //遍历所有产生式
+        TmpFirstSet &tmpSet = vecTmpFirstSet[iter.key()];
+        for(const Prod &prod : iter.value()) {    //遍历所有的产生式右部
+            for(int symbol : prod.symbols) {    //遍历产生式右部的所有符号
+                if(isTerminal(symbol)) {    //如果该符号为终结符，则将其添加到当前FIRST集中并跳出该循环
+                    if(!tmpSet.contains(symbol))
+                        tmpSet << symbol;
+                    break;
+                }
+
+                //将该符号以FIRST集的形式添加到当前FIRST集中
+                TmpSymbol quoteSymbol(symbol, true);
+                if(!tmpSet.contains(quoteSymbol))
+                    tmpSet << quoteSymbol;
+
+                if(!mResult.mSymbolsNil[symbol])     //如果该符号无法推导出空串，则跳出该循环
+                    break;
+            }
+        }
+    }
+
+    bool isContinue;
+    do {//解析
+        isContinue = false;
+
+        for(TmpFirstSet &tmpFirstSet : vecTmpFirstSet) {    //遍历所有FIRST集
+            for(int i = 0; i < tmpFirstSet.size(); i++) {   //遍历FIRST集中的所有内容
+                const TmpSymbol &tmpSymbol = tmpFirstSet[i];
+                if(tmpSymbol.isQuote) { //如果是以FIRST集的形式
+                    isContinue = true;
+                    for(const TmpSymbol &otherSymbol : vecTmpFirstSet[tmpSymbol.digit]) { //遍历并展开FIRST集
+                        if(!tmpFirstSet.contains(otherSymbol))
+                            tmpFirstSet << otherSymbol;
+                    }
+                    tmpFirstSet.removeAt(i);
+                    i--;
+                }
+            }
+        }
+    } while(isContinue);
+
+    mResult.mFirstSet.resize(size);
+    for(int i = 0; i < size; i++) {
+        SymbolVec &firstSet = mResult.mFirstSet[i];
+        const TmpFirstSet &tmpFirstSet = vecTmpFirstSet[i];
+
+        firstSet.reserve(tmpFirstSet.size());
+        for(const TmpSymbol &tmpSymbol : tmpFirstSet)
+            firstSet << tmpSymbol.digit;
+    }
+}
+void Parser_::parseFollowSet() {
+    struct TmpSymbol
+    {
+        enum Type { Symbol, FirstSet, FollowSet } type;
+        int digit;
+        TmpSymbol(Type state, int digit) : type(state), digit(digit) {}
+
+        //这并不是unused，只是Qt没看出来(在QVector<>::contains中使用)
+        inline bool operator==(const TmpSymbol &other) const { return type == other.type && digit == other.digit; }
+    };
+    typedef QVector<TmpSymbol> TmpFollowSet;
+    QVector<TmpFollowSet> vecTmpFollowSet;
+    int size = mResult.mNonterminalMaxIndex + 1;
+    vecTmpFollowSet.resize(size);
+
+    //初始化解析
+    vecTmpFollowSet[0] << TmpSymbol(TmpSymbol::Symbol, mResult.mNonterminalMaxIndex + 1);    //向"S"的FOLLOW集中加入"$"
+    for(auto iter = mResult.mProds.cbegin(); iter != mResult.mProds.cend(); ++iter) { //遍历所有产生式
+        for(const Prod &prod : iter.value()) {    //遍历所有的产生式右部
+            const SymbolVec &prodSymbols = prod.symbols;
+            QVector<TmpSymbol> vec;
+            vec << TmpSymbol(TmpSymbol::FollowSet, iter.key());     //将产生式左部以FOLLOW集的形式添加到vec中
+            for(auto prodIter = prodSymbols.crbegin(); prodIter != prodSymbols.crend(); ++prodIter) {   //反向遍历产生式右部
+                //如果该符号是非终结符，则将vec中的所有内容加入到该符号的FOLLOW集中
+                if(isNonterminal(*prodIter)) {
+                    TmpFollowSet &tmpFollowSet = vecTmpFollowSet[*prodIter];
+                    for(const TmpSymbol &tmpSymbol : vec) {
+                        if(!tmpFollowSet.contains(tmpSymbol))
+                            tmpFollowSet << tmpSymbol;
+                    }
+                }
+
+                //如果该符号是终结符或者不能推导出空串，则清除vec的内容
+                if(isTerminal(*prodIter) || !mResult.mSymbolsNil[*prodIter])
+                    vec.clear();
+
+                //如果该符号是非终结符，则将其以FIRST集的形式添加到vec中，否则将其直接添加到vec中
+                TmpSymbol tmpSymbol(isNonterminal(*prodIter) ? TmpSymbol::FirstSet : TmpSymbol::Symbol, *prodIter);
+                if(!vec.contains(tmpSymbol))
+                    vec << tmpSymbol;
+            }
+        }
+    }
+
+    bool isContinue;
+    do {//解析
+        isContinue = false;
+
+        for(TmpFollowSet &tmpFollowSet : vecTmpFollowSet) {     //遍历所有的FOLLOW集
+            for(int i = 0; i < tmpFollowSet.size(); i++) {      //遍历该FOLLOW集的所有内容
+                TmpSymbol &tmpSymbol = tmpFollowSet[i];
+                if(tmpSymbol.type == TmpSymbol::FirstSet) {     //如果是以FIRST集的形式
+                    isContinue = true;
+                    for(int symbol : mResult.mFirstSet[tmpSymbol.digit]) {    //遍历并展开FIRST集
+                        TmpSymbol otherSymbol(TmpSymbol::Symbol, symbol);
+                        if(!tmpFollowSet.contains(otherSymbol))
+                            tmpFollowSet << otherSymbol;
+                    }
+                    tmpFollowSet.removeAt(i);
+                    i--;
+                } else if(tmpSymbol.type == TmpSymbol::FollowSet) {     //如果是以FOLLOW集的形式
+                    isContinue = true;
+                    for(const TmpSymbol &otherSymbol : vecTmpFollowSet[tmpSymbol.digit]) {    //遍历并展开FOLLOW集
+                        if(!tmpFollowSet.contains(otherSymbol))
+                            tmpFollowSet << otherSymbol;
+                    }
+                    tmpFollowSet.removeAt(i);
+                    i--;
+                }
+            }
+        }
+    } while(isContinue);
+
+    mResult.mFollowSet.resize(size);
+    for(int i = 0; i < size; i++) {
+        SymbolVec &followSet = mResult.mFollowSet[i];
+        const TmpFollowSet &tmpFollowSet = vecTmpFollowSet[i];
+
+        followSet.reserve(tmpFollowSet.size());
+        for(const TmpSymbol &tmpSymbol : tmpFollowSet)
+            followSet << tmpSymbol.digit;
+    }
+}
+void Parser_::parseSelectSets() {
+    int size = mResult.mNonterminalMaxIndex + 1;
+    mResult.mSelectSets.resize(size);
+
+    //解析
+    for(auto iter = mResult.mProds.cbegin(); iter != mResult.mProds.cend(); ++iter) {     //遍历所有产生式
+        for(const Prod &prod : iter.value()) {   //遍历所有的产生式右部
+            const SymbolVec &prodSymbols = prod.symbols;
+            SymbolVec firstSet;
+            bool hasNil = true;
+
+            for(int symbol : prodSymbols) {    //遍历产生式右部的所有符号
+                if(isNonterminal(symbol)) {     //如果该符号是非终结符
+                    for(int otherSymbol : mResult.mFirstSet[symbol]) {    //遍历该非终结符的FIRST集
+                        if(!firstSet.contains(otherSymbol))
+                            firstSet << otherSymbol;
+                    }
+                } else {
+                    if(!firstSet.contains(symbol))
+                        firstSet << symbol;
+                }
+
+                if(isTerminal(symbol) || !mResult.mSymbolsNil[symbol]) {  //如果该符号是终结符或者无法推导出空串
+                    hasNil = false;
+                    break;
+                }
+            }
+
+            if(hasNil) {
+                for(int symbol : mResult.mFollowSet[iter.key()]) {    //遍历产生式左部符号的FOLLOW集
+                    if(!firstSet.contains(symbol))
+                        firstSet << symbol;
+                }
+            }
+            mResult.mSelectSets[iter.key()] << SelectSet{ firstSet, prod };
+        }
+    }
+
+    //检查SELECT集是否出现交叉
+    QVector<SymbolVec> vecIntersectedSymbols;
+    vecIntersectedSymbols.resize(size);
+    bool hasIntersection = false;
+    for(int i = 0; i < size; i++) {     //遍历所有的非终结符
+        SymbolVec appearedSymbols;
+        SymbolVec &intersectedSymbols = vecIntersectedSymbols[i];
+        for(const SelectSet &selectSet : mResult.mSelectSets[i]) {   //遍历该非终结符的所有SELECT集
+            for(int symbol : selectSet.symbols) {   //遍历该SELECT集的所有符号
+                if(appearedSymbols.contains(symbol)) {
+                    hasIntersection = true;
+                    if(!intersectedSymbols.contains(symbol))
+                        intersectedSymbols << symbol;
+                    break;
+                } else appearedSymbols << symbol;
+            }
+        }
+    }
+    if(hasIntersection) {   //如果出现交叉
+        // QString text = formatSelectSet(true, &vecIntersectedSymbols);
+        // issues << Issue(Issue::Error, tr("SELECT set has intersections"), -1, -1, 
+        //     { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
+        mResult.mIssues << Issue(Issue::Error, tr("SELECT set has intersections"));
     }
 }
