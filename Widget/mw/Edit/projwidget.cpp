@@ -144,6 +144,8 @@ void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
 }
 
 void ProjWidget::onParse() {
+    mBtnParse->setEnabled(false);
+
     QListWidget *errListWidget = mOutputWidget->errListWidget();
     QListWidget *outputListWidget = mOutputWidget->outputListWidget();
     errListWidget->clear();
@@ -259,6 +261,7 @@ void ProjWidget::onParse() {
 
     mNoteWidget->setText(tr("Analysis completed"));
     mNoteWidget->setColor(qRgb(0, 128, 0));
+    mBtnParse->setEnabled(true);
 }
 
 void ProjWidget::changeEvent(QEvent *ev) {
