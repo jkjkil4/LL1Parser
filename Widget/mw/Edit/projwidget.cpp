@@ -152,9 +152,11 @@ void ProjWidget::onParse() {
     QTime t;
     t.start();
 
-    { Parser_ t(mProjPath); }
+    {
+        Parser_ t(mProjPath, this);
+    }
 
-    Parser::parse(mEdit->document());
+    /*Parser::parse(mEdit->document());
     if(!Parser::hasError())
         Parser::outputFile(mProjPath);
 
@@ -253,7 +255,7 @@ void ProjWidget::onParse() {
         itemSelectSet->setData(Qt::UserRole + 1, strSelectSet);
         itemSelectSet->setData(Qt::UserRole + 2, Parser::formatSelectSet(true));
         outputListWidget->addItem(itemSelectSet);
-    }
+    }*/
 
     mNoteWidget->setText(tr("Analysis completed"));
     mNoteWidget->setColor(qRgb(0, 128, 0));

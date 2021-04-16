@@ -2,7 +2,9 @@
 
 #include <QDebug>
 
-Parser_::Parser_(const QString &filePath) {
+Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent) 
+    : QObject(parent), mDialogParent(dialogParent)
+{
     FilesDivideds filesDivideds;
     CanonicalFilePath cFilePath(filePath);
 
@@ -25,16 +27,16 @@ Parser_::Parser_(const QString &filePath) {
 
     mResult.mSymbols.appendKey(FileSymbol{ fileId, "S" });  //开始符号
     mResult.mSymbolsInfo.append(SymbolInfo{ DeclarePos(), true });
-    tryParse("Nonterminal", parseSymbol);   //分析非终结符
+    tryParse("Nonterminal", &Parser_::parseSymbol);   //分析非终结符
     mResult.mNonterminalMaxIndex = mResult.mSymbolsInfo.size() - 1;
 
     mResult.mSymbols.appendKey(FileSymbol{ fileId, "$" });  //结束符号
     mResult.mSymbolsInfo.append(SymbolInfo{ DeclarePos(), true });
-    tryParse("Terminal", parseSymbol);      //分析终结符
+    tryParse("Terminal", &Parser_::parseSymbol);      //分析终结符
     mResult.mTerminalMaxIndex = mResult.mSymbolsInfo.size() - 1;
 
-    tryParse("Action", parseAction);
-    tryParse("Production", parseProd);
+    tryParse("Action", &Parser_::parseAction);
+    tryParse("Production", &Parser_::parseProd);
     if(mResult.mHasProd) {
         //检查是否有未使用的符号
         int index = 0;
@@ -46,6 +48,7 @@ Parser_::Parser_(const QString &filePath) {
             }
             index++;
         }
+
         //检查是否有未使用的语义动作
         index = 0;
         for(const ActionInfo &info : mResult.mActionsInfo) {
@@ -69,6 +72,8 @@ Parser_::Parser_(const QString &filePath) {
     parseSelectSets();
     if(mResult.mIssues.hasError())
         goto End;
+
+    tryParse("JS", &Parser_::parseJS);
 
     {//检查是否有未知标记
         QString trUnkTag = tr("Unknown tag \"%1\"");
@@ -216,6 +221,14 @@ bool Parser_::checkDividedArg(const QString &tag, const Divideds &divideds, cons
         }
     }
     return hasArg;
+}
+int Parser_::findTrueRowByDividedRow(const Divideds &divideds, int dividedRow) {
+    for(const Divided &divided : divideds.map()) {
+        if(dividedRow < divided.parts.size())
+            return divided.parts[dividedRow].row;
+        dividedRow -= divided.parts.size();
+    }
+    return -1;
 }
 
 void Parser_::parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
@@ -697,5 +710,40 @@ void Parser_::parseSelectSets() {
         // issues << Issue(Issue::Error, tr("SELECT set has intersections"), -1, -1, 
         //     { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
         mResult.mIssues << Issue(Issue::Error, tr("SELECT set has intersections"));
+    }
+}
+
+void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
+    int fileId = mResult.mFiles.keyIndex(cFilePath);
+    checkDividedArg(tag, divideds, cFilePath);
+
+    JS *js = mResult.mJS[fileId] = new JS(this);     //初始化JS
+
+    QString trJSTerminate = tr("JS runs too long in first execution,\n"
+                            "Do you want to force it to terminate?\n"
+                            "If you continue waiting, it may finish.");
+    
+    //将分割的字符串合并为整体
+    QString total;
+    for(const Divided &divided : divideds.map())
+        for(const Divided::Part &part : divided.parts)
+            total += part.text + '\n';
+
+    //执行js脚本    
+    DelayedVerifyDialog dialog(trJSTerminate, mDialogParent);
+    dialog.delayedVerify(800);
+    bool terminate = false;
+    connect(&dialog, &DelayedVerifyDialog::accepted, [this, js, &terminate] {
+        js->onTerminateProcess();
+        terminate = true;
+        mResult.mIssues << Issue(Issue::Error, tr("JS terminated in first execution"));
+    });
+    QJSValue result = js->terminableEvaluate(total);
+    if(terminate)
+        return;
+    if(result.isError()) {
+        int dividedRow = result.property("lineNumber").toInt() - 1;
+        int row = findTrueRowByDividedRow(divideds, dividedRow);
+        mResult.mIssues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(result.toString()), cFilePath, row, -1);
     }
 }

@@ -31,9 +31,12 @@ CONFIG += c++11 console
 SOURCES += \
         Class/parser.cpp \
         Class/parser_.cpp \
+        Class/js.cpp \
         Class/jsobject.cpp \
         Class/texthighlighter.cpp \
         Widget/Dialog/newprojdialog.cpp \
+        Widget/Dialog/settingsdialog.cpp \
+        Widget/Dialog/delayedverifydialog.cpp \
         Widget/Menu/rflmenu.cpp \
         Widget/Other/infowidget.cpp \
         Widget/mw/Edit/editview.cpp \
@@ -43,7 +46,6 @@ SOURCES += \
         Widget/mw/Edit/projwidget.cpp \
         Widget/mw/HomePage/homepage.cpp \
         Widget/mw/HomePage/recentfilelistwidget.cpp \
-        Widget/Dialog/settingsdialog.cpp \
         Widget/sidebar.cpp \
         main.cpp \
         Widget/mainwindow.cpp
@@ -51,12 +53,15 @@ SOURCES += \
 HEADERS += \
         Class/parser.h \
         Class/parser_.h \
+        Class/js.h \
         Class/jsobject.h \
         Class/texthighlighter.h \
         Widget/Menu/rflmenu.h \
         Widget/Other/colorwidget.h \
         Class/translator.h \
         Widget/Dialog/newprojdialog.h \
+        Widget/Dialog/settingsdialog.h \
+        Widget/Dialog/delayedverifydialog.h \
         Widget/Other/infowidget.h \
         Widget/mw/Edit/editview.h \
         Widget/mw/Edit/notewidget.h \
@@ -66,7 +71,6 @@ HEADERS += \
         Widget/mw/HomePage/homepage.h \
         Widget/mw/HomePage/recentfilelistwidget.h \
         Widget/mw/mainwindowview.h \
-        Widget/Dialog/settingsdialog.h \
         Widget/sidebar.h \
         Widget/mainwindow.h \
         header.h

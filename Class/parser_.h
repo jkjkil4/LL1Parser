@@ -7,6 +7,8 @@
 #include <QFileInfo>
 
 #include "header.h"
+#include "js.h"
+#include "Widget/Dialog/delayedverifydialog.h"
 #include <Lib/header.h>
 
 
@@ -180,6 +182,11 @@ public:
     public:
         friend class Parser_;
 
+        ~TotalResult() {
+            for(JS *js : mJS)
+                delete js;
+        }
+
         const ValueMap<CanonicalFilePath>& files() const { return mFiles; }
         const QMap<ImportKey, ImportValue>& fileRels() const { return mFileRels; }
         const Issues& issues() const { return mIssues; }
@@ -217,9 +224,11 @@ public:
         QVector<SymbolVec> mFirstSet;       //所有FIRST集
         QVector<SymbolVec> mFollowSet;      //所有FOLLOW集
         QVector<SelectSets> mSelectSets;    //所有SELECT集
+
+        QMap<int, JS*> mJS;
     };
 
-    Parser_(const QString &filePath);
+    Parser_(const QString &filePath, QWidget *dialogParent = nullptr, QObject *parent = nullptr);
     const TotalResult& result() const { return mResult; }
 
 signals:
@@ -233,6 +242,7 @@ private:
     bool divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath = ""); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
     void divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath = "");    //分割并递归分割
     bool checkDividedArg(const QString &tag, const Divideds &divideds, const QString &filePath = ""); //判断Divideds是否含有有参数的Divided，若有，则产生警告
+    int findTrueRowByDividedRow(const Divideds &divideds, int dividedRow);   //在分隔的部分中的行数找到对应原文档中的行数
 
     typedef void(Parser_::*ParseFn)(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
@@ -242,7 +252,9 @@ private:
     void parseFirstSet();
     void parseFollowSet();
     void parseSelectSets();
+    void parseJS(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
 
+    QWidget *mDialogParent;
     TotalResult mResult;
 };
 
