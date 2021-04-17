@@ -5,11 +5,10 @@
 Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent) 
     : QObject(parent), mDialogParent(dialogParent)
 {
-    FilesDivideds filesDivideds;
     CanonicalFilePath cFilePath(filePath);
 
-    auto tryParse = [this, &filesDivideds](const QString &tag, ParseFn fn) {    //尝试分析指定标记
-        for(auto fileIter = filesDivideds.begin(); fileIter != filesDivideds.end(); ++fileIter) {   //遍历所有文件
+    auto tryParse = [this](const QString &tag, ParseFn fn) {    //尝试分析指定标记
+        for(auto fileIter = mResult.mFilesDivideds.begin(); fileIter != mResult.mFilesDivideds.end(); ++fileIter) {   //遍历所有文件
             const CanonicalFilePath &cFilePath = fileIter.key();   //文件名
             auto iter = fileIter->find(tag);    //查找标记
             if(iter != fileIter->end()) {
@@ -19,7 +18,7 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
         }
     };
 
-    divideAndImportFile(filesDivideds, cFilePath);
+    divideAndImportFile(cFilePath);
     int fileId = mResult.mFiles.keyIndex(cFilePath);
 
     if(mResult.mIssues.hasError())
@@ -74,10 +73,12 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
         goto End;
 
     tryParse("JS", &Parser_::parseJS);
+    if(mResult.mIssues.hasError()) goto End;
+    tryParse("Output", &Parser_::parseOutput);
 
     {//检查是否有未知标记
         QString trUnkTag = tr("Unknown tag \"%1\"");
-        for(auto iter = filesDivideds.cbegin(); iter != filesDivideds.cend(); ++iter) {  //遍历所有文件
+        for(auto iter = mResult.mFilesDivideds.cbegin(); iter != mResult.mFilesDivideds.cend(); ++iter) {  //遍历所有文件
             const QString &fileName = QFileInfo(iter.key()).fileName();
             const MapDivideds &mapDivideds = iter.value();
             for(auto iter2 = mapDivideds.cbegin(); iter2 != mapDivideds.cend(); ++iter2) {  //遍历该文件的所有分割部分
@@ -116,7 +117,7 @@ Parser_::~Parser_() {
         delete js;
 }
 
-bool Parser_::divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath) {
+bool Parser_::divideFile(const CanonicalFilePath &cFilePath, const QString &basePath) {
     if(mResult.mFiles.contains(cFilePath))  //如果处理过该文件，则return
         return false;
     mResult.mFiles.appendKey(cFilePath);    //标记处理过该文件
@@ -130,7 +131,7 @@ bool Parser_::divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, 
 
     QTextStream in(&file);  //用于读取文件
     QRegularExpression regex("%\\[(.*?)(?:\\:(.*?)){0,1}\\]%");     //正则表达式
-    MapDivideds &mapDivideds = fd[cFilePath];    //得到该文件对应的mapDivideds
+    MapDivideds &mapDivideds = mResult.mFilesDivideds[cFilePath];    //得到该文件对应的mapDivideds
     int row = 0;    //用于记录行数
     Divided *pDivided = nullptr;    //分割部分
     while(!in.atEnd()) {    //循环遍历文件的每一行
@@ -158,12 +159,12 @@ bool Parser_::divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, 
 
     return true;
 }
-void Parser_::divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath) {
-    if(!divideFile(fd, cFilePath, basePath))    //尝试分割，若返回值为false则return
+void Parser_::divideAndImportFile(const CanonicalFilePath &cFilePath, const QString &basePath) {
+    if(!divideFile(cFilePath, basePath))    //尝试分割，若返回值为false则return
         return;
 
     int fileId = mResult.mFiles.keyIndex(cFilePath);
-    MapDivideds &md = fd[cFilePath];   //得到分割的内容
+    MapDivideds &md = mResult.mFilesDivideds[cFilePath];   //得到分割的内容
     auto iter = md.find("Import");     //查找"Import"标记
     if(iter == md.end())   //若没有，则return
         return;
@@ -200,7 +201,7 @@ void Parser_::divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cF
 
             //递归分割文件
             QString aImportFilePath = QDir(QFileInfo(cFilePath).path()).absoluteFilePath(importFilePath);
-            divideAndImportFile(fd, aImportFilePath, cFilePath);
+            divideAndImportFile(aImportFilePath, cFilePath);
             ImportKey key{ fileId, abbre };
             auto iterRel = mResult.mFileRels.constFind(key);
             if(iterRel != mResult.mFileRels.cend()) {   //检查是否重复
@@ -232,6 +233,24 @@ int Parser_::findTrueRowByDividedRow(const Divideds &divideds, int dividedRow) {
         dividedRow -= divided.parts.size();
     }
     return -1;
+}
+Parser_::FileElement Parser_::transFileElement(int fileId, const QString &name) {
+    int resFileId = fileId;
+    QString resName;
+    int splitIndex = name.indexOf(':');
+    if(splitIndex == -1) {
+        resName = name;
+    } else {
+        QString resFileAbbre = name.left(splitIndex);
+        auto iter = mResult.mFileRels.find({ fileId, resFileAbbre });
+        if(iter == mResult.mFileRels.end())
+            return FileElement{ -1, "" };
+
+        resFileId = (*iter).fileId;
+        resName = name.right(name.length() - splitIndex - 1);
+    }
+    qDebug() << resFileId << resName;
+    return FileElement{ resFileId, resName };
 }
 
 void Parser_::parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
@@ -349,7 +368,7 @@ void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, 
             prod.declarePos = DeclarePos{ part.row, part.col };
             //得到产生式的左部
             const SplitElement &leftElement = list[0];
-            int leftDigit = mResult.mSymbols.keyIndex({ fileId, leftElement.str });
+            int leftDigit = mResult.mSymbols.keyIndex(transFileElement(fileId, leftElement.str));
             if(leftDigit == -1) {
                 mResult.mIssues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(leftElement.str), 
                     cFilePath, part.row, part.col + leftElement.col);
@@ -364,7 +383,7 @@ void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, 
                 const QString &str = se.str;
                 if(str.length() >= 4 && str.left(2) == "__" && str.right(2) == "__") {  //如果是语义动作
                     QString name = str.mid(2, str.length() - 4); //得到语义动作的名称
-                    int action = mResult.mActions.keyIndex({ fileId, name });
+                    int action = mResult.mActions.keyIndex(transFileElement(fileId, name));
                     if(action == -1) {    //检查是否存在语义动作
                         mResult.mIssues << Issue(Issue::Error, tr("Unknown semantic action \"%1\"").arg(name), 
                             cFilePath, part.row, part.col + se.col);
@@ -376,7 +395,7 @@ void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, 
                         mResult.mActionsInfo[action].used = true;   //标记该语义动作使用过
                     }
                 } else {    //否则，是词法符号
-                    int digit = mResult.mSymbols.keyIndex({ fileId, str });
+                    int digit = mResult.mSymbols.keyIndex(transFileElement(fileId, str));
                     if(digit == -1) {   //检查是否存在该符号
                         mResult.mIssues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(str), 
                             cFilePath, part.row, part.col + se.col);
@@ -908,4 +927,74 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
         int row = findTrueRowByDividedRow(divideds, dividedRow);
         mResult.mIssues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(result.toString()), cFilePath, row, -1);
     }
+}
+void Parser_::parseOutput(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
+    // int fileId = mResult.mFiles.keyIndex(cFilePath);
+
+    // QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式，用于匹配格式化操作
+    // for(const Divided &divided : divideds.map()) {    //遍历所有Divided，得到所有要输出的内容
+    //     QString text;   //用于得到当前内容
+    //     bool hasPrev = false;
+    //     for(const Divided::Part &part : divided.parts) {
+    //         if(hasPrev) {
+    //             text += '\n';
+    //         } else hasPrev = true;
+    //         QString res;    //用于得到当前行的结果
+    //         int start = 0;
+    //         QRegularExpressionMatchIterator matchIter = ruleOutputFormat.globalMatch(part.text);    //使用正则表达式匹配该行
+    //         while(matchIter.hasNext()) {    //遍历所有匹配
+    //             QRegularExpressionMatch match = matchIter.next();
+    //             res += part.text.mid(start, match.capturedStart() - start);
+    //             start = match.capturedEnd();
+    //             QString name = match.captured(1);
+    //             QString arg = match.captured(2);
+                
+    //             int argFileId = -1;
+    //             QString argName;
+    //             int splitIndex = arg.indexOf(':');
+    //             if(splitIndex == -1) {
+    //                 argName = arg;
+    //             } else {
+    //                 QString argFileAbbre = arg.left(splitIndex);
+    //                 auto iter = mResult.mFileRels.find({ fileId, argFileAbbre });
+    //                 if(iter == mResult.mFileRels.end()) {
+    //                     mResult.mIssues << Issue(Issue::Error, tr("Unknown "));
+    //                     continue;
+    //                 }
+
+    //                 argName = arg.right(arg.length() - splitIndex - 1);
+    //             }
+
+
+    //             if(name == "js") {  //如果是调用js
+    //                 bool hasFn = false;     //标记在js中是否有该函数
+    //                 if(js) {
+    //                     QJSValue jsValueFn = js->globalObject().property(arg);   //得到arg在js中对应的内容
+    //                     if(jsValueFn.isCallable()) {    //如果可以作为函数调用
+    //                         hasFn = true;
+    //                         QJSValue jsRes = jsValueFn.call();
+    //                         if(jsRes.isError()) {   //如果有错，则输出错误信息
+    //                             int dividedRow = jsRes.property("lineNumber").toInt() - 1;
+    //                             int row = findTrueRowByDividedRow(jsDivideds, dividedRow);
+    //                             mResult.mIssues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(jsRes.toString()), cFilePath, row, -1);
+    //                         } else res += jsValueFn.call().toString(); //将调用的结果附加到res中
+    //                     }
+    //                 }
+    //                 if(!hasFn) {    //如果没有对应函数，则报错
+    //                     issues << Issue(Issue::Error, tr("Unknown js function \"%1\"").arg(arg));
+    //                 }
+    //             } else if(name == "symbol") {   //如果是以符号数字替换
+    //                 int symbol = mapSymbols.value(arg, -1); //查找arg对应的数字
+    //                 if(symbol != -1) {  //如果有对应的数字，则附加到res中，否则报错
+    //                     res += QString::number(symbol);
+    //                 } else issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(arg));
+    //             } else {
+    //                 issues << Issue(Issue::Error, tr("Unknown \"%1\"").arg(name), part.row);    //如果name未知，则报错
+    //             }
+    //         }
+    //         res += part.text.mid(start, part.text.length() - start);
+    //         text += res;
+    //     }
+    //     listOutput << Output{ divided.arg, text };
+    // }
 }

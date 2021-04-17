@@ -206,6 +206,8 @@ public:
         bool isTerminal(int id) { return id > mNonterminalMaxIndex && id <= mTerminalMaxIndex; }
 
     private:
+        FilesDivideds mFilesDivideds;
+
         ValueMap<CanonicalFilePath> mFiles;     //所有涉及的文件
         QMap<ImportKey, ImportValue> mFileRels; //文件Import关系
         Issues mIssues;     //所有问题
@@ -238,10 +240,11 @@ signals:
     void beforeReadFile(const QString &filePath);
     
 private:
-    bool divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath = ""); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
-    void divideAndImportFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath = "");    //分割并递归分割
+    bool divideFile(const CanonicalFilePath &cFilePath, const QString &basePath = ""); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
+    void divideAndImportFile(const CanonicalFilePath &cFilePath, const QString &basePath = "");    //分割并递归分割
     bool checkDividedArg(const QString &tag, const Divideds &divideds, const QString &filePath = ""); //判断Divideds是否含有有参数的Divided，若有，则产生警告
     int findTrueRowByDividedRow(const Divideds &divideds, int dividedRow);   //在分隔的部分中的行数找到对应原文档中的行数
+    FileElement transFileElement(int fileId, const QString &name);
 
     typedef void(Parser_::*ParseFn)(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
@@ -252,6 +255,7 @@ private:
     void parseFollowSet();
     void parseSelectSets();
     void parseJS(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    void parseOutput(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
 
     QWidget *mDialogParent;
     TotalResult mResult;
