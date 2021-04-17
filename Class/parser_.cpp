@@ -96,6 +96,8 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
     
     End:
     qDebug() << "=============================";
+    if(mResult.mJsObj && mResult.mJsObj->hasDebugMessage())
+        qDebug().noquote() << mResult.mJsObj->debugMessage();
     for(const Issue &issue : mResult.mIssues.list()) {
         qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m")
             << (issue.type == Issue::Error ? "Error" : "Warning")
@@ -109,9 +111,10 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
             << issue.what;
     }
 }
-
-bool Parser_::isNonterminal(int id) { return id >= 0 && id <= mResult.mNonterminalMaxIndex; }
-bool Parser_::isTerminal(int id) { return id > mResult.mNonterminalMaxIndex && id <= mResult.mTerminalMaxIndex; }
+Parser_::~Parser_() {
+    for(JS *js : mResult.mJS)
+        delete js;
+}
 
 bool Parser_::divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath) {
     if(mResult.mFiles.contains(cFilePath))  //如果处理过该文件，则return
@@ -351,7 +354,7 @@ void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, 
                 mResult.mIssues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(leftElement.str), 
                     cFilePath, part.row, part.col + leftElement.col);
                 hasErr = true;
-            } else if(isTerminal(leftDigit)) {
+            } else if(mResult.isTerminal(leftDigit)) {
                 mResult.mIssues << Issue(Issue::Error, tr("The left of the production cannot be a terminal"), 
                     cFilePath, part.row, part.col);
             } else mResult.mSymbolsInfo[leftDigit].used = true;     //标记该符号使用过
@@ -432,7 +435,7 @@ void Parser_::parseSymbolsNil() {
                 NilState state = Can;   //对于当前产生式右部的结果
                 for(int symbol : prodSymbols) {     //遍历该产生式右部的所有符号
                     //如果当前位置的符号 不是非终结符 或者 是非终结符但是不能推导出空串
-                    if(!isNonterminal(symbol) || tmpVecNil[symbol] == Cannot) {
+                    if(!mResult.isNonterminal(symbol) || tmpVecNil[symbol] == Cannot) {
                         state = Cannot;     //标记为Cannot
                         break;
                     }
@@ -519,7 +522,7 @@ void Parser_::parseFirstSet() {
         TmpFirstSet &tmpSet = vecTmpFirstSet[iter.key()];
         for(const Prod &prod : iter.value()) {    //遍历所有的产生式右部
             for(int symbol : prod.symbols) {    //遍历产生式右部的所有符号
-                if(isTerminal(symbol)) {    //如果该符号为终结符，则将其添加到当前FIRST集中并跳出该循环
+                if(mResult.isTerminal(symbol)) {    //如果该符号为终结符，则将其添加到当前FIRST集中并跳出该循环
                     if(!tmpSet.contains(symbol))
                         tmpSet << symbol;
                     break;
@@ -590,7 +593,7 @@ void Parser_::parseFollowSet() {
             vec << TmpSymbol(TmpSymbol::FollowSet, iter.key());     //将产生式左部以FOLLOW集的形式添加到vec中
             for(auto prodIter = prodSymbols.crbegin(); prodIter != prodSymbols.crend(); ++prodIter) {   //反向遍历产生式右部
                 //如果该符号是非终结符，则将vec中的所有内容加入到该符号的FOLLOW集中
-                if(isNonterminal(*prodIter)) {
+                if(mResult.isNonterminal(*prodIter)) {
                     TmpFollowSet &tmpFollowSet = vecTmpFollowSet[*prodIter];
                     for(const TmpSymbol &tmpSymbol : vec) {
                         if(!tmpFollowSet.contains(tmpSymbol))
@@ -599,11 +602,11 @@ void Parser_::parseFollowSet() {
                 }
 
                 //如果该符号是终结符或者不能推导出空串，则清除vec的内容
-                if(isTerminal(*prodIter) || !mResult.mSymbolsNil[*prodIter])
+                if(mResult.isTerminal(*prodIter) || !mResult.mSymbolsNil[*prodIter])
                     vec.clear();
 
                 //如果该符号是非终结符，则将其以FIRST集的形式添加到vec中，否则将其直接添加到vec中
-                TmpSymbol tmpSymbol(isNonterminal(*prodIter) ? TmpSymbol::FirstSet : TmpSymbol::Symbol, *prodIter);
+                TmpSymbol tmpSymbol(mResult.isNonterminal(*prodIter) ? TmpSymbol::FirstSet : TmpSymbol::Symbol, *prodIter);
                 if(!vec.contains(tmpSymbol))
                     vec << tmpSymbol;
             }
@@ -661,7 +664,7 @@ void Parser_::parseSelectSets() {
             bool hasNil = true;
 
             for(int symbol : prodSymbols) {    //遍历产生式右部的所有符号
-                if(isNonterminal(symbol)) {     //如果该符号是非终结符
+                if(mResult.isNonterminal(symbol)) {     //如果该符号是非终结符
                     for(int otherSymbol : mResult.mFirstSet[symbol]) {    //遍历该非终结符的FIRST集
                         if(!firstSet.contains(otherSymbol))
                             firstSet << otherSymbol;
@@ -671,7 +674,7 @@ void Parser_::parseSelectSets() {
                         firstSet << symbol;
                 }
 
-                if(isTerminal(symbol) || !mResult.mSymbolsNil[symbol]) {  //如果该符号是终结符或者无法推导出空串
+                if(mResult.isTerminal(symbol) || !mResult.mSymbolsNil[symbol]) {  //如果该符号是终结符或者无法推导出空串
                     hasNil = false;
                     break;
                 }
@@ -718,6 +721,165 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     checkDividedArg(tag, divideds, cFilePath);
 
     JS *js = mResult.mJS[fileId] = new JS(this);     //初始化JS
+    JSObject *&obj = mResult.mJsObj;
+    if(!obj)
+        obj = new JSObject;
+    obj->setNonterminalMaxIndex(mResult.mNonterminalMaxIndex);
+    obj->setTerminalMaxIndex(mResult.mTerminalMaxIndex);
+    //传入对象和数据
+    QJSValue jsObj = js->newQObject(obj);
+    js->globalObject().setProperty("lp", jsObj);
+    jsObj.setProperty("nonterminalMaxIndex", mResult.mNonterminalMaxIndex);
+    jsObj.setProperty("terminalMaxIndex", mResult.mTerminalMaxIndex);
+
+    int fileCount = mResult.mFiles.map().size();
+    int symbolCount = mResult.mSymbols.map().size();
+    int nonterminalCount = mResult.mNonterminalMaxIndex + 1;
+    int actionCount = mResult.mActions.map().size();
+
+    //传入文件列表
+    QJSValue jsFileArray = js->newArray((uint)fileCount);
+    repeat(int, i, fileCount)
+        jsFileArray.setProperty((uint)i, mResult.mFiles.indexKey(i).text());
+    jsObj.setProperty("arrFiles", jsFileArray);
+
+    //传入符号列表
+    QJSValue jsSymbolArray = js->newArray((uint)symbolCount);
+    repeat(int, i, symbolCount) {
+        FileSymbol fs = mResult.mSymbols.indexKey(i);
+        QJSValue jsSymbol = js->newObject();
+        jsSymbol.setProperty("fileId", fs.fileId);
+        jsSymbol.setProperty("str", fs.str);
+        jsSymbolArray.setProperty((uint)i, jsSymbol);
+    }
+    jsObj.setProperty("arrSymbols", jsSymbolArray);
+
+    //传入语义动作
+    QJSValue jsActionArray = js->newArray((uint)actionCount);
+    repeat(int, i, actionCount) {
+        FileAction fa = mResult.mActions.indexKey(i);
+        const ActionInfo &info = mResult.mActionsInfo[i];
+        QJSValue jsAction = js->newObject();
+        jsAction.setProperty("fileId", fa.fileId);
+        jsAction.setProperty("name", fa.str);
+        jsAction.setProperty("text", info.val);
+        jsActionArray.setProperty((uint)i, jsAction);
+    }
+    jsObj.setProperty("arrActions", jsActionArray);
+
+    //传入产生式
+    QJSValue jsProdsArray = js->newArray((uint)symbolCount);
+    repeat(int, i, symbolCount) {   //遍历所有的符号
+        Prods &prods = mResult.mProds[i];     //该符号的所有产生式
+        int prodsSize = prods.size();   //产生式数量
+        QJSValue jsProdArray = js->newArray((uint)prodsSize);
+        int index = 0;
+        for(auto iter = prods.begin(); iter != prods.end(); ++iter) {   //遍历该符号的所有产生式
+            const Prod &prod = *iter;   //其中一个产生式
+            int size = prod.symbols.size() + prod.actions.size();   //结果大小
+            QJSValue jsSymbolArray = js->newArray((uint)size);
+
+            //将产生式符号和语义动作加入到jsSymbolArray中
+            int start = 0;
+            int pos = 0;
+            auto addElement = [js, &jsSymbolArray, &pos](int value, bool isSymbol) {    //lambda，用于添加元素
+                QJSValue jsElement = js->newObject();
+                jsElement.setProperty("value", value);
+                jsElement.setProperty("isSymbol", isSymbol);
+                jsSymbolArray.setProperty((uint)pos, jsElement);
+                pos++;
+            };
+            for(const ProdAction &action : prod.actions) {
+                for(int i = start; i < action.pos; i++)
+                    addElement(prod.symbols[i], true);
+                addElement(action.id, false);
+                start = action.pos;
+            }
+            for(int i = start; i < prod.symbols.size(); i++)
+                addElement(prod.symbols[i], true);
+
+            jsProdArray.setProperty((uint)index, jsSymbolArray);
+            
+            index++;
+        }
+        jsProdsArray.setProperty((uint)i, jsProdArray);
+    }
+    jsObj.setProperty("arrProds", jsProdsArray);
+
+    //传入能否推导出空串
+    QJSValue jsNilArray = js->newArray((uint)symbolCount);
+    repeat(int, i, symbolCount)
+        jsNilArray.setProperty((uint)i, mResult.mSymbolsNil[i]);
+    jsObj.setProperty("arrSymbolNil", jsNilArray);
+
+    //传入FIRST集
+    QJSValue jsFirstSetArray = js->newArray((uint)nonterminalCount);
+    for(int i = 0; i < nonterminalCount; i++) {   //遍历所有非终结符
+        const SymbolVec &symbols = mResult.mFirstSet[i];        //该符号的FIRST集
+        int count = symbols.size();
+        QJSValue jsSymbols = js->newArray((uint)count);
+        repeat(int, j, count)
+            jsSymbols.setProperty((uint)j, symbols[j]);
+        jsFirstSetArray.setProperty((uint)i, jsSymbols);
+    }
+    jsObj.setProperty("arrFirstSet", jsFirstSetArray);
+
+    //传入FOLLOW集
+    QJSValue jsFollowSetArray = js->newArray((uint)nonterminalCount);
+    for(int i = 0; i < nonterminalCount; i++) {     //遍历所有非终结符
+        const SymbolVec &symbols = mResult.mFollowSet[i];   //该符号的FOLLOW集
+        int count = symbols.size();
+        QJSValue jsSymbols = js->newArray((uint)count);
+        repeat(int, j, count)
+            jsSymbols.setProperty((uint)j, symbols[j]);
+        jsFollowSetArray.setProperty((uint)i, jsSymbols);
+    }
+    jsObj.setProperty("arrFollowSet", jsFollowSetArray);
+
+    //传入SELECT集
+    QJSValue jsSelectSetsArray = js->newArray((uint)nonterminalCount);
+    for(int i = 0; i < nonterminalCount; i++) {     //遍历所有非终结符
+        const SelectSets &selectSets = mResult.mSelectSets[i];  //该符号的所有SELECT集
+        int selectSetCount = selectSets.size();     //该符号的SELECT集数量
+        QJSValue jsSelectSets = js->newArray((uint)selectSetCount);
+        repeat(int, j, selectSetCount) {    //遍历该符号的所有SELECT集
+            const SelectSet &selectSet = selectSets[j];           //当前SELECT集
+            int prodSize = selectSet.prod.symbols.size() + selectSet.prod.actions.size();   //产生式元素数量
+            int symbolsSize = selectSet.symbols.size();     //SELECT集符号数量
+
+            QJSValue jsSelectSet = js->newObject();
+            QJSValue jsProd = js->newArray((uint)prodSize);
+            QJSValue jsSymbols = js->newArray((uint)symbolsSize);
+
+            //将产生式的所有元素添加到jsProd中
+            int index = 0;
+            int start = 0;
+            auto fnAddElement = [js, &jsProd, &index](int value, bool isSymbol) {   //lambda，用于添加元素
+                QJSValue jsElement = js->newObject();
+                jsElement.setProperty("value", value);
+                jsElement.setProperty("isSymbol", isSymbol);
+                jsProd.setProperty((uint)index, jsElement);
+                index++;
+            };
+            for(const ProdAction &action : selectSet.prod.actions) {
+                for(int k = start; k < action.pos; k++)
+                    fnAddElement(selectSet.prod.symbols[k], true);
+                fnAddElement(action.id, false);
+                start = action.pos;
+            }
+            for(int k = start; k < selectSet.prod.symbols.size(); k++)
+                fnAddElement(selectSet.prod.symbols[k], true);
+
+            repeat(int, k, symbolsSize) //遍历当前SELECT集
+                jsSymbols.setProperty((uint)k, selectSet.symbols[k]);
+
+            jsSelectSet.setProperty("prod", jsProd);
+            jsSelectSet.setProperty("symbols", jsSymbols);
+            jsSelectSets.setProperty((uint)j, jsSelectSet);
+        }
+        jsSelectSetsArray.setProperty((uint)i, jsSelectSets);
+    }
+    jsObj.setProperty("arrSelectSets", jsSelectSetsArray);
 
     QString trJSTerminate = tr("JS runs too long in first execution,\n"
                             "Do you want to force it to terminate?\n"

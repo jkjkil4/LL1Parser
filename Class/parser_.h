@@ -8,6 +8,7 @@
 
 #include "header.h"
 #include "js.h"
+#include "jsobject.h"
 #include "Widget/Dialog/delayedverifydialog.h"
 #include <Lib/header.h>
 
@@ -182,11 +183,6 @@ public:
     public:
         friend class Parser_;
 
-        ~TotalResult() {
-            for(JS *js : mJS)
-                delete js;
-        }
-
         const ValueMap<CanonicalFilePath>& files() const { return mFiles; }
         const QMap<ImportKey, ImportValue>& fileRels() const { return mFileRels; }
         const Issues& issues() const { return mIssues; }
@@ -203,6 +199,11 @@ public:
         const QVector<SymbolVec>& firstSet() const { return mFirstSet; }
         const QVector<SymbolVec>& followSet() const { return mFollowSet; }
         const QVector<SelectSets>& selectSets() const { return mSelectSets; }
+
+        QString jsDebugMessage() const { if(mJsObj) return mJsObj->debugMessage(); }
+
+        bool isNonterminal(int id) { return id >= 0 && id <= mNonterminalMaxIndex; }
+        bool isTerminal(int id) { return id > mNonterminalMaxIndex && id <= mTerminalMaxIndex; }
 
     private:
         ValueMap<CanonicalFilePath> mFiles;     //所有涉及的文件
@@ -226,17 +227,15 @@ public:
         QVector<SelectSets> mSelectSets;    //所有SELECT集
 
         QMap<int, JS*> mJS;
+        JSObject *mJsObj = nullptr;
     };
 
     Parser_(const QString &filePath, QWidget *dialogParent = nullptr, QObject *parent = nullptr);
+    ~Parser_() override;
     const TotalResult& result() const { return mResult; }
 
 signals:
     void beforeReadFile(const QString &filePath);
-
-public slots:
-    bool isNonterminal(int id);
-    bool isTerminal(int id);
     
 private:
     bool divideFile(FilesDivideds &fd, const CanonicalFilePath &cFilePath, const QString &basePath = ""); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
