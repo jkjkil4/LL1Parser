@@ -97,8 +97,6 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
     
     End:
     qDebug() << "=============================";
-    if(mResult.mJsObj && mResult.mJsObj->hasDebugMessage())
-        qDebug().noquote() << mResult.mJsObj->debugMessage();
     for(const Issue &issue : mResult.mIssues.list()) {
         qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m")
             << (issue.type == Issue::Error ? "Error" : "Warning")
@@ -249,7 +247,6 @@ Parser_::FileElement Parser_::transFileElement(int fileId, const QString &name) 
         resFileId = (*iter).fileId;
         resName = name.right(name.length() - splitIndex - 1);
     }
-    qDebug() << resFileId << resName;
     return FileElement{ resFileId, resName };
 }
 
@@ -739,15 +736,12 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     int fileId = mResult.mFiles.keyIndex(cFilePath);
     checkDividedArg(tag, divideds, cFilePath);
 
-    JS *js = mResult.mJS[fileId] = new JS(this);     //初始化JS
-    JSObject *&obj = mResult.mJsObj;
-    if(!obj)
-        obj = new JSObject;
-    obj->setNonterminalMaxIndex(mResult.mNonterminalMaxIndex);
-    obj->setTerminalMaxIndex(mResult.mTerminalMaxIndex);
+    JS *js = mResult.mJS[fileId] = new JS;     //初始化JS
+    js->obj.setNonterminalMaxIndex(mResult.mNonterminalMaxIndex);
+    js->obj.setTerminalMaxIndex(mResult.mTerminalMaxIndex);
     //传入对象和数据
-    QJSValue jsObj = js->newQObject(obj);
-    js->globalObject().setProperty("lp", jsObj);
+    QJSValue jsObj = js->engine.newQObject(&js->obj);
+    js->engine.globalObject().setProperty("lp", jsObj);
     jsObj.setProperty("nonterminalMaxIndex", mResult.mNonterminalMaxIndex);
     jsObj.setProperty("terminalMaxIndex", mResult.mTerminalMaxIndex);
 
@@ -757,16 +751,16 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     int actionCount = mResult.mActions.map().size();
 
     //传入文件列表
-    QJSValue jsFileArray = js->newArray((uint)fileCount);
+    QJSValue jsFileArray = js->engine.newArray((uint)fileCount);
     repeat(int, i, fileCount)
         jsFileArray.setProperty((uint)i, mResult.mFiles.indexKey(i).text());
     jsObj.setProperty("arrFiles", jsFileArray);
 
     //传入符号列表
-    QJSValue jsSymbolArray = js->newArray((uint)symbolCount);
+    QJSValue jsSymbolArray = js->engine.newArray((uint)symbolCount);
     repeat(int, i, symbolCount) {
         FileSymbol fs = mResult.mSymbols.indexKey(i);
-        QJSValue jsSymbol = js->newObject();
+        QJSValue jsSymbol = js->engine.newObject();
         jsSymbol.setProperty("fileId", fs.fileId);
         jsSymbol.setProperty("str", fs.str);
         jsSymbolArray.setProperty((uint)i, jsSymbol);
@@ -774,11 +768,11 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     jsObj.setProperty("arrSymbols", jsSymbolArray);
 
     //传入语义动作
-    QJSValue jsActionArray = js->newArray((uint)actionCount);
+    QJSValue jsActionArray = js->engine.newArray((uint)actionCount);
     repeat(int, i, actionCount) {
         FileAction fa = mResult.mActions.indexKey(i);
         const ActionInfo &info = mResult.mActionsInfo[i];
-        QJSValue jsAction = js->newObject();
+        QJSValue jsAction = js->engine.newObject();
         jsAction.setProperty("fileId", fa.fileId);
         jsAction.setProperty("name", fa.str);
         jsAction.setProperty("text", info.val);
@@ -787,22 +781,22 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     jsObj.setProperty("arrActions", jsActionArray);
 
     //传入产生式
-    QJSValue jsProdsArray = js->newArray((uint)symbolCount);
+    QJSValue jsProdsArray = js->engine.newArray((uint)symbolCount);
     repeat(int, i, symbolCount) {   //遍历所有的符号
         Prods &prods = mResult.mProds[i];     //该符号的所有产生式
         int prodsSize = prods.size();   //产生式数量
-        QJSValue jsProdArray = js->newArray((uint)prodsSize);
+        QJSValue jsProdArray = js->engine.newArray((uint)prodsSize);
         int index = 0;
         for(auto iter = prods.begin(); iter != prods.end(); ++iter) {   //遍历该符号的所有产生式
             const Prod &prod = *iter;   //其中一个产生式
             int size = prod.symbols.size() + prod.actions.size();   //结果大小
-            QJSValue jsSymbolArray = js->newArray((uint)size);
+            QJSValue jsSymbolArray = js->engine.newArray((uint)size);
 
             //将产生式符号和语义动作加入到jsSymbolArray中
             int start = 0;
             int pos = 0;
             auto addElement = [js, &jsSymbolArray, &pos](int value, bool isSymbol) {    //lambda，用于添加元素
-                QJSValue jsElement = js->newObject();
+                QJSValue jsElement = js->engine.newObject();
                 jsElement.setProperty("value", value);
                 jsElement.setProperty("isSymbol", isSymbol);
                 jsSymbolArray.setProperty((uint)pos, jsElement);
@@ -826,17 +820,17 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     jsObj.setProperty("arrProds", jsProdsArray);
 
     //传入能否推导出空串
-    QJSValue jsNilArray = js->newArray((uint)symbolCount);
+    QJSValue jsNilArray = js->engine.newArray((uint)symbolCount);
     repeat(int, i, symbolCount)
         jsNilArray.setProperty((uint)i, mResult.mSymbolsNil[i]);
     jsObj.setProperty("arrSymbolNil", jsNilArray);
 
     //传入FIRST集
-    QJSValue jsFirstSetArray = js->newArray((uint)nonterminalCount);
+    QJSValue jsFirstSetArray = js->engine.newArray((uint)nonterminalCount);
     for(int i = 0; i < nonterminalCount; i++) {   //遍历所有非终结符
         const SymbolVec &symbols = mResult.mFirstSet[i];        //该符号的FIRST集
         int count = symbols.size();
-        QJSValue jsSymbols = js->newArray((uint)count);
+        QJSValue jsSymbols = js->engine.newArray((uint)count);
         repeat(int, j, count)
             jsSymbols.setProperty((uint)j, symbols[j]);
         jsFirstSetArray.setProperty((uint)i, jsSymbols);
@@ -844,11 +838,11 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     jsObj.setProperty("arrFirstSet", jsFirstSetArray);
 
     //传入FOLLOW集
-    QJSValue jsFollowSetArray = js->newArray((uint)nonterminalCount);
+    QJSValue jsFollowSetArray = js->engine.newArray((uint)nonterminalCount);
     for(int i = 0; i < nonterminalCount; i++) {     //遍历所有非终结符
         const SymbolVec &symbols = mResult.mFollowSet[i];   //该符号的FOLLOW集
         int count = symbols.size();
-        QJSValue jsSymbols = js->newArray((uint)count);
+        QJSValue jsSymbols = js->engine.newArray((uint)count);
         repeat(int, j, count)
             jsSymbols.setProperty((uint)j, symbols[j]);
         jsFollowSetArray.setProperty((uint)i, jsSymbols);
@@ -856,25 +850,25 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     jsObj.setProperty("arrFollowSet", jsFollowSetArray);
 
     //传入SELECT集
-    QJSValue jsSelectSetsArray = js->newArray((uint)nonterminalCount);
+    QJSValue jsSelectSetsArray = js->engine.newArray((uint)nonterminalCount);
     for(int i = 0; i < nonterminalCount; i++) {     //遍历所有非终结符
         const SelectSets &selectSets = mResult.mSelectSets[i];  //该符号的所有SELECT集
         int selectSetCount = selectSets.size();     //该符号的SELECT集数量
-        QJSValue jsSelectSets = js->newArray((uint)selectSetCount);
+        QJSValue jsSelectSets = js->engine.newArray((uint)selectSetCount);
         repeat(int, j, selectSetCount) {    //遍历该符号的所有SELECT集
             const SelectSet &selectSet = selectSets[j];           //当前SELECT集
             int prodSize = selectSet.prod.symbols.size() + selectSet.prod.actions.size();   //产生式元素数量
             int symbolsSize = selectSet.symbols.size();     //SELECT集符号数量
 
-            QJSValue jsSelectSet = js->newObject();
-            QJSValue jsProd = js->newArray((uint)prodSize);
-            QJSValue jsSymbols = js->newArray((uint)symbolsSize);
+            QJSValue jsSelectSet = js->engine.newObject();
+            QJSValue jsProd = js->engine.newArray((uint)prodSize);
+            QJSValue jsSymbols = js->engine.newArray((uint)symbolsSize);
 
             //将产生式的所有元素添加到jsProd中
             int index = 0;
             int start = 0;
             auto fnAddElement = [js, &jsProd, &index](int value, bool isSymbol) {   //lambda，用于添加元素
-                QJSValue jsElement = js->newObject();
+                QJSValue jsElement = js->engine.newObject();
                 jsElement.setProperty("value", value);
                 jsElement.setProperty("isSymbol", isSymbol);
                 jsProd.setProperty((uint)index, jsElement);
@@ -915,11 +909,11 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     dialog.delayedVerify(800);
     bool terminate = false;
     connect(&dialog, &DelayedVerifyDialog::accepted, [this, js, &terminate] {
-        js->onTerminateProcess();
+        js->engine.onTerminateProcess();
         terminate = true;
         mResult.mIssues << Issue(Issue::Error, tr("JS terminated in first execution"));
     });
-    QJSValue result = js->terminableEvaluate(total);
+    QJSValue result = js->engine.terminableEvaluate(total);
     if(terminate)
         return;
     if(result.isError()) {
@@ -948,28 +942,12 @@ void Parser_::parseOutput(const CanonicalFilePath &cFilePath, const QString &tag
     //             start = match.capturedEnd();
     //             QString name = match.captured(1);
     //             QString arg = match.captured(2);
-                
-    //             int argFileId = -1;
-    //             QString argName;
-    //             int splitIndex = arg.indexOf(':');
-    //             if(splitIndex == -1) {
-    //                 argName = arg;
-    //             } else {
-    //                 QString argFileAbbre = arg.left(splitIndex);
-    //                 auto iter = mResult.mFileRels.find({ fileId, argFileAbbre });
-    //                 if(iter == mResult.mFileRels.end()) {
-    //                     mResult.mIssues << Issue(Issue::Error, tr("Unknown "));
-    //                     continue;
-    //                 }
-
-    //                 argName = arg.right(arg.length() - splitIndex - 1);
-    //             }
-
+    //             FileElement element = transFileElement(fileId, arg);
 
     //             if(name == "js") {  //如果是调用js
     //                 bool hasFn = false;     //标记在js中是否有该函数
     //                 if(js) {
-    //                     QJSValue jsValueFn = js->globalObject().property(arg);   //得到arg在js中对应的内容
+    //                     QJSValue jsValueFn = js->engine.globalObject().property(arg);   //得到arg在js中对应的内容
     //                     if(jsValueFn.isCallable()) {    //如果可以作为函数调用
     //                         hasFn = true;
     //                         QJSValue jsRes = jsValueFn.call();

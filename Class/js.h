@@ -24,11 +24,11 @@ private:
     int mEvaluateLineNumber;
 };
 
-class JS : public QJSEngine
+class JSEngine : public QJSEngine
 {
     Q_OBJECT
 public:
-    JS(QObject *parent = nullptr);
+    JSEngine(QObject *parent = nullptr);
 
     QJSValue terminableEvaluate(const QString &program, const QString &fileName = QString(), int lineNumber = 1);
 

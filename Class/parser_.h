@@ -160,7 +160,7 @@ public:
     // 语义动作信息
     struct ActionInfo { DeclarePos declarePos; QString val; bool used; };
 
-    //产生式相关
+    // 产生式相关
     typedef QVector<int> SymbolVec;         //符号列表
     struct ProdAction { int pos, id; };     //语义动作
     struct Prod     //产生式
@@ -173,9 +173,13 @@ public:
     typedef QList<Prod> Prods;
     typedef QMap<int, Prods> MapProds;
 
-    //SELECT集
+    // SELECT集
     struct SelectSet { SymbolVec symbols; const Prod &prod; };
     typedef QVector<SelectSet> SelectSets;
+
+    // JSEngine和JSObject
+    struct JS { JSEngine engine; JSObject obj; };
+    struct JSDebugMessage { int fileId; QString text; };
 
     // 用于存储总结果
     class TotalResult
@@ -200,7 +204,15 @@ public:
         const QVector<SymbolVec>& followSet() const { return mFollowSet; }
         const QVector<SelectSets>& selectSets() const { return mSelectSets; }
 
-        QString jsDebugMessage() const { if(mJsObj) return mJsObj->debugMessage(); }
+        QList<JSDebugMessage> jsDebugMessage() const {
+            QList<JSDebugMessage> jsDebugMsgList;
+            for(auto iter = mJS.cbegin(); iter != mJS.cend(); ++iter) {
+                const JSObject &obj = (*iter)->obj;
+                if(obj.hasDebugMessage())
+                    jsDebugMsgList << JSDebugMessage{ iter.key(), iter.value()->obj.debugMessage() };
+            }
+            return jsDebugMsgList;
+        }
 
         bool isNonterminal(int id) { return id >= 0 && id <= mNonterminalMaxIndex; }
         bool isTerminal(int id) { return id > mNonterminalMaxIndex && id <= mTerminalMaxIndex; }
@@ -229,7 +241,6 @@ public:
         QVector<SelectSets> mSelectSets;    //所有SELECT集
 
         QMap<int, JS*> mJS;
-        JSObject *mJsObj = nullptr;
     };
 
     Parser_(const QString &filePath, QWidget *dialogParent = nullptr, QObject *parent = nullptr);

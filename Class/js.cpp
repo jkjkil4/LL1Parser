@@ -16,11 +16,11 @@ void ThreadEvaluate::run() {
 }
 
 
-JS::JS(QObject *parent) : QJSEngine(parent), threadEvaluate(this) {
-    connect(&threadEvaluate, &ThreadEvaluate::evaluateResultReady, this, &JS::onEvaluateResultReady);
+JSEngine::JSEngine(QObject *parent) : QJSEngine(parent), threadEvaluate(this) {
+    connect(&threadEvaluate, &ThreadEvaluate::evaluateResultReady, this, &JSEngine::onEvaluateResultReady);
 }
 
-QJSValue JS::terminableEvaluate(const QString &program, const QString &fileName, int lineNumber) {
+QJSValue JSEngine::terminableEvaluate(const QString &program, const QString &fileName, int lineNumber) {
     jsResult = QJSValue();
     threadEvaluate.setEvaluateArgs(program, fileName, lineNumber);
     threadEvaluate.start();
@@ -30,12 +30,12 @@ QJSValue JS::terminableEvaluate(const QString &program, const QString &fileName,
     return jsResult;
 }
 
-void JS::onTerminateProcess() {
+void JSEngine::onTerminateProcess() {
     threadEvaluate.terminate();
     threadEvaluate.wait();
     eventLoop.quit();
 }
-void JS::onEvaluateResultReady(const QJSValue &result) {
+void JSEngine::onEvaluateResultReady(const QJSValue &result) {
     jsResult = result;
     eventLoop.quit();
 }
