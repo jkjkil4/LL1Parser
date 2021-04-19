@@ -24,6 +24,24 @@ private:
     int mEvaluateLineNumber;
 };
 
+class ThreadCall : public QThread
+{
+    Q_OBJECT
+    void run() override;
+public:
+    explicit ThreadCall(QJSEngine *jsEngine, QObject *parent = nullptr);
+
+    void setCallVal(const QJSValue &callVal);
+
+signals:
+    void callResultReady(const QJSValue &result);
+
+private:
+    QJSEngine *mJsEngine;
+
+    QJSValue mCallVal;
+};
+
 class JSEngine : public QJSEngine
 {
     Q_OBJECT
@@ -31,15 +49,18 @@ public:
     JSEngine(QObject *parent = nullptr);
 
     QJSValue terminableEvaluate(const QString &program, const QString &fileName = QString(), int lineNumber = 1);
+    QJSValue terminableCall(const QJSValue &jsCallVal);
 
 public slots:
-    void onTerminateProcess();
+    void onTerminateEvaluate();
+    void onTerminateCall();
 
 private slots:
-    void onEvaluateResultReady(const QJSValue &result);
+    void onResultReady(const QJSValue &result);
 
 private:
     ThreadEvaluate threadEvaluate;
+    ThreadCall threadCall;
     QEventLoop eventLoop;
 
     QJSValue jsResult;

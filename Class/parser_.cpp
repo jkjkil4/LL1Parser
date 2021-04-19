@@ -905,13 +905,13 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
             total += part.text + '\n';
 
     //执行js脚本    
-    DelayedVerifyDialog dialog(trJSTerminate, mDialogParent);
+    DelayedVerifyDialog dialog(cFilePath + '\n' + trJSTerminate, mDialogParent);
     dialog.delayedVerify(800);
     bool terminate = false;
-    connect(&dialog, &DelayedVerifyDialog::accepted, [this, js, &terminate] {
-        js->engine.onTerminateProcess();
+    connect(&dialog, &DelayedVerifyDialog::accepted, [this, &cFilePath, js, &terminate] {
+        js->engine.onTerminateEvaluate();
         terminate = true;
-        mResult.mIssues << Issue(Issue::Error, tr("JS terminated in first execution"));
+        mResult.mIssues << Issue(Issue::Error, tr("JS terminated in first execution"), cFilePath);
     });
     QJSValue result = js->engine.terminableEvaluate(total);
     if(terminate)
@@ -922,57 +922,95 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
         mResult.mIssues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(result.toString()), cFilePath, row, -1);
     }
 }
-void Parser_::parseOutput(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
-    // int fileId = mResult.mFiles.keyIndex(cFilePath);
+void Parser_::parseOutput(const CanonicalFilePath &cFilePath, const QString &, const Divideds &divideds) {
+    int fileId = mResult.mFiles.keyIndex(cFilePath);
+    QString path = QFileInfo(cFilePath).path();
+    QString trJSCallTerminate = tr("JS runs too long when calling \"%1\",\n"
+                                "Do you want to force it to terminate?\n"
+                                "If you continue waiting, it may finish.");
 
-    // QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式，用于匹配格式化操作
-    // for(const Divided &divided : divideds.map()) {    //遍历所有Divided，得到所有要输出的内容
-    //     QString text;   //用于得到当前内容
-    //     bool hasPrev = false;
-    //     for(const Divided::Part &part : divided.parts) {
-    //         if(hasPrev) {
-    //             text += '\n';
-    //         } else hasPrev = true;
-    //         QString res;    //用于得到当前行的结果
-    //         int start = 0;
-    //         QRegularExpressionMatchIterator matchIter = ruleOutputFormat.globalMatch(part.text);    //使用正则表达式匹配该行
-    //         while(matchIter.hasNext()) {    //遍历所有匹配
-    //             QRegularExpressionMatch match = matchIter.next();
-    //             res += part.text.mid(start, match.capturedStart() - start);
-    //             start = match.capturedEnd();
-    //             QString name = match.captured(1);
-    //             QString arg = match.captured(2);
-    //             FileElement element = transFileElement(fileId, arg);
+    QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式，用于匹配格式化操作
+    const QMap<QString, Divided> &map = divideds.map();
+    for(auto iter = map.cbegin(); iter != map.cend(); ++iter) {    //遍历所有Divided，得到所有要输出的内容
+        const Divided &divided = iter.value();
+        QString text;   //用于得到当前内容
+        bool hasPrev = false;
+        for(const Divided::Part &part : divided.parts) {
+            if(hasPrev) {
+                text += '\n';
+            } else hasPrev = true;
+            QString res;    //用于得到当前行的结果
+            int start = 0;
+            QRegularExpressionMatchIterator matchIter = ruleOutputFormat.globalMatch(part.text);    //使用正则表达式匹配该行
+            while(matchIter.hasNext()) {    //遍历所有匹配
+                QRegularExpressionMatch match = matchIter.next();
+                res += part.text.mid(start, match.capturedStart() - start);
+                start = match.capturedEnd();
+                QString name = match.captured(1);
+                QString arg = match.captured(2);
+                FileElement element = transFileElement(fileId, arg);
 
-    //             if(name == "js") {  //如果是调用js
-    //                 bool hasFn = false;     //标记在js中是否有该函数
-    //                 if(js) {
-    //                     QJSValue jsValueFn = js->engine.globalObject().property(arg);   //得到arg在js中对应的内容
-    //                     if(jsValueFn.isCallable()) {    //如果可以作为函数调用
-    //                         hasFn = true;
-    //                         QJSValue jsRes = jsValueFn.call();
-    //                         if(jsRes.isError()) {   //如果有错，则输出错误信息
-    //                             int dividedRow = jsRes.property("lineNumber").toInt() - 1;
-    //                             int row = findTrueRowByDividedRow(jsDivideds, dividedRow);
-    //                             mResult.mIssues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(jsRes.toString()), cFilePath, row, -1);
-    //                         } else res += jsValueFn.call().toString(); //将调用的结果附加到res中
-    //                     }
-    //                 }
-    //                 if(!hasFn) {    //如果没有对应函数，则报错
-    //                     issues << Issue(Issue::Error, tr("Unknown js function \"%1\"").arg(arg));
-    //                 }
-    //             } else if(name == "symbol") {   //如果是以符号数字替换
-    //                 int symbol = mapSymbols.value(arg, -1); //查找arg对应的数字
-    //                 if(symbol != -1) {  //如果有对应的数字，则附加到res中，否则报错
-    //                     res += QString::number(symbol);
-    //                 } else issues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(arg));
-    //             } else {
-    //                 issues << Issue(Issue::Error, tr("Unknown \"%1\"").arg(name), part.row);    //如果name未知，则报错
-    //             }
-    //         }
-    //         res += part.text.mid(start, part.text.length() - start);
-    //         text += res;
-    //     }
-    //     listOutput << Output{ divided.arg, text };
-    // }
+                if(name == "js") {  //如果是调用js
+                    bool hasFn = false;     //标记在js中是否有该函数
+                    JS *js = mResult.mJS.value(element.fileId, nullptr);
+                    if(js) {
+                        CanonicalFilePath cOtherFilePath = mResult.mFiles.indexKey(element.fileId);
+                        const Divideds &jsDivideds = mResult.mFilesDivideds.value(cOtherFilePath).value("JS");
+                        QJSValue jsValueFn = js->engine.globalObject().property(element.str);   //得到arg在js中对应的内容
+                        if(jsValueFn.isCallable()) {    //如果可以作为函数调用
+                            hasFn = true;
+
+                            DelayedVerifyDialog dialog(cFilePath + '\n' + trJSCallTerminate.arg(arg), mDialogParent);
+                            dialog.delayedVerify(800);
+                            bool terminate = false;
+                            connect(&dialog, &DelayedVerifyDialog::accepted, [this, &cFilePath, &part, start, &arg, js, &terminate] {
+                                js->engine.onTerminateCall();
+                                terminate = true;
+                                mResult.mIssues << Issue(Issue::Error, tr("JS terminated when calling \"%1\"").arg(arg), 
+                                    cFilePath, part.row, part.col + start);
+                            });
+                            QJSValue jsRes = js->engine.terminableCall(jsValueFn);
+                            if(terminate)
+                                return;
+
+                            if(jsRes.isError()) {   //如果有错，则输出错误信息
+                                int dividedRow = jsRes.property("lineNumber").toInt() - 1;
+                                int row = findTrueRowByDividedRow(jsDivideds, dividedRow);
+                                mResult.mIssues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(jsRes.toString()), 
+                                    cOtherFilePath, row);
+                            } else res += jsValueFn.call().toString(); //将调用的结果附加到res中
+                        }
+                    }
+                    if(!hasFn) {    //如果没有对应函数，则报错
+                        mResult.mIssues << Issue(Issue::Error, tr("Unknown js function \"%1\"").arg(arg),
+                            cFilePath, part.row, part.col + start);
+                    }
+                } else if(name == "symbol") {   //如果是以符号数字替换
+                    int symbol = mResult.mSymbols.keyIndex(element); //查找arg对应的数字
+                    if(symbol != -1) {  //如果有对应的数字，则附加到res中，否则报错
+                        res += QString::number(symbol);
+                    } else {
+                        mResult.mIssues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(arg),
+                            cFilePath, part.row, part.col + start);
+                    }
+                } else {
+                    mResult.mIssues << Issue(Issue::Error, tr("Unknown \"%1\"").arg(name),
+                        cFilePath, part.row, part.col + start);    //如果name未知，则报错
+                }
+            }
+            res += part.text.mid(start, part.text.length() - start);
+            text += res;
+        }
+        mResult.mOutput << Output{ path, iter.key(), text };
+    }
+}
+
+QList<Parser_::JSDebugMessage> Parser_::Result::jsDebugMessage() const {
+    QList<JSDebugMessage> jsDebugMsgList;
+    for(auto iter = mJS.cbegin(); iter != mJS.cend(); ++iter) {
+        const JSObject &obj = (*iter)->obj;
+        if(obj.hasDebugMessage())
+            jsDebugMsgList << JSDebugMessage{ iter.key(), iter.value()->obj.debugMessage() };
+    }
+    return jsDebugMsgList;
 }

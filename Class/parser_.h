@@ -181,8 +181,15 @@ public:
     struct JS { JSEngine engine; JSObject obj; };
     struct JSDebugMessage { int fileId; QString text; };
 
+    // 输出内容
+    struct Output
+    {
+        QString basePath, path;
+        QString text;
+    };
+
     // 用于存储总结果
-    class TotalResult
+    class Result
     {
     public:
         friend class Parser_;
@@ -204,15 +211,8 @@ public:
         const QVector<SymbolVec>& followSet() const { return mFollowSet; }
         const QVector<SelectSets>& selectSets() const { return mSelectSets; }
 
-        QList<JSDebugMessage> jsDebugMessage() const {
-            QList<JSDebugMessage> jsDebugMsgList;
-            for(auto iter = mJS.cbegin(); iter != mJS.cend(); ++iter) {
-                const JSObject &obj = (*iter)->obj;
-                if(obj.hasDebugMessage())
-                    jsDebugMsgList << JSDebugMessage{ iter.key(), iter.value()->obj.debugMessage() };
-            }
-            return jsDebugMsgList;
-        }
+        QList<JSDebugMessage> jsDebugMessage() const;
+        const QList<Output>& outputList() const { return mOutput; }
 
         bool isNonterminal(int id) { return id >= 0 && id <= mNonterminalMaxIndex; }
         bool isTerminal(int id) { return id > mNonterminalMaxIndex && id <= mTerminalMaxIndex; }
@@ -241,11 +241,12 @@ public:
         QVector<SelectSets> mSelectSets;    //所有SELECT集
 
         QMap<int, JS*> mJS;
+        QList<Output> mOutput;
     };
 
     Parser_(const QString &filePath, QWidget *dialogParent = nullptr, QObject *parent = nullptr);
     ~Parser_() override;
-    const TotalResult& result() const { return mResult; }
+    const Result& result() const { return mResult; }
 
 signals:
     void beforeReadFile(const QString &filePath);
@@ -266,10 +267,10 @@ private:
     void parseFollowSet();
     void parseSelectSets();
     void parseJS(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
-    void parseOutput(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    void parseOutput(const CanonicalFilePath &cFilePath, const QString &, const Divideds &divideds);
 
     QWidget *mDialogParent;
-    TotalResult mResult;
+    Result mResult;
 };
 
 
