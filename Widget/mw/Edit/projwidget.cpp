@@ -163,9 +163,9 @@ void ProjWidget::onParse() {
         if(!issue.filePath.isEmpty())
             text += QFileInfo(issue.filePath).fileName() + ' ';
         if(issue.row != -1) {
-            text += tr("Row:%1").arg(issue.row) + ' ';
+            text += tr("Row:%1").arg(issue.row + 1) + ' ';
             if(issue.col != -1)
-                text += tr("Col:%1").arg(issue.col) + ' ';
+                text += tr("Col:%1").arg(issue.col + 1) + ' ';
         }
 
         //添加
