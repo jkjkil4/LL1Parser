@@ -148,20 +148,35 @@ void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
 void ProjWidget::onParse() {
     mBtnParse->setEnabled(false);
 
-    mOutputWidget->clear();
+    mOutputWidget->clear();     //清除原有信息
     QListWidget *errListWidget = mOutputWidget->errListWidget();
     QListWidget *outputListWidget = mOutputWidget->outputListWidget();
 
-    QTime t;
+    QTime t;    //用于计时（包括分析时间和输出文件时间）
     t.start();
 
     Parser parser(mProjPath, this);
     Parser::Result &result = parser.result();
-    if(!result.issues().hasError()) {
+    if(!result.issues().hasError()) {   //如果没有错误，则显示输出文件列表项
         QStringList paths = result.output();
         if(!paths.isEmpty()) {
             auto item = NewPlwiFn([paths] {
-                FilesWidget *widget = new FilesWidget(paths);
+                QListWidget *widget = new QListWidget;
+                
+                //遍历所有输出文件路径，向widget添加item
+                for(const QString &filePath : qAsConst(paths)) {
+                    QListWidgetItem *item = new QListWidgetItem(filePath);
+                    item->setIcon(QFileIconProvider().icon(filePath));
+                    widget->addItem(item);
+                }
+                //绑定itemDoubleClicked，以打开相应文件夹
+                connect(widget, &QListWidget::itemDoubleClicked, [](QListWidgetItem *item) {
+                    QString path = QFileInfo(item->text()).path();
+                    if(QDir().exists(path))
+                        QDesktopServices::openUrl(QUrl("file:///" + path));
+                });
+
+                //设置窗口属性
                 widget->setAttribute(Qt::WA_DeleteOnClose);
                 widget->setWindowTitle(tr("Files"));
                 widget->resize(600, 400);
@@ -169,19 +184,28 @@ void ProjWidget::onParse() {
                 widget->show();
             });
             item->setText(tr("Files have been outputed"));
-            item->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
             outputListWidget->addItem(item);
         }
     }
-    for(const Parser::Issue &issue : result.issues().list()) {
+
+    int ms = t.elapsed();
+    ProjListWidgetItem *item = new ProjListWidgetItem(tr("Elapsed time: %1ms").arg(ms));
+    item->setForeground(Qt::blue);
+    outputListWidget->insertItem(0, item);
+
+    mOutputWidget->setCurrentWidget(result.issues().hasError() ? errListWidget : outputListWidget);
+
+    QString strRow = tr("Row:%1");
+    QString strCol = tr("Col:%1");
+    for(const Parser::Issue &issue : result.issues().list()) {  //遍历错误并显示到错误列表中
         //得到文本
         QString text;
         if(!issue.filePath.isEmpty())
             text += QFileInfo(issue.filePath).fileName() + ' ';
         if(issue.row != -1) {
-            text += tr("Row:%1").arg(issue.row + 1) + ' ';
+            text += strRow.arg(issue.row + 1) + ' ';
             if(issue.col != -1)
-                text += tr("Col:%1").arg(issue.col + 1) + ' ';
+                text += strCol.arg(issue.col + 1) + ' ';
         }
 
         //添加
@@ -193,58 +217,53 @@ void ProjWidget::onParse() {
         errListWidget->addItem(item);
     }
 
-    /*Parser::parse(mEdit->document());
-    if(!Parser::hasError())
-        Parser::outputFile(mProjPath);
+    QList<Parser::JSDebugMessage> jsDebugMsg = result.jsDebugMessage();
+    if(!jsDebugMsg.isEmpty()) {     //如果有调试信息，则显示调试信息项
+        Parser::ValueMap<Parser::CanonicalFilePath> files = result.files();
+        auto item = NewPlwiFn([files, jsDebugMsg]{
+            //lambda 用于显示调试信息
+            auto fnShowMsg = [](const QString &fileName, const QString &text) {
+                QPlainTextEdit *edit = new QPlainTextEdit;
+                edit->setAttribute(Qt::WA_DeleteOnClose);
+                edit->setWindowTitle(tr("Debug Message of \"%1\"").arg(fileName));
+                edit->setPlainText(text);
+                edit->resize(400, 340);
+                j::SetFamily(edit, fontSourceCodePro.mFamily);
+                j::SetPointSize(edit, 10);
+                edit->show();
+            };
 
-    int ms = t.elapsed();
-    QListWidgetItem *item = new QListWidgetItem(tr("Elapsed time: %1ms").arg(ms));
-    item->setForeground(Qt::blue);
-    item->setData(Qt::UserRole, (int)UserRole::NoRole);
-    outputListWidget->addItem(item);
-
-    mOutputWidget->setCurrentWidget(Parser::issues.isEmpty() ? outputListWidget : errListWidget);
-
-    QString strRow = tr("Row");
-    QString strPhrase = tr("Phrase");
-    for(const Parser::Issue &issue : Parser::issues) {    //遍历所有问题
-        //得到文本
-        QString text;
-        if(issue.row != -1) {
-            text += strRow + ":" + QString::number(issue.row + 1) + "    ";
-            if(issue.phrase != -1)
-                text += strPhrase + ":" + QString::number(issue.phrase + 1) + "    ";
-        }
-        text += issue.what;
-
-        //添加
-        QListWidgetItem *item = new QListWidgetItem(text);
-        if(issue.userDataList.isEmpty()) {
-            if(issue.row == -1) {
-                item->setData(Qt::UserRole, (int)UserRole::NoRole);
+            //如果只有一个文件有调试信息，则直接显示，否则弹出列表进行选择
+            if(jsDebugMsg.size() == 1) {
+                const Parser::JSDebugMessage &msg = jsDebugMsg[0];
+                fnShowMsg(QFileInfo(files.indexKey(msg.fileId)).fileName(), msg.text);
             } else {
-                item->setData(Qt::UserRole, (int)UserRole::MoveDocumentCursor);
-                item->setData(Qt::UserRole + 1, QPoint(qMax(0, issue.phrase), issue.row));
+                QListWidget *widget = new QListWidget;
+
+                //遍历所有调试信息，向widget添加item
+                for(const Parser::JSDebugMessage &msg : qAsConst(jsDebugMsg)) {
+                    QListWidgetItem *item = new QListWidgetItem(files.indexKey(msg.fileId));
+                    item->setData(Qt::UserRole, msg.text);
+                    widget->addItem(item);
+                }
+                //绑定itemDoubleClicked，以显示对应的调试信息
+                connect(widget, &QListWidget::itemDoubleClicked, [fnShowMsg](QListWidgetItem *item) {
+                    fnShowMsg(QFileInfo(item->text()).fileName(), item->data(Qt::UserRole).toString());
+                });
+
+                //设置窗口属性
+                widget->setAttribute(Qt::WA_DeleteOnClose);
+                widget->setWindowTitle(tr("Debug Message"));
+                widget->resize(600, 400);
+                widget->setMinimumSize(300, 200);
+                widget->show();
             }
-        } else {
-            int offset = 0;
-            for(const QVariant &variant : qAsConst(issue.userDataList)) {
-                item->setData(Qt::UserRole + offset, variant);
-                offset++;
-            }
-        }
-        item->setIcon(issue.icon());
-        errListWidget->addItem(item);
+        });
+        item->setText(tr("JS debug message"));
+        outputListWidget->addItem(item);
     }
 
-    if(!Parser::jsDebugMessage.isEmpty()) {
-        QString strJSDebugMsg = tr("JS debug message");
-        QListWidgetItem *itemJSDebug = new QListWidgetItem(strJSDebugMsg + tr("(Double click to show detail)"));
-        itemJSDebug->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
-        itemJSDebug->setData(Qt::UserRole + 1, strJSDebugMsg);
-        itemJSDebug->setData(Qt::UserRole + 2, Parser::jsDebugMessage);
-        outputListWidget->addItem(itemJSDebug);
-    }
+    /******.................
 
     if(!Parser::hasError()) {
         QString strDbClick = tr("(Double click to show detail)");

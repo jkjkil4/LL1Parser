@@ -9,14 +9,15 @@
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QTime>
-#include <QProcess>
+//#include <QProcess>
+#include <QDesktopServices>
+#include <QFileIconProvider>
 
 #include <Lib/PlainButton/plainbutton.h>
 #include "Widget/Other/colorwidget.h"
 #include "notewidget.h"
 #include "plaintextedit.h"
 #include "outputwidget.h"
-#include "fileswidget.h"
 #include "header.h"
 //#include "Class/Parser/parser.h"
 #include "Class/Parser/parser.h"
