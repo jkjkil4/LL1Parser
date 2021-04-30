@@ -15,12 +15,13 @@ public:
     explicit OutputWidget(QWidget *parent = nullptr);
 
     void setCurrentWidget(QWidget *widget);
+    void clear();
 
     QListWidget* errListWidget() const { return mErrListWidget; }
     QListWidget* outputListWidget() const { return mOutputListWidget; }
 
 private:
-    QTabWidget *tabWidget = new QTabWidget;
+    QTabWidget *mTabWidget = new QTabWidget;
 
     QListWidget *mErrListWidget = new QListWidget;
     QListWidget *mOutputListWidget = new QListWidget;

@@ -91,71 +91,88 @@ void ProjWidget::setSaved(bool _isSaved) {
 void ProjWidget::updateTr() {
     mBtnParse->setText(tr("Parse"));
 }
-
+#include <QDebug>
 void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
-    switch(item->data(Qt::UserRole).toInt()) {
-    case (int)UserRole::ShowPlainText: {
-        QPlainTextEdit *textWidget = new QPlainTextEdit;
-        textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
-        textWidget->setPlainText(item->data(Qt::UserRole + 2).toString());
-        textWidget->setReadOnly(true);
-        textWidget->setLineWrapMode(QPlainTextEdit::NoWrap);
-        textWidget->setAttribute(Qt::WA_DeleteOnClose);
-        textWidget->setMinimumSize(300, 300);
-        j::SetPointSize(textWidget, 11);
-        j::SetFamily(textWidget, fontSourceCodePro.mFamily);
-        textWidget->show();
-        break;
-    }
-    case (int)UserRole::ShowHtmlText: {
-        QTextEdit *textWidget = new QTextEdit;
-        textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
-        textWidget->setHtml(item->data(Qt::UserRole + 2).toString());
-        textWidget->setReadOnly(true);
-        textWidget->setLineWrapMode(QTextEdit::NoWrap);
-        textWidget->setAttribute(Qt::WA_DeleteOnClose);
-        textWidget->setMinimumSize(300, 300);
-        j::SetPointSize(textWidget, 11);
-        j::SetFamily(textWidget, fontSourceCodePro.mFamily);
-        textWidget->show();
-        break;
-    }
-    case (int)UserRole::MoveDocumentCursor: {
-        QPoint pos = item->data(Qt::UserRole + 1).toPoint();
-        if(pos.y() >= 0 && pos.y() < mEdit->document()->lineCount()) {
-            QTextBlock block = mEdit->document()->findBlockByLineNumber(pos.y());
-            QTextCursor tc = mEdit->textCursor();
-            tc.setPosition(block.position());
-            mEdit->setTextCursor(tc);
-            mEdit->setFocus();
-        }
-        break;
-    }
-    case (int)UserRole::OpenFolder: {
-#ifdef Q_OS_WIN
-        QString path = item->data(Qt::UserRole + 1).toString();
-        if(QDir().exists(path))
-            QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << path);
-#else
-        QMessageBox::information(this, "", tr("This function is not supported in this operating system"));
-#endif
-    }
-    }
+    ProjListWidgetItem *uItem = (ProjListWidgetItem*)item;
+    emit processItemDbClick(uItem);
+//     switch(item->data(Qt::UserRole).toInt()) {
+//     case (int)UserRole::ShowPlainText: {
+//         QPlainTextEdit *textWidget = new QPlainTextEdit;
+//         textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
+//         textWidget->setPlainText(item->data(Qt::UserRole + 2).toString());
+//         textWidget->setReadOnly(true);
+//         textWidget->setLineWrapMode(QPlainTextEdit::NoWrap);
+//         textWidget->setAttribute(Qt::WA_DeleteOnClose);
+//         textWidget->setMinimumSize(300, 300);
+//         j::SetPointSize(textWidget, 11);
+//         j::SetFamily(textWidget, fontSourceCodePro.mFamily);
+//         textWidget->show();
+//         break;
+//     }
+//     case (int)UserRole::ShowHtmlText: {
+//         QTextEdit *textWidget = new QTextEdit;
+//         textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
+//         textWidget->setHtml(item->data(Qt::UserRole + 2).toString());
+//         textWidget->setReadOnly(true);
+//         textWidget->setLineWrapMode(QTextEdit::NoWrap);
+//         textWidget->setAttribute(Qt::WA_DeleteOnClose);
+//         textWidget->setMinimumSize(300, 300);
+//         j::SetPointSize(textWidget, 11);
+//         j::SetFamily(textWidget, fontSourceCodePro.mFamily);
+//         textWidget->show();
+//         break;
+//     }
+//     case (int)UserRole::MoveDocumentCursor: {
+//         QPoint pos = item->data(Qt::UserRole + 1).toPoint();
+//         if(pos.y() >= 0 && pos.y() < mEdit->document()->lineCount()) {
+//             QTextBlock block = mEdit->document()->findBlockByLineNumber(pos.y());
+//             QTextCursor tc = mEdit->textCursor();
+//             tc.setPosition(block.position());
+//             mEdit->setTextCursor(tc);
+//             mEdit->setFocus();
+//         }
+//         break;
+//     }
+//     case (int)UserRole::OpenFolder: {
+// #ifdef Q_OS_WIN
+//         QString path = item->data(Qt::UserRole + 1).toString();
+//         if(QDir().exists(path))
+//             QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << path);
+// #else
+//         QMessageBox::information(this, "", tr("This function is not supported in this operating system"));
+// #endif
+//     }
+//     }
 }
 
 void ProjWidget::onParse() {
     mBtnParse->setEnabled(false);
 
+    mOutputWidget->clear();
     QListWidget *errListWidget = mOutputWidget->errListWidget();
     QListWidget *outputListWidget = mOutputWidget->outputListWidget();
-    errListWidget->clear();
-    outputListWidget->clear();
 
     QTime t;
     t.start();
 
-    {
-        Parser_ t(mProjPath, this);
+    Parser_ parser(mProjPath, this);
+    const Parser_::Result &result = parser.result();
+    for(const Parser_::Issue &issue : result.issues().list()) {
+        //得到文本
+        QString text;
+        if(!issue.filePath.isEmpty())
+            text += QFileInfo(issue.filePath).fileName() + ' ';
+        if(issue.row != -1) {
+            text += tr("Row:%1").arg(issue.row) + ' ';
+            if(issue.col != -1)
+                text += tr("Col:%1").arg(issue.col) + ' ';
+        }
+
+        //添加
+        ProjListWidgetItem *item = issue.newItem();
+        item->setIcon(issue.icon());
+        item->setText(text.isEmpty() ? issue.what : "[ " + text + "] " + issue.what);
+        errListWidget->addItem(item);
     }
 
     /*Parser::parse(mEdit->document());

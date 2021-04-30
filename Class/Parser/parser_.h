@@ -10,6 +10,7 @@
 #include "js.h"
 #include "jsobject.h"
 #include "Widget/Dialog/delayedverifydialog.h"
+#include "Class/ProjListWidgetItem/projlistwidgetitem.h"
 #include <Lib/header.h>
 
 
@@ -67,14 +68,37 @@ public:
             Error = QStyle::SP_MessageBoxCritical
         } type;         //类型
         QString what;   //描述
-        QString fileName;   //文件名称
+        QString filePath;   //文件名称
         int row = -1;   //行
         int col = -1;   //列
+
+        Issue(Type type, const QString &what, QString filePath = "") : type(type), what(what), filePath(filePath) {}
+        Issue(Type type, const QString &what, const QString &filePath, int row, int col = -1)
+            : type(type), what(what), filePath(filePath), row(row), col(col) 
+        {
+            item = new PLWI_MoveDocCursor(filePath, row, col);
+        }
+        Issue(Type type, const QString &what, ProjListWidgetItem *item)
+            : type(type), what(what), item(item) {}
+
+        void copyFrom(const Issue &other) {
+            type = other.type;
+            what = other.what;
+            filePath = other.filePath;
+            row = other.row;
+            col = other.col;
+            item = other.newItem();
+        }
+        Issue(const Issue &other) { copyFrom(other); }
+        Issue& operator=(const Issue &other) { copyFrom(other); return *this; }
+
+        ~Issue() { j::SafeDelete(item); }
         
-        Issue(Type type, const QString &what, const QString &fileName = "", int row = -1, int col = -1)
-            : type(type), what(what), fileName(fileName), row(row), col(col) {}
-        
+        ProjListWidgetItem* newItem() const { return item ? item->copy() : nullptr; }
         QIcon icon() const { return QApplication::style()->standardIcon((QStyle::StandardPixmap)type); }
+    
+    private:
+        ProjListWidgetItem *item = nullptr;
     };
 
     /*  对QList<Issue>的封装

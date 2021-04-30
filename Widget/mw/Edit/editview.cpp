@@ -17,42 +17,39 @@ EditView::EditView(QWidget *parent) : MainWindowView(parent)
     setLayout(layMain);
 }
 
-bool EditView::open(const QString &projPath) {
+ProjWidget* EditView::open(const QString &projPath) {
     QFileInfo info(projPath);
     if(!info.exists()) {
-        QMessageBox::critical(this, tr("Error"), tr("\"%1\" dose not exists").arg(projPath));
-        return false;
+        QMessageBox::critical(this, tr("Error"), tr("\"%1\" does not exists").arg(projPath));
+        return nullptr;
     }
     QString canonicalProjPath = info.canonicalFilePath();
 
     int count = mTabWidget->count();
-    bool has = false;
     repeat(int, i, count) { //遍历所有已打开的项目
         ProjWidget *widget = (ProjWidget*)mTabWidget->widget(i);
         if(widget->projPath() == canonicalProjPath) {    //如果项目已打开
             mTabWidget->setCurrentIndex(i);  //切换到该项目
-            has = true;
-            break;
+            return widget;
         }
     }
 
-    if(!has) {  //如果项目未打开，则添加页面打开项目
-        ProjWidget *widget = new ProjWidget(canonicalProjPath);
-        if(!widget->load()) {   //如果读取失败，则提示并return
-            delete widget;
-            QMessageBox::critical(this, tr("Error"), tr("Cannot load the project \"%1\"").arg(widget->projName()));
-            return false;
-        }
-        mTabWidget->addTab(widget, " " + widget->projName() + " ");
-        mTabWidget->setCurrentWidget(widget);
-        connect(widget, &ProjWidget::stateChanged, [this, widget](bool isSaved){
-            mTabWidget->setTabText(mTabWidget->indexOf(widget), " " + (isSaved ? widget->projName() : widget->projName() + "*") + " ");
-        });
+    //如果项目未打开，则添加页面打开项目
+    ProjWidget *widget = new ProjWidget(canonicalProjPath);
+    connect(widget, &ProjWidget::processItemDbClick, this, &EditView::onProcessItemDbClick);
+    if(!widget->load()) {   //如果读取失败，则提示并return
+        delete widget;
+        QMessageBox::critical(this, tr("Error"), tr("Cannot load the project \"%1\"").arg(widget->projName()));
+        return nullptr;
     }
+    mTabWidget->addTab(widget, " " + widget->projName() + " ");
+    mTabWidget->setCurrentWidget(widget);
+    connect(widget, &ProjWidget::stateChanged, [this, widget](bool isSaved){
+        mTabWidget->setTabText(mTabWidget->indexOf(widget), " " + (isSaved ? widget->projName() : widget->projName() + "*") + " ");
+    });
 
-    return true;
+    return widget;
 }
-
 
 bool EditView::confirmClose(int index) {
     ProjWidget *widget = (ProjWidget*)mTabWidget->widget(index);
@@ -110,5 +107,9 @@ void EditView::onTabCloseRequested(int index) {
         emit changeView("HomePage");
     }
     return;
+}
+
+void EditView::onProcessItemDbClick(ProjListWidgetItem *item) {
+    item->onDoubleClicked(this);
 }
 

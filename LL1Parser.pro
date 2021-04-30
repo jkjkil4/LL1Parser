@@ -29,10 +29,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11 console
 
 SOURCES += \
-        Class/parser.cpp \
-        Class/parser_.cpp \
-        Class/js.cpp \
-        Class/jsobject.cpp \
+        Class/Parser/parser_.cpp \
+        Class/Parser/js.cpp \
+        Class/Parser/jsobject.cpp \
+        Class/ProjListWidgetItem/projlistwidgetitem.cpp \
         Class/texthighlighter.cpp \
         Widget/Dialog/newprojdialog.cpp \
         Widget/Dialog/settingsdialog.cpp \
@@ -51,10 +51,10 @@ SOURCES += \
         Widget/mainwindow.cpp
 
 HEADERS += \
-        Class/parser.h \
-        Class/parser_.h \
-        Class/js.h \
-        Class/jsobject.h \
+        Class/Parser/parser_.h \
+        Class/Parser/js.h \
+        Class/Parser/jsobject.h \
+        Class/ProjListWidgetItem/projlistwidgetitem.h \
         Class/texthighlighter.h \
         Widget/Menu/rflmenu.h \
         Widget/Other/colorwidget.h \

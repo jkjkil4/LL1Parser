@@ -17,8 +17,9 @@
 #include "plaintextedit.h"
 #include "outputwidget.h"
 #include "header.h"
-#include "Class/parser.h"
-#include "Class/parser_.h"
+//#include "Class/Parser/parser.h"
+#include "Class/Parser/parser_.h"
+#include "Class/ProjListWidgetItem/projlistwidgetitem.h"
 #include "Class/texthighlighter.h"
 
 class ProjWidget : public QWidget
@@ -41,8 +42,11 @@ public:
     VAR_GET_FUNC(projPath, mProjPath, QString)
     VAR_GET_FUNC(isSaved, mSaved, bool)
 
+    VAR_GET_FUNC(editWidget, mEdit, PlainTextEdit*)
+
 signals:
     void stateChanged(bool mSaved);    //当保存情况改变时发出的信号
+    void processItemDbClick(ProjListWidgetItem *item);
 
 private slots:
     void onListWidgetDoubleClicked(QListWidgetItem *item);

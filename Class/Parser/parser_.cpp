@@ -1,6 +1,6 @@
 #include "parser_.h"
 
-#include <QDebug>
+// #include <QDebug>
 
 Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent) 
     : QObject(parent), mDialogParent(dialogParent)
@@ -95,20 +95,20 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
         }
     }
     
-    End:
-    qDebug() << "=============================";
-    for(const Issue &issue : mResult.mIssues.list()) {
-        qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m")
-            << (issue.type == Issue::Error ? "Error" : "Warning")
-            << "\033[0m    "
-            << issue.fileName
-            << "  "
-            << issue.row
-            << "  "
-            << issue.col
-            << "  "
-            << issue.what;
-    }
+    End:;
+    // qDebug() << "=============================";
+    // for(const Issue &issue : mResult.mIssues.list()) {
+    //     qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m")
+    //         << (issue.type == Issue::Error ? "Error" : "Warning")
+    //         << "\033[0m    "
+    //         << QFileInfo(issue.filePath).fileName()
+    //         << "  "
+    //         << issue.row
+    //         << "  "
+    //         << issue.col
+    //         << "  "
+    //         << issue.what;
+    // }
 }
 Parser_::~Parser_() {
     for(JS *js : mResult.mJS)
@@ -820,8 +820,8 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
     jsObj.setProperty("arrProds", jsProdsArray);
 
     //传入能否推导出空串
-    QJSValue jsNilArray = js->engine.newArray((uint)symbolCount);
-    repeat(int, i, symbolCount)
+    QJSValue jsNilArray = js->engine.newArray((uint)nonterminalCount);
+    repeat(int, i, nonterminalCount)
         jsNilArray.setProperty((uint)i, mResult.mSymbolsNil[i]);
     jsObj.setProperty("arrSymbolNil", jsNilArray);
 
