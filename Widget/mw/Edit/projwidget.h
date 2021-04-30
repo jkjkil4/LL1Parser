@@ -18,7 +18,7 @@
 #include "outputwidget.h"
 #include "header.h"
 //#include "Class/Parser/parser.h"
-#include "Class/Parser/parser_.h"
+#include "Class/Parser/parser.h"
 #include "Class/ProjListWidgetItem/projlistwidgetitem.h"
 #include "Class/texthighlighter.h"
 

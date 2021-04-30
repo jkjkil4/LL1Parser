@@ -91,7 +91,7 @@ void ProjWidget::setSaved(bool _isSaved) {
 void ProjWidget::updateTr() {
     mBtnParse->setText(tr("Parse"));
 }
-#include <QDebug>
+
 void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
     ProjListWidgetItem *uItem = (ProjListWidgetItem*)item;
     emit processItemDbClick(uItem);
@@ -155,9 +155,11 @@ void ProjWidget::onParse() {
     QTime t;
     t.start();
 
-    Parser_ parser(mProjPath, this);
-    const Parser_::Result &result = parser.result();
-    for(const Parser_::Issue &issue : result.issues().list()) {
+    Parser parser(mProjPath, this);
+    Parser::Result &result = parser.result();
+    if(!result.issues().hasError())
+        result.output();
+    for(const Parser::Issue &issue : result.issues().list()) {
         //得到文本
         QString text;
         if(!issue.filePath.isEmpty())
@@ -170,9 +172,11 @@ void ProjWidget::onParse() {
 
         //添加
         ProjListWidgetItem *item = issue.newItem();
-        item->setIcon(issue.icon());
-        item->setText(text.isEmpty() ? issue.what : "[ " + text + "] " + issue.what);
-        errListWidget->addItem(item);
+        if(item) {
+            item->setIcon(issue.icon());
+            item->setText(text.isEmpty() ? issue.what : "[ " + text + "] " + issue.what);
+            errListWidget->addItem(item);
+        }
     }
 
     /*Parser::parse(mEdit->document());

@@ -1,8 +1,8 @@
-#include "parser_.h"
+#include "parser.h"
 
-// #include <QDebug>
+#include <QDebug>
 
-Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent) 
+Parser::Parser(const QString &filePath, QWidget *dialogParent, QObject *parent) 
     : QObject(parent), mDialogParent(dialogParent)
 {
     CanonicalFilePath cFilePath(filePath);
@@ -26,16 +26,16 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
 
     mResult.mSymbols.appendKey(FileSymbol{ fileId, "S" });  //开始符号
     mResult.mSymbolsInfo.append(SymbolInfo{ DeclarePos(), true });
-    tryParse("Nonterminal", &Parser_::parseSymbol);   //分析非终结符
+    tryParse("Nonterminal", &Parser::parseSymbol);   //分析非终结符
     mResult.mNonterminalMaxIndex = mResult.mSymbolsInfo.size() - 1;
 
     mResult.mSymbols.appendKey(FileSymbol{ fileId, "$" });  //结束符号
     mResult.mSymbolsInfo.append(SymbolInfo{ DeclarePos(), true });
-    tryParse("Terminal", &Parser_::parseSymbol);      //分析终结符
+    tryParse("Terminal", &Parser::parseSymbol);      //分析终结符
     mResult.mTerminalMaxIndex = mResult.mSymbolsInfo.size() - 1;
 
-    tryParse("Action", &Parser_::parseAction);
-    tryParse("Production", &Parser_::parseProd);
+    tryParse("Action", &Parser::parseAction);
+    tryParse("Production", &Parser::parseProd);
     if(mResult.mHasProd) {
         //检查是否有未使用的符号
         int index = 0;
@@ -72,9 +72,9 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
     if(mResult.mIssues.hasError())
         goto End;
 
-    tryParse("JS", &Parser_::parseJS);
+    tryParse("JS", &Parser::parseJS);
     if(mResult.mIssues.hasError()) goto End;
-    tryParse("Output", &Parser_::parseOutput);
+    tryParse("Output", &Parser::parseOutput);
 
     {//检查是否有未知标记
         QString trUnkTag = tr("Unknown tag \"%1\"");
@@ -110,12 +110,12 @@ Parser_::Parser_(const QString &filePath, QWidget *dialogParent, QObject *parent
     //         << issue.what;
     // }
 }
-Parser_::~Parser_() {
+Parser::~Parser() {
     for(JS *js : mResult.mJS)
         delete js;
 }
 
-bool Parser_::divideFile(const CanonicalFilePath &cFilePath, const QString &basePath) {
+bool Parser::divideFile(const CanonicalFilePath &cFilePath, const QString &basePath) {
     if(mResult.mFiles.contains(cFilePath))  //如果处理过该文件，则return
         return false;
     mResult.mFiles.appendKey(cFilePath);    //标记处理过该文件
@@ -157,7 +157,7 @@ bool Parser_::divideFile(const CanonicalFilePath &cFilePath, const QString &base
 
     return true;
 }
-void Parser_::divideAndImportFile(const CanonicalFilePath &cFilePath, const QString &basePath) {
+void Parser::divideAndImportFile(const CanonicalFilePath &cFilePath, const QString &basePath) {
     if(!divideFile(cFilePath, basePath))    //尝试分割，若返回值为false则return
         return;
 
@@ -211,7 +211,7 @@ void Parser_::divideAndImportFile(const CanonicalFilePath &cFilePath, const QStr
         }
     }
 }
-bool Parser_::checkDividedArg(const QString &tag, const Divideds &divideds, const QString &filePath) {
+bool Parser::checkDividedArg(const QString &tag, const Divideds &divideds, const QString &filePath) {
     bool hasArg = false;
     const QMap<QString, Divided>& map = divideds.map();
     for(auto iter = map.cbegin(); iter != map.cend(); ++iter) {   //遍历所有的Divided
@@ -224,7 +224,7 @@ bool Parser_::checkDividedArg(const QString &tag, const Divideds &divideds, cons
     }
     return hasArg;
 }
-int Parser_::findTrueRowByDividedRow(const Divideds &divideds, int dividedRow) {
+int Parser::findTrueRowByDividedRow(const Divideds &divideds, int dividedRow) {
     for(const Divided &divided : divideds.map()) {
         if(dividedRow < divided.parts.size())
             return divided.parts[dividedRow].row;
@@ -232,7 +232,7 @@ int Parser_::findTrueRowByDividedRow(const Divideds &divideds, int dividedRow) {
     }
     return -1;
 }
-Parser_::FileElement Parser_::transFileElement(int fileId, const QString &name) {
+Parser::FileElement Parser::transFileElement(int fileId, const QString &name) {
     int resFileId = fileId;
     QString resName;
     int splitIndex = name.indexOf(':');
@@ -250,7 +250,7 @@ Parser_::FileElement Parser_::transFileElement(int fileId, const QString &name) 
     return FileElement{ resFileId, resName };
 }
 
-void Parser_::parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
+void Parser::parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
     int fileId = mResult.mFiles.keyIndex(cFilePath);
     checkDividedArg(tag, divideds, cFilePath);
     for(const Divided &divided : divideds.map()) {
@@ -293,7 +293,7 @@ void Parser_::parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag
         }
     }
 }
-void Parser_::parseAction(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
+void Parser::parseAction(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
     int fileId = mResult.mFiles.keyIndex(cFilePath);
     checkDividedArg(tag, divideds, cFilePath);
     QRegularExpression regex("([^ \t]+)(?:[ \t]+(.+))?");
@@ -324,7 +324,7 @@ void Parser_::parseAction(const CanonicalFilePath &cFilePath, const QString &tag
         }
     }
 }
-void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
+void Parser::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
     int fileId = mResult.mFiles.keyIndex(cFilePath);
     checkDividedArg(tag, divideds, cFilePath);
     for(const Divided &divided : divideds.map()) {
@@ -422,7 +422,7 @@ void Parser_::parseProd(const CanonicalFilePath &cFilePath, const QString &tag, 
     }
 }
 
-void Parser_::parseSymbolsNil() {
+void Parser::parseSymbolsNil() {
     enum NilState { Cannot = 0, Unknown = 1, Can = 2 };
     QVector<NilState> tmpVecNil;
     int size = mResult.mNonterminalMaxIndex + 1;
@@ -517,7 +517,7 @@ void Parser_::parseSymbolsNil() {
     repeat(int, i, size)
         mResult.mSymbolsNil[i] = (tmpVecNil[i] == Can);
 }
-void Parser_::parseFirstSet() {
+void Parser::parseFirstSet() {
     struct TmpSymbol
     {
         TmpSymbol(int digit) : digit(digit), isQuote(false) {}
@@ -585,7 +585,7 @@ void Parser_::parseFirstSet() {
             firstSet << tmpSymbol.digit;
     }
 }
-void Parser_::parseFollowSet() {
+void Parser::parseFollowSet() {
     struct TmpSymbol
     {
         enum Type { Symbol, FirstSet, FollowSet } type;
@@ -668,7 +668,7 @@ void Parser_::parseFollowSet() {
             followSet << tmpSymbol.digit;
     }
 }
-void Parser_::parseSelectSets() {
+void Parser::parseSelectSets() {
     int size = mResult.mNonterminalMaxIndex + 1;
     mResult.mSelectSets.resize(size);
 
@@ -732,7 +732,7 @@ void Parser_::parseSelectSets() {
     }
 }
 
-void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
+void Parser::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds) {
     int fileId = mResult.mFiles.keyIndex(cFilePath);
     checkDividedArg(tag, divideds, cFilePath);
 
@@ -922,7 +922,7 @@ void Parser_::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, co
         mResult.mIssues << Issue(Issue::Error, tr("JS error: \" %1 \"").arg(result.toString()), cFilePath, row, -1);
     }
 }
-void Parser_::parseOutput(const CanonicalFilePath &cFilePath, const QString &, const Divideds &divideds) {
+void Parser::parseOutput(const CanonicalFilePath &cFilePath, const QString &, const Divideds &divideds) {
     int fileId = mResult.mFiles.keyIndex(cFilePath);
     QString path = QFileInfo(cFilePath).path();
     QString trJSCallTerminate = tr("JS runs too long when calling \"%1\",\n"
@@ -1005,7 +1005,9 @@ void Parser_::parseOutput(const CanonicalFilePath &cFilePath, const QString &, c
     }
 }
 
-QList<Parser_::JSDebugMessage> Parser_::Result::jsDebugMessage() const {
+
+//-------------Parser::Result------------------
+QList<Parser::JSDebugMessage> Parser::Result::jsDebugMessage() const {
     QList<JSDebugMessage> jsDebugMsgList;
     for(auto iter = mJS.cbegin(); iter != mJS.cend(); ++iter) {
         const JSObject &obj = (*iter)->obj;
@@ -1013,4 +1015,32 @@ QList<Parser_::JSDebugMessage> Parser_::Result::jsDebugMessage() const {
             jsDebugMsgList << JSDebugMessage{ iter.key(), iter.value()->obj.debugMessage() };
     }
     return jsDebugMsgList;
+}
+
+void Parser::Result::output() {
+    QMap<CanonicalFilePath, QString> mapOutput;
+    for(const Output &output : mOutput) {
+        QDir dir(output.basePath);
+        QString &text = mapOutput[dir.absoluteFilePath(output.path)];
+        if(!text.isEmpty())
+            text += '\n';
+        text += output.text;
+    }
+    for(auto iter = mapOutput.cbegin(); iter != mapOutput.cend(); ++iter) {
+        const QString &filePath = iter.key();
+        const QString &text = iter.value();
+        if(!QDir(QFileInfo(filePath).path()).exists()) {
+            mIssues << Issue(Issue::Error, tr("File \"%1\" does not exists").arg(filePath));
+            continue;
+        }
+        QFile file(filePath);
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            mIssues << Issue(Issue::Error, tr("Cannot write text to file \"%1\"").arg(filePath));
+            continue;
+        }
+        QTextStream out(&file);
+        out.setCodec("UTF-8");
+        out << text;
+        file.close();
+    }
 }

@@ -29,7 +29,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11 console
 
 SOURCES += \
-        Class/Parser/parser_.cpp \
+        Class/Parser/parser.cpp \
         Class/Parser/js.cpp \
         Class/Parser/jsobject.cpp \
         Class/ProjListWidgetItem/projlistwidgetitem.cpp \
@@ -51,7 +51,7 @@ SOURCES += \
         Widget/mainwindow.cpp
 
 HEADERS += \
-        Class/Parser/parser_.h \
+        Class/Parser/parser.h \
         Class/Parser/js.h \
         Class/Parser/jsobject.h \
         Class/ProjListWidgetItem/projlistwidgetitem.h \

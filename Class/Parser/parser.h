@@ -15,7 +15,7 @@
 
 
 // 用于进行LL1语法分析
-class Parser_ : QObject
+class Parser : QObject
 {
     Q_OBJECT
 public:
@@ -216,7 +216,7 @@ public:
     class Result
     {
     public:
-        friend class Parser_;
+        friend class Parser;
 
         const ValueMap<CanonicalFilePath>& files() const { return mFiles; }
         const QMap<ImportKey, ImportValue>& fileRels() const { return mFileRels; }
@@ -240,6 +240,8 @@ public:
 
         bool isNonterminal(int id) { return id >= 0 && id <= mNonterminalMaxIndex; }
         bool isTerminal(int id) { return id > mNonterminalMaxIndex && id <= mTerminalMaxIndex; }
+
+        void output();
 
     private:
         FilesDivideds mFilesDivideds;
@@ -268,9 +270,9 @@ public:
         QList<Output> mOutput;
     };
 
-    Parser_(const QString &filePath, QWidget *dialogParent = nullptr, QObject *parent = nullptr);
-    ~Parser_() override;
-    const Result& result() const { return mResult; }
+    Parser(const QString &filePath, QWidget *dialogParent = nullptr, QObject *parent = nullptr);
+    ~Parser() override;
+    Result& result() { return mResult; }
 
 signals:
     void beforeReadFile(const QString &filePath);
@@ -282,7 +284,7 @@ private:
     int findTrueRowByDividedRow(const Divideds &divideds, int dividedRow);   //在分隔的部分中的行数找到对应原文档中的行数
     FileElement transFileElement(int fileId, const QString &name);
 
-    typedef void(Parser_::*ParseFn)(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
+    typedef void(Parser::*ParseFn)(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseSymbol(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseAction(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
     void parseProd(const CanonicalFilePath &cFilePath, const QString &tag, const Divideds &divideds);
