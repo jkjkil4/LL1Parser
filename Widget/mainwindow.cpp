@@ -214,13 +214,9 @@ void MainWindow::onRFLMenuRequested(const QPoint &pos) {
     } else if(res == menu.mActRemove) {
         rfManager.remove(item.row);
     } else if(res == menu.mActShowInExplorer) {
-#ifdef Q_OS_WIN
         QString path = QFileInfo(item.filePath).path();
         if(QDir().exists(path))
-            QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << path);
-#else
-        QMessageBox::information(this, "", tr("This function is not supported in this operating system"));
-#endif
+            QDesktopServices::openUrl(QUrl("file:///" + path));
     }
 }
 

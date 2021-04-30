@@ -5,7 +5,8 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
-#include <QProcess>
+//#include <QProcess>
+#include <QDesktopServices>
 #include <QHBoxLayout>
 #include <QSettings>
 //#include <QDebug>

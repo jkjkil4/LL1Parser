@@ -1,6 +1,6 @@
 #include "parser.h"
 
-#include <QDebug>
+// #include <QDebug>
 
 Parser::Parser(const QString &filePath, QWidget *dialogParent, QObject *parent) 
     : QObject(parent), mDialogParent(dialogParent)
@@ -36,28 +36,8 @@ Parser::Parser(const QString &filePath, QWidget *dialogParent, QObject *parent)
 
     tryParse("Action", &Parser::parseAction);
     tryParse("Production", &Parser::parseProd);
-    if(mResult.mHasProd) {
-        //检查是否有未使用的符号
-        int index = 0;
-        for(const SymbolInfo &info : mResult.mSymbolsInfo) {
-            if(!info.used) {
-                FileSymbol fs = mResult.mSymbols.indexKey(index);
-                mResult.mIssues << Issue(Issue::Warning, tr("Unused symbol \"%1\"").arg(fs.str),
-                    mResult.mFiles.indexKey(fs.fileId), info.declarePos.row, info.declarePos.col);
-            }
-            index++;
-        }
-
-        //检查是否有未使用的语义动作
-        index = 0;
-        for(const ActionInfo &info : mResult.mActionsInfo) {
-            if(!info.used) {
-                FileAction fa = mResult.mActions.indexKey(index);
-                mResult.mIssues << Issue(Issue::Warning, tr("Unused semantic action \"%1\"").arg(fa.str),
-                    mResult.mFiles.indexKey(fa.fileId), info.declarePos.row, info.declarePos.col);
-            }
-        }
-    } else mResult.mIssues << Issue(Issue::Error, tr("Cannot find any production"));
+    if(!mResult.mHasProd)
+        mResult.mIssues << Issue(Issue::Error, tr("Cannot find any production"));
     
     if(mResult.mIssues.hasError())
         goto End;
@@ -73,8 +53,34 @@ Parser::Parser(const QString &filePath, QWidget *dialogParent, QObject *parent)
         goto End;
 
     tryParse("JS", &Parser::parseJS);
-    if(mResult.mIssues.hasError()) goto End;
+    if(mResult.mIssues.hasError()) 
+        goto End;
     tryParse("Output", &Parser::parseOutput);
+    if(mResult.mIssues.hasError()) 
+        goto End;
+
+    {//检查是否有未使用的符号
+        int index = 0;
+        for(const SymbolInfo &info : mResult.mSymbolsInfo) {
+            if(!info.used) {
+                FileSymbol fs = mResult.mSymbols.indexKey(index);
+                mResult.mIssues << Issue(Issue::Warning, tr("Unused symbol \"%1\"").arg(fs.str),
+                    mResult.mFiles.indexKey(fs.fileId), info.declarePos.row, info.declarePos.col);
+            }
+            index++;
+        }
+    }
+
+    {//检查是否有未使用的语义动作
+        int index = 0;
+        for(const ActionInfo &info : mResult.mActionsInfo) {
+            if(!info.used) {
+                FileAction fa = mResult.mActions.indexKey(index);
+                mResult.mIssues << Issue(Issue::Warning, tr("Unused semantic action \"%1\"").arg(fa.str),
+                    mResult.mFiles.indexKey(fa.fileId), info.declarePos.row, info.declarePos.col);
+            }
+        }
+    }
 
     {//检查是否有未知标记
         QString trUnkTag = tr("Unknown tag \"%1\"");
@@ -987,8 +993,9 @@ void Parser::parseOutput(const CanonicalFilePath &cFilePath, const QString &, co
                     }
                 } else if(name == "symbol") {   //如果是以符号数字替换
                     int symbol = mResult.mSymbols.keyIndex(element); //查找arg对应的数字
-                    if(symbol != -1) {  //如果有对应的数字，则附加到res中，否则报错
+                    if(symbol != -1) {  //如果有对应的数字，则附加到res中并标记使用过，否则报错
                         res += QString::number(symbol);
+                        mResult.mSymbolsInfo[symbol].used = true;
                     } else {
                         mResult.mIssues << Issue(Issue::Error, tr("Unknown symbol \"%1\"").arg(arg),
                             cFilePath, part.row, part.col + start);
@@ -1009,7 +1016,7 @@ void Parser::parseOutput(const CanonicalFilePath &cFilePath, const QString &, co
 //-------------Parser::Result------------------
 QList<Parser::JSDebugMessage> Parser::Result::jsDebugMessage() const {
     QList<JSDebugMessage> jsDebugMsgList;
-    for(auto iter = mJS.cbegin(); iter != mJS.cend(); ++iter) {
+    for(auto iter = mJS.cbegin(); iter != mJS.cend(); ++iter) {     //遍历所有文件的js
         const JSObject &obj = (*iter)->obj;
         if(obj.hasDebugMessage())
             jsDebugMsgList << JSDebugMessage{ iter.key(), iter.value()->obj.debugMessage() };
@@ -1017,16 +1024,18 @@ QList<Parser::JSDebugMessage> Parser::Result::jsDebugMessage() const {
     return jsDebugMsgList;
 }
 
-void Parser::Result::output() {
+QStringList Parser::Result::output() {
     QMap<CanonicalFilePath, QString> mapOutput;
-    for(const Output &output : mOutput) {
+    for(const Output &output : mOutput) {   //遍历所有的输出文件，合并重复
         QDir dir(output.basePath);
         QString &text = mapOutput[dir.absoluteFilePath(output.path)];
         if(!text.isEmpty())
             text += '\n';
         text += output.text;
     }
-    for(auto iter = mapOutput.cbegin(); iter != mapOutput.cend(); ++iter) {
+
+    QStringList listPaths;
+    for(auto iter = mapOutput.cbegin(); iter != mapOutput.cend(); ++iter) {     //遍历所有合并后的输出文件，并输出
         const QString &filePath = iter.key();
         const QString &text = iter.value();
         if(!QDir(QFileInfo(filePath).path()).exists()) {
@@ -1042,5 +1051,8 @@ void Parser::Result::output() {
         out.setCodec("UTF-8");
         out << text;
         file.close();
+        listPaths << filePath;
     }
+
+    return listPaths;   //返回成功写入的文件
 }

@@ -157,8 +157,22 @@ void ProjWidget::onParse() {
 
     Parser parser(mProjPath, this);
     Parser::Result &result = parser.result();
-    if(!result.issues().hasError())
-        result.output();
+    if(!result.issues().hasError()) {
+        QStringList paths = result.output();
+        if(!paths.isEmpty()) {
+            auto item = NewPlwiFn([paths] {
+                FilesWidget *widget = new FilesWidget(paths);
+                widget->setAttribute(Qt::WA_DeleteOnClose);
+                widget->setWindowTitle(tr("Files"));
+                widget->resize(600, 400);
+                widget->setMinimumSize(300, 200);
+                widget->show();
+            });
+            item->setText(tr("Files have been outputed"));
+            item->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
+            outputListWidget->addItem(item);
+        }
+    }
     for(const Parser::Issue &issue : result.issues().list()) {
         //得到文本
         QString text;
@@ -171,12 +185,12 @@ void ProjWidget::onParse() {
         }
 
         //添加
-        ProjListWidgetItem *item = issue.newItem();
-        if(item) {
-            item->setIcon(issue.icon());
-            item->setText(text.isEmpty() ? issue.what : "[ " + text + "] " + issue.what);
-            errListWidget->addItem(item);
-        }
+        QListWidgetItem *item = issue.newItem();
+        if(!item)
+            item = new QListWidgetItem;
+        item->setIcon(issue.icon());
+        item->setText(text.isEmpty() ? issue.what : "[ " + text + "] " + issue.what);
+        errListWidget->addItem(item);
     }
 
     /*Parser::parse(mEdit->document());

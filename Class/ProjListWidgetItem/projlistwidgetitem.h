@@ -33,3 +33,21 @@ private:
     QString projPath;
     int mRow, mCol;
 };
+
+//-------------PLWI_Fn---------------
+template<typename Fn>
+class PLWI_Fn : public ProjListWidgetItem
+{
+public:
+    PLWI_Fn(Fn fn) : fn(fn) {}
+
+    ProjListWidgetItem* copy() const override { return new PLWI_Fn<Fn>(*this); }
+
+    void onDoubleClicked(EditView *) override { fn(); }
+
+private:
+    Fn fn;
+};
+
+template<typename Fn>
+inline PLWI_Fn<Fn>* NewPlwiFn(Fn fn) { return new PLWI_Fn<Fn>(fn); }

@@ -241,7 +241,7 @@ public:
         bool isNonterminal(int id) { return id >= 0 && id <= mNonterminalMaxIndex; }
         bool isTerminal(int id) { return id > mNonterminalMaxIndex && id <= mTerminalMaxIndex; }
 
-        void output();
+        QStringList output();
 
     private:
         FilesDivideds mFilesDivideds;

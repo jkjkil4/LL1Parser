@@ -16,6 +16,7 @@
 #include "notewidget.h"
 #include "plaintextedit.h"
 #include "outputwidget.h"
+#include "fileswidget.h"
 #include "header.h"
 //#include "Class/Parser/parser.h"
 #include "Class/Parser/parser.h"

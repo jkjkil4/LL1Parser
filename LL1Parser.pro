@@ -43,6 +43,7 @@ SOURCES += \
         Widget/mw/Edit/notewidget.cpp \
         Widget/mw/Edit/outputwidget.cpp \
         Widget/mw/Edit/plaintextedit.cpp \
+        Widget/mw/Edit/fileswidget.cpp \
         Widget/mw/Edit/projwidget.cpp \
         Widget/mw/HomePage/homepage.cpp \
         Widget/mw/HomePage/recentfilelistwidget.cpp \
@@ -67,6 +68,7 @@ HEADERS += \
         Widget/mw/Edit/notewidget.h \
         Widget/mw/Edit/outputwidget.h \
         Widget/mw/Edit/plaintextedit.h \
+        Widget/mw/Edit/fileswidget.h \
         Widget/mw/Edit/projwidget.h \
         Widget/mw/HomePage/homepage.h \
         Widget/mw/HomePage/recentfilelistwidget.h \
