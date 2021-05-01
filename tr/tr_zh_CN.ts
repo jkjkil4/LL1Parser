@@ -2,14 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
-    <name>DelayedVerifyDialog</name>
-    <message>
-        <location filename="../Widget/Dialog/delayedverifydialog.h" line="26"/>
-        <source>Terminate</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>EditView</name>
     <message>
         <location filename="../Widget/mw/Edit/editview.cpp" line="23"/>
@@ -21,7 +13,7 @@
     <message>
         <location filename="../Widget/mw/Edit/editview.cpp" line="23"/>
         <source>&quot;%1&quot; does not exists</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;%1&quot; 不存在</translation>
     </message>
     <message>
         <location filename="../Widget/mw/Edit/editview.cpp" line="42"/>
@@ -65,12 +57,12 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../Widget/mainwindow.h" line="90"/>
+        <location filename="../Widget/mainwindow.h" line="91"/>
         <source>HomePage</source>
         <translation>主页</translation>
     </message>
     <message>
-        <location filename="../Widget/mainwindow.h" line="91"/>
+        <location filename="../Widget/mainwindow.h" line="92"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
@@ -119,11 +111,6 @@
         <location filename="../Widget/mainwindow.cpp" line="199"/>
         <source>or</source>
         <translation>或</translation>
-    </message>
-    <message>
-        <location filename="../Widget/mainwindow.cpp" line="222"/>
-        <source>This function is not supported in this operating system</source>
-        <translation>当前操作系统不支持该功能</translation>
     </message>
 </context>
 <context>
@@ -205,28 +192,96 @@
 <context>
     <name>Parser</name>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="359"/>
         <source>Lack of &quot;-&gt;&quot; to represent production</source>
-        <translation type="vanished">缺少 &quot;-&gt;&quot; 来表示产生式</translation>
+        <translation>缺少 &quot;-&gt;&quot; 来表示产生式</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="364"/>
         <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
-        <translation type="vanished">应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
+        <translation>应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="86"/>
         <source>Unknown tag &quot;%1&quot;</source>
-        <translation type="vanished">未知的标记 &quot;%1&quot;</translation>
+        <translation>未知的标记 &quot;%1&quot;</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="67"/>
+        <source>Unused symbol &quot;%1&quot;</source>
+        <translation>未使用的符号 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="79"/>
+        <source>Unused semantic action &quot;%1&quot;</source>
+        <translation>未使用的语义动作动作 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="132"/>
+        <source>Cannot open the file &quot;%1&quot;</source>
+        <translation>无法打开文件 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="201"/>
+        <source>The import path of &quot;%1&quot; is empty</source>
+        <translation>&quot;%1&quot; 的导入路径为空</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="212"/>
+        <location filename="../Class/Parser/parser.cpp" line="290"/>
+        <location filename="../Class/Parser/parser.cpp" line="323"/>
+        <source>Redefintition of &quot;%1&quot; (First definition is at row %2, col %3)</source>
+        <translation>&quot;%1&quot; 重复定义（首次定义在 第%2行 第%3列）</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="226"/>
         <source>The tag &quot;%1&quot; does not need to provide any parameter</source>
-        <translation type="vanished">标记 &quot;%1&quot; 不需要提供任何参数</translation>
+        <translation>标记 &quot;%1&quot; 不需要提供任何参数</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="281"/>
+        <source>Symbol name &quot;%1&quot; cannot contain &quot;:&quot;</source>
+        <translation>符号名称 &quot;%1&quot; 不能包含 &quot;:&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="420"/>
+        <source>Redefinition of the production (First definition is at row %1, col %2)</source>
+        <translation>产生式重复定义（首次定义在 第%1行 第%2列）</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="903"/>
+        <source>JS runs too long in first execution,
+Do you want to force it to terminate?
+If you continue waiting, it may finish.</source>
+        <translation>JS在首次执行时运行过久，
+你要让他强制终止吗？
+如果你继续等待，它可能会完成。</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="914"/>
+        <location filename="../Class/Parser/parser.cpp" line="969"/>
+        <source>Terminate</source>
+        <translation>终止</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="920"/>
+        <source>JS terminated in first execution</source>
+        <translation>JS在首次执行时终止</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="1042"/>
+        <source>File &quot;%1&quot; does not exists</source>
+        <translation>文件 &quot;%1&quot; 不存在</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="40"/>
         <source>Cannot find any production</source>
-        <translation type="vanished">无法找到任何产生式</translation>
+        <translation>无法找到任何产生式</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="276"/>
         <source>Cannot use &quot;%1&quot; as symbol</source>
-        <translation type="vanished">不能使用 &quot;%1&quot; 作为符号</translation>
+        <translation>不能使用 &quot;%1&quot; 作为符号</translation>
     </message>
     <message>
         <source>Symbol &quot;%1&quot; is already an nonterminal</source>
@@ -241,36 +296,60 @@
         <translation type="vanished">符号 &quot;%1&quot; 已经是终结符</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="376"/>
+        <location filename="../Class/Parser/parser.cpp" line="403"/>
+        <location filename="../Class/Parser/parser.cpp" line="1000"/>
         <source>Unknown symbol &quot;%1&quot;</source>
-        <translation type="vanished">未知的符号 &quot;%1&quot;</translation>
+        <translation>未知的符号 &quot;%1&quot;</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="380"/>
         <source>The left of the production cannot be a terminal</source>
-        <translation type="vanished">产生式左部不能为终结符</translation>
+        <translation>产生式左部不能为终结符</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="391"/>
         <source>Unknown semantic action &quot;%1&quot;</source>
-        <translation type="vanished">未知语义动作 &quot;%1&quot;</translation>
+        <translation>未知语义动作 &quot;%1&quot;</translation>
     </message>
     <message>
         <source>Redefinition of the production</source>
         <translation type="vanished">产生式重复定义</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="928"/>
+        <location filename="../Class/Parser/parser.cpp" line="985"/>
         <source>JS error: &quot; %1 &quot;</source>
-        <translation type="vanished">JS错误: &quot; %1 &quot;</translation>
+        <translation>JS错误: &quot; %1 &quot;</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="934"/>
+        <source>JS runs too long when calling &quot;%1&quot;,
+Do you want to force it to terminate?
+If you continue waiting, it may finish.</source>
+        <translation>JS在调用 &quot;%1&quot; 时运行过久，
+你要让他强制终止吗？
+如果你继续等待，它可能会完成。</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="975"/>
+        <source>JS terminated when calling &quot;%1&quot;</source>
+        <translation>JS在调用 &quot;%1&quot; 时终止</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="991"/>
         <source>Unknown js function &quot;%1&quot;</source>
-        <translation type="vanished">未知js函数 &quot;%1&quot;</translation>
+        <translation>未知js函数 &quot;%1&quot;</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="1004"/>
         <source>Unknown &quot;%1&quot;</source>
-        <translation type="vanished">未知的 &quot;%1&quot;</translation>
+        <translation>未知的 &quot;%1&quot;</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="517"/>
         <source>Appear left recursive</source>
-        <translation type="vanished">出现左递归</translation>
+        <translation>出现左递归</translation>
     </message>
     <message>
         <source>(Double click to show detail)</source>
@@ -281,16 +360,18 @@
         <translation type="vanished">错误信息</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="737"/>
         <source>SELECT set has intersections</source>
-        <translation type="vanished">SELECT集有交叉</translation>
+        <translation>SELECT集有交叉</translation>
     </message>
     <message>
         <source>Cannot create the output directory</source>
         <translation type="vanished">无法创建输出目录</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="1047"/>
         <source>Cannot write text to file &quot;%1&quot;</source>
-        <translation type="vanished">无法将文本写入文件 &quot;%1&quot;</translation>
+        <translation>无法将文本写入文件 &quot;%1&quot;</translation>
     </message>
     <message>
         <source>The SELECT set of &quot;%1&quot; has intersections</source>
@@ -301,149 +382,14 @@
         <translation type="obsolete">信息</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="1086"/>
         <source>Can be empty string</source>
-        <translation type="vanished">可以为空串</translation>
+        <translation>可以为空串</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="1090"/>
         <source>Cannot be empty string</source>
-        <translation type="vanished">不能为空串</translation>
-    </message>
-</context>
-<context>
-    <name>Parser_</name>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="45"/>
-        <source>Unused symbol &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="56"/>
-        <source>Unused semantic action &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="60"/>
-        <source>Cannot find any production</source>
-        <translation type="unfinished">无法找到任何产生式</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="80"/>
-        <source>Unknown tag &quot;%1&quot;</source>
-        <translation type="unfinished">未知的标记 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="126"/>
-        <source>Cannot open the file &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="195"/>
-        <source>The import path of &quot;%1&quot; is empty</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="206"/>
-        <location filename="../Class/Parser/parser_.cpp" line="284"/>
-        <location filename="../Class/Parser/parser_.cpp" line="317"/>
-        <source>Redefintition of &quot;%1&quot; (First definition is at row %2, col %3)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="220"/>
-        <source>The tag &quot;%1&quot; does not need to provide any parameter</source>
-        <translation type="unfinished">标记 &quot;%1&quot; 不需要提供任何参数</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="270"/>
-        <source>Cannot use &quot;%1&quot; as symbol</source>
-        <translation type="unfinished">不能使用 &quot;%1&quot; 作为符号</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="275"/>
-        <source>Symbol name &quot;%1&quot; cannot contain &quot;:&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="353"/>
-        <source>Lack of &quot;-&gt;&quot; to represent production</source>
-        <translation type="unfinished">缺少 &quot;-&gt;&quot; 来表示产生式</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="358"/>
-        <source>Should be &quot;-&gt;&quot; instead of &quot;%1&quot;</source>
-        <translation type="unfinished">应为 &quot;-&gt;&quot; 而不是 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="370"/>
-        <location filename="../Class/Parser/parser_.cpp" line="397"/>
-        <location filename="../Class/Parser/parser_.cpp" line="993"/>
-        <source>Unknown symbol &quot;%1&quot;</source>
-        <translation type="unfinished">未知的符号 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="374"/>
-        <source>The left of the production cannot be a terminal</source>
-        <translation type="unfinished">产生式左部不能为终结符</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="385"/>
-        <source>Unknown semantic action &quot;%1&quot;</source>
-        <translation type="unfinished">未知语义动作 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="414"/>
-        <source>Redefinition of the production (First definition is at row %1, col %2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="511"/>
-        <source>Appear left recursive</source>
-        <translation type="unfinished">出现左递归</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="731"/>
-        <source>SELECT set has intersections</source>
-        <translation type="unfinished">SELECT集有交叉</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="897"/>
-        <source>JS runs too long in first execution,
-Do you want to force it to terminate?
-If you continue waiting, it may finish.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="914"/>
-        <source>JS terminated in first execution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="922"/>
-        <location filename="../Class/Parser/parser_.cpp" line="979"/>
-        <source>JS error: &quot; %1 &quot;</source>
-        <translation type="unfinished">JS错误: &quot; %1 &quot;</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="928"/>
-        <source>JS runs too long when calling &quot;%1&quot;,
-Do you want to force it to terminate?
-If you continue waiting, it may finish.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="969"/>
-        <source>JS terminated when calling &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="985"/>
-        <source>Unknown js function &quot;%1&quot;</source>
-        <translation type="unfinished">未知js函数 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../Class/Parser/parser_.cpp" line="997"/>
-        <source>Unknown &quot;%1&quot;</source>
-        <translation type="unfinished">未知的 &quot;%1&quot;</translation>
+        <translation>不能为空串</translation>
     </message>
 </context>
 <context>
@@ -459,67 +405,84 @@ If you continue waiting, it may finish.</source>
         <translation>解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="166"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="132"/>
+        <source>Double click to show in folder</source>
+        <translation>双击以在文件夹中显示</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="141"/>
+        <source>Files</source>
+        <translation>文件</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="146"/>
+        <source>Files have been outputed</source>
+        <translation>文件已被输出</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="159"/>
         <source>Row:%1</source>
-        <translation type="unfinished"></translation>
+        <translation>行:%1</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="168"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="160"/>
         <source>Col:%1</source>
-        <translation type="unfinished"></translation>
+        <translation>列:%1</translation>
     </message>
     <message>
-        <source>This function is not supported in this operating system</source>
-        <translation type="vanished">当前操作系统不支持该功能</translation>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="189"/>
+        <source>Debug Message of &quot;%1&quot;</source>
+        <translation>&quot;%1&quot; 的调试信息</translation>
     </message>
     <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="216"/>
+        <source>Double click to show detail</source>
+        <translation>双击以显示详细内容</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="225"/>
+        <source>Debug Message</source>
+        <translation>调试信息</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="239"/>
+        <source>Analysised files</source>
+        <translation>分析的文件</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="246"/>
+        <source>Empty string state</source>
+        <translation>空串情况</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="153"/>
         <source>Elapsed time: %1ms</source>
-        <translation type="vanished">用时: %1毫秒</translation>
+        <translation>用时: %1毫秒</translation>
     </message>
     <message>
-        <source>Row</source>
-        <translation type="vanished">行</translation>
-    </message>
-    <message>
-        <source>Phrase</source>
-        <translation type="vanished">词</translation>
-    </message>
-    <message>
-        <source>Files has been outputted to the directory &quot;%1&quot;</source>
-        <translation type="vanished">文件已被输出至目录 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <source>Productions</source>
-        <translation type="vanished">产生式</translation>
-    </message>
-    <message>
-        <source>Empty string condition</source>
-        <translation type="vanished">空串情况</translation>
-    </message>
-    <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="253"/>
         <source>FIRST set</source>
-        <translation type="vanished">FIRST集</translation>
+        <translation>FIRST集</translation>
     </message>
     <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="260"/>
         <source>FOLLOW set</source>
-        <translation type="vanished">FOLLOW集</translation>
+        <translation>FOLLOW集</translation>
     </message>
     <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="267"/>
         <source>SELECT set</source>
-        <translation type="vanished">SELECT集</translation>
+        <translation>SELECT集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="279"/>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="274"/>
         <source>Analysis completed</source>
         <translation>分析已完成</translation>
     </message>
     <message>
+        <location filename="../Widget/mw/Edit/projwidget.cpp" line="231"/>
         <source>JS debug message</source>
-        <translation type="vanished">JS调试信息</translation>
-    </message>
-    <message>
-        <source>(Double click to show detail)</source>
-        <translation type="vanished">（双击以显示详细信息）</translation>
+        <translation>JS调试信息</translation>
     </message>
 </context>
 <context>
@@ -585,7 +548,7 @@ If you continue waiting, it may finish.</source>
     </message>
     <message>
         <location filename="../Widget/Menu/rflmenu.h" line="15"/>
-        <source>Show in Explorer</source>
+        <source>Show in Folder</source>
         <translation>在文件夹中显示</translation>
     </message>
 </context>

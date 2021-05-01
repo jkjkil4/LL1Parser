@@ -14,7 +14,7 @@
 class DelayedVerifyDialog : public QDialog
 {
 public:
-    DelayedVerifyDialog(const QString &text, QWidget *parent = nullptr);
+    DelayedVerifyDialog(const QString &text, const QString &btnText, QWidget *parent = nullptr);
 
     void delayedVerify(int delayMsec);
 
@@ -23,7 +23,7 @@ public:
 
 private:
     QLabel *mLabText = new QLabel;
-    QPushButton *mBtnAccept = new QPushButton(tr("Terminate"));
+    QPushButton *mBtnAccept = new QPushButton;
 
     QTimer *mTimer = new QTimer(this);
 };

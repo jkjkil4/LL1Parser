@@ -911,7 +911,7 @@ void Parser::parseJS(const CanonicalFilePath &cFilePath, const QString &tag, con
             total += part.text + '\n';
 
     //执行js脚本    
-    DelayedVerifyDialog dialog(cFilePath + '\n' + trJSTerminate, mDialogParent);
+    DelayedVerifyDialog dialog(cFilePath + '\n' + trJSTerminate, tr("Terminate"), mDialogParent);
     dialog.delayedVerify(800);
     bool terminate = false;
     connect(&dialog, &DelayedVerifyDialog::accepted, [this, &cFilePath, js, &terminate] {
@@ -966,7 +966,7 @@ void Parser::parseOutput(const CanonicalFilePath &cFilePath, const QString &, co
                         if(jsValueFn.isCallable()) {    //如果可以作为函数调用
                             hasFn = true;
 
-                            DelayedVerifyDialog dialog(cFilePath + '\n' + trJSCallTerminate.arg(arg), mDialogParent);
+                            DelayedVerifyDialog dialog(cFilePath + '\n' + trJSCallTerminate.arg(arg), tr("Terminate"), mDialogParent);
                             dialog.delayedVerify(800);
                             bool terminate = false;
                             connect(&dialog, &DelayedVerifyDialog::accepted, [this, &cFilePath, &part, start, &arg, js, &terminate] {

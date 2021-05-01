@@ -1,9 +1,12 @@
 #include "delayedverifydialog.h"
 
-DelayedVerifyDialog::DelayedVerifyDialog(const QString &text, QWidget *parent) 
+DelayedVerifyDialog::DelayedVerifyDialog(const QString &text, const QString &btnText, QWidget *parent) 
     : QDialog(parent) 
 {
-    mLabText->setText(text); //设置文字
+    //设置文字
+    mLabText->setText(text);
+    mBtnAccept->setText(btnText);
+
     mTimer->setSingleShot(true);    //定时器
     QWidget *topWidget = new QWidget;   //顶部控件
     ColorWidget *bottomWidget = new ColorWidget(C_BOTTOM);  //底部控件
