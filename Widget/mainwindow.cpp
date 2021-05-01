@@ -213,7 +213,7 @@ void MainWindow::onRFLMenuRequested(const QPoint &pos) {
         rfManager.append(item.filePath);
     } else if(res == menu.mActRemove) {
         rfManager.remove(item.row);
-    } else if(res == menu.mActShowInExplorer) {
+    } else if(res == menu.mActShowInFolder) {
         QString path = QFileInfo(item.filePath).path();
         if(QDir().exists(path))
             QDesktopServices::openUrl(QUrl("file:///" + path));

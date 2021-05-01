@@ -7,12 +7,12 @@ RFLMenu::RFLMenu(const QString &title, QWidget *parent) : QMenu(title, parent) {
 RFLMenu::~RFLMenu() {
     delete mActMoveToFirst;
     delete mActRemove;
-    delete mActShowInExplorer;
+    delete mActShowInFolder;
 }
 
 void RFLMenu::init() {
     addAction(mActMoveToFirst);
     addAction(mActRemove);
     addSeparator();
-    addAction(mActShowInExplorer);
+    addAction(mActShowInFolder);
 }

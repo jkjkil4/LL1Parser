@@ -3,21 +3,13 @@
 #include "Widget/mw/Edit/editview.h"
 #include "Widget/mw/Edit/projwidget.h"
 
-//-------------copy---------------
-ProjListWidgetItem* ProjListWidgetItem::copy() const { return new ProjListWidgetItem(*this); }
-ProjListWidgetItem* PLWI_MoveDocCursor::copy() const { return new PLWI_MoveDocCursor(*this); }
-
 //-------------ProjListWidgetItem---------------
 void ProjListWidgetItem::onDoubleClicked(EditView *) {}
-void ProjListWidgetItem::onDoubleClicked(QPlainTextEdit *) {}
+ProjListWidgetItem* ProjListWidgetItem::copy() const { return new ProjListWidgetItem(*this); }
 
 //-------------PLWI_MoveDocCursor---------------
-PLWI_MoveDocCursor::PLWI_MoveDocCursor(const QString &projPath, int row, int col)
-    : projPath(projPath), mRow(row), mCol(col == -1 ? 0 : col) {}
 void PLWI_MoveDocCursor::onDoubleClicked(EditView *editView) {
-    onDoubleClicked(editView->open(projPath)->editWidget());
-}
-void PLWI_MoveDocCursor::onDoubleClicked(QPlainTextEdit *edit) {
+    QPlainTextEdit *edit = editView->open(projPath)->editWidget();
     QTextDocument *doc = edit->document();
     if(mRow < 0 || mRow >= doc->lineCount())
         return;
@@ -28,4 +20,32 @@ void PLWI_MoveDocCursor::onDoubleClicked(QPlainTextEdit *edit) {
     tc.setPosition(block.position() + mCol);
     edit->setTextCursor(tc);
     edit->setFocus();
+}
+
+//---------------PLWI_ShowPlainText--------------
+void PLWI_ShowPlainText::onDoubleClicked(EditView *) {
+    QPlainTextEdit *edit = new QPlainTextEdit;
+    edit->setAttribute(Qt::WA_DeleteOnClose);
+    edit->setWindowTitle(title);
+    edit->setReadOnly(true);
+    edit->setPlainText(text);
+    edit->resize(600, 400);
+    edit->setMinimumSize(300, 200);
+    j::SetPointSize(edit, 10);
+    j::SetFamily(edit, fontSourceCodePro.mFamily);
+    edit->show();
+}
+
+//----------------PLWI_ShowHtmlText--------------
+void PLWI_ShowHtmlText::onDoubleClicked(EditView *) {
+    QTextEdit *edit = new QTextEdit;
+    edit->setAttribute(Qt::WA_DeleteOnClose);
+    edit->setWindowTitle(title);
+    edit->setReadOnly(true);
+    edit->setHtml(html);
+    edit->resize(600, 400);
+    edit->setMinimumSize(300, 200);
+    j::SetPointSize(edit, 10);
+    j::SetFamily(edit, fontSourceCodePro.mFamily);
+    edit->show();
 }

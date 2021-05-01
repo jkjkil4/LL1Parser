@@ -12,7 +12,7 @@ public:
 
     QAction *mActMoveToFirst = new QAction(tr("Move to first"));
     QAction *mActRemove = new QAction(tr("Remove"));
-    QAction *mActShowInExplorer = new QAction(tr("Show in Explorer"));
+    QAction *mActShowInFolder = new QAction(tr("Show in Folder"));
 
 private:
     void init();

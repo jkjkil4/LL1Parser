@@ -493,7 +493,7 @@ void Parser::parseSymbolsNil() {
             // ts.setCodec("UTF-8");
             // bool hasPrev = false;
             // for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) {  //遍历所有产生式
-            //     const QString &symbolStr = mapSymbols.key(iter.key()).str;
+            //     const QString &symbolStr = mSymbols.indexKey(iter.key()).format();
             //     for(const Prod &prod : iter.value()) {   //遍历所有的产生式右部
             //         const SymbolVec &prodSymbols = prod.symbols;
             //         //换行
@@ -507,7 +507,7 @@ void Parser::parseSymbolsNil() {
             //         for(int symbol : prodSymbols) {    //遍历该产生式右部
             //             QString &format = (isNonterminal(symbol) ? formats[tmpVecNil[symbol]] : formatTerminal);
             //             ts << " <font color=\"" << format << "\">";
-            //             ts << mapSymbols.key(symbol).str;
+            //             ts << mSymbols.indexKey(symbol).format();
             //             ts << "</font>";
             //         }
             //     }
@@ -1055,4 +1055,132 @@ QStringList Parser::Result::output() {
     }
 
     return listPaths;   //返回成功写入的文件
+}
+
+QString Parser::Result::formatFiles() {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
+    
+    int count = mFiles.map().size();
+    bool hasPrev = false;
+    repeat(int, i, count) {     //遍历所有文件
+        if(hasPrev) {
+            ts << '\n';
+        } else hasPrev = true;
+        ts << i << " ---> " << mFiles.indexKey(i);
+    }
+
+    return result;
+}
+QString Parser::Result::formatSymbolsNil() {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
+
+    QVector<int> vecCanBeNil, vecCannotBeNil;
+    for(int i = 0; i <= mNonterminalMaxIndex; i++) {    //遍历所有非终结符，检查能否推导出空串
+        (mSymbolsNil[i] ? vecCanBeNil : vecCannotBeNil) << i;
+    }
+
+    ts << tr("Can be empty string") << ":";
+    for(int symbol : vecCanBeNil)   //遍历所有能推导出空串的
+        ts << "\n" << mSymbols.indexKey(symbol).format();
+
+    ts << "\n\n" << tr("Cannot be empty string") << ":";
+    for(int symbol : vecCannotBeNil)    //遍历所有不能推导出空串的
+        ts << "\n" << mSymbols.indexKey(symbol).format();
+
+    return result;
+}
+QString Parser::Result::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool showNil) {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
+
+    bool hasPrev = false;
+    for(int i = 0; i < vecSet.size(); i++) {    //遍历该集合
+        if(hasPrev) {
+            ts << (useHtml ? "<br>" : "\n");
+        } else hasPrev = true;
+
+        useHtml ? (ts << "<font color=\"blue\">" << mSymbols.indexKey(i).format() << "</font>") : (ts << mSymbols.indexKey(i).format());
+        ts << " { ";
+
+        const SymbolVec &set = vecSet[i];
+        bool hasPrev2 = false;
+        for(int symbol : set) {
+            if(hasPrev2) {
+                ts << ", ";
+            } else hasPrev2 = true;
+
+            useHtml ? (ts << "<font color=\"purple\">" << mSymbols.indexKey(symbol).format() << "</font>") : (ts << mSymbols.indexKey(symbol).format());
+        }
+
+        if(showNil && mSymbolsNil[i]) {
+            if(hasPrev) ts << ", ";
+            ts << (useHtml ? "<font color=\"magenta\">nil</font>" : "nil");
+        }
+
+        ts << " }";
+    }
+
+    return result;
+}
+QString Parser::Result::formatSelectSet(bool useHtml, QVector<SymbolVec> *pVecIntersectedSymbols) {
+    QString result;
+    QTextStream ts(&result);
+    ts.setCodec("UTF-8");
+
+    bool hasPrev = false;
+    for(int i = 0; i < mSelectSets.size(); i++) {     //遍历所有非终结符
+        for(const SelectSet &selectSet : mSelectSets[i]) {  //遍历该非终结符的SELECT集
+            if(hasPrev) {
+                ts << (useHtml ? "<br>" : "\n");
+            } else hasPrev = true;
+
+            useHtml ? (ts << "<font color=\"blue\">" << mSymbols.indexKey(i).format() << "</font>") : (ts << mSymbols.indexKey(i).format());
+            ts << " -> ";
+            if(selectSet.prod.symbols.isEmpty() && selectSet.prod.actions.isEmpty()) {
+                ts << (useHtml ? "<font color=\"magenta\">nil</font> " : "nil ");
+            } else {
+                int start = 0;
+                for(const ProdAction &action : selectSet.prod.actions) {
+                    for(int j = start; j < action.pos; j++) {
+                        int symbol = selectSet.prod.symbols[j];
+                        useHtml ? (ts << "<font color=\"blue\">" << mSymbols.indexKey(symbol).format() << "</font>") : (ts << mSymbols.indexKey(symbol).format());
+                        ts << " ";
+                    }
+                    useHtml ? (ts << "<font color=\"magenta\">" << mActions.indexKey(action.id).format() << "</font>") : (ts << mActions.indexKey(action.id).format());
+                    ts << " ";
+                    start = action.pos;
+                }
+                for(int j = start; j < selectSet.prod.symbols.length(); j++) {
+                    int symbol = selectSet.prod.symbols[j];
+                    useHtml ? (ts << "<font color=\"blue\">" << mSymbols.indexKey(symbol).format() << "</font>") : (ts << mSymbols.indexKey(symbol).format());
+                    ts << " ";
+                }
+            }
+
+            ts << "{ ";
+            bool hasPrev2 = false;
+            for(int symbol : selectSet.symbols) {   //遍历该SELECT集
+                if(hasPrev2) {
+                    ts << ", ";
+                } else hasPrev2 = true;
+
+                bool isWrong = (pVecIntersectedSymbols && pVecIntersectedSymbols->at(i).contains(symbol));
+                if(isWrong) {
+                    useHtml ? (ts << "<font color=\"red\"><u>" << mSymbols.indexKey(symbol).format() << "</u></font>")
+                            : (ts << mSymbols.indexKey(symbol).format());
+                } else {
+                    useHtml ? (ts << "<font color=\"purple\">" << mSymbols.indexKey(symbol).format() << "</font>")
+                            : (ts << mSymbols.indexKey(symbol).format());
+                }
+            }
+            ts << " }";
+        }
+    }
+
+    return result;
 }

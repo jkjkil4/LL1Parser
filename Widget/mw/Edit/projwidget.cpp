@@ -95,54 +95,6 @@ void ProjWidget::updateTr() {
 void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
     ProjListWidgetItem *uItem = (ProjListWidgetItem*)item;
     emit processItemDbClick(uItem);
-//     switch(item->data(Qt::UserRole).toInt()) {
-//     case (int)UserRole::ShowPlainText: {
-//         QPlainTextEdit *textWidget = new QPlainTextEdit;
-//         textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
-//         textWidget->setPlainText(item->data(Qt::UserRole + 2).toString());
-//         textWidget->setReadOnly(true);
-//         textWidget->setLineWrapMode(QPlainTextEdit::NoWrap);
-//         textWidget->setAttribute(Qt::WA_DeleteOnClose);
-//         textWidget->setMinimumSize(300, 300);
-//         j::SetPointSize(textWidget, 11);
-//         j::SetFamily(textWidget, fontSourceCodePro.mFamily);
-//         textWidget->show();
-//         break;
-//     }
-//     case (int)UserRole::ShowHtmlText: {
-//         QTextEdit *textWidget = new QTextEdit;
-//         textWidget->setWindowTitle(item->data(Qt::UserRole + 1).toString());
-//         textWidget->setHtml(item->data(Qt::UserRole + 2).toString());
-//         textWidget->setReadOnly(true);
-//         textWidget->setLineWrapMode(QTextEdit::NoWrap);
-//         textWidget->setAttribute(Qt::WA_DeleteOnClose);
-//         textWidget->setMinimumSize(300, 300);
-//         j::SetPointSize(textWidget, 11);
-//         j::SetFamily(textWidget, fontSourceCodePro.mFamily);
-//         textWidget->show();
-//         break;
-//     }
-//     case (int)UserRole::MoveDocumentCursor: {
-//         QPoint pos = item->data(Qt::UserRole + 1).toPoint();
-//         if(pos.y() >= 0 && pos.y() < mEdit->document()->lineCount()) {
-//             QTextBlock block = mEdit->document()->findBlockByLineNumber(pos.y());
-//             QTextCursor tc = mEdit->textCursor();
-//             tc.setPosition(block.position());
-//             mEdit->setTextCursor(tc);
-//             mEdit->setFocus();
-//         }
-//         break;
-//     }
-//     case (int)UserRole::OpenFolder: {
-// #ifdef Q_OS_WIN
-//         QString path = item->data(Qt::UserRole + 1).toString();
-//         if(QDir().exists(path))
-//             QProcess::startDetached("cmd.exe", QStringList() << "/c" << "start" << "" << path);
-// #else
-//         QMessageBox::information(this, "", tr("This function is not supported in this operating system"));
-// #endif
-//     }
-//     }
 }
 
 void ProjWidget::onParse() {
@@ -161,22 +113,30 @@ void ProjWidget::onParse() {
         QStringList paths = result.output();
         if(!paths.isEmpty()) {
             auto item = NewPlwiFn([paths] {
-                QListWidget *widget = new QListWidget;
+                QListWidget *listWidget = new QListWidget;
                 
-                //遍历所有输出文件路径，向widget添加item
+                //遍历所有输出文件路径，向listWidget添加item
                 for(const QString &filePath : qAsConst(paths)) {
                     QListWidgetItem *item = new QListWidgetItem(filePath);
                     item->setIcon(QFileIconProvider().icon(filePath));
-                    widget->addItem(item);
+                    listWidget->addItem(item);
                 }
                 //绑定itemDoubleClicked，以打开相应文件夹
-                connect(widget, &QListWidget::itemDoubleClicked, [](QListWidgetItem *item) {
+                connect(listWidget, &QListWidget::itemDoubleClicked, [](QListWidgetItem *item) {
                     QString path = QFileInfo(item->text()).path();
                     if(QDir().exists(path))
                         QDesktopServices::openUrl(QUrl("file:///" + path));
                 });
 
-                //设置窗口属性
+                //总布局
+                QLabel *label = new QLabel(tr("Double click to show in folder"));
+                QVBoxLayout *layout = new QVBoxLayout;
+                layout->addWidget(label, 0, Qt::AlignLeft);
+                layout->addWidget(listWidget, 1);
+
+                //显示窗口
+                QWidget *widget = new QWidget;
+                widget->setLayout(layout);
                 widget->setAttribute(Qt::WA_DeleteOnClose);
                 widget->setWindowTitle(tr("Files"));
                 widget->resize(600, 400);
@@ -184,6 +144,7 @@ void ProjWidget::onParse() {
                 widget->show();
             });
             item->setText(tr("Files have been outputed"));
+            item->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
             outputListWidget->addItem(item);
         }
     }
@@ -238,20 +199,28 @@ void ProjWidget::onParse() {
                 const Parser::JSDebugMessage &msg = jsDebugMsg[0];
                 fnShowMsg(QFileInfo(files.indexKey(msg.fileId)).fileName(), msg.text);
             } else {
-                QListWidget *widget = new QListWidget;
+                QListWidget *listWidget = new QListWidget;
 
-                //遍历所有调试信息，向widget添加item
+                //遍历所有调试信息，向listWidget添加item
                 for(const Parser::JSDebugMessage &msg : qAsConst(jsDebugMsg)) {
                     QListWidgetItem *item = new QListWidgetItem(files.indexKey(msg.fileId));
                     item->setData(Qt::UserRole, msg.text);
-                    widget->addItem(item);
+                    listWidget->addItem(item);
                 }
                 //绑定itemDoubleClicked，以显示对应的调试信息
-                connect(widget, &QListWidget::itemDoubleClicked, [fnShowMsg](QListWidgetItem *item) {
+                connect(listWidget, &QListWidget::itemDoubleClicked, [fnShowMsg](QListWidgetItem *item) {
                     fnShowMsg(QFileInfo(item->text()).fileName(), item->data(Qt::UserRole).toString());
                 });
 
-                //设置窗口属性
+                //总布局
+                QLabel *label = new QLabel(tr("Double click to show detail"));
+                QVBoxLayout *layout = new QVBoxLayout;
+                layout->addWidget(label, 0, Qt::AlignLeft);
+                layout->addWidget(listWidget, 1);
+
+                //显示窗口
+                QWidget *widget = new QWidget;
+                widget->setLayout(layout);
                 widget->setAttribute(Qt::WA_DeleteOnClose);
                 widget->setWindowTitle(tr("Debug Message"));
                 widget->resize(600, 400);
@@ -260,58 +229,47 @@ void ProjWidget::onParse() {
             }
         });
         item->setText(tr("JS debug message"));
+        item->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
         outputListWidget->addItem(item);
     }
 
-    /******.................
+    //如果没有错误，则显示相关信息
+    if(!result.issues().hasError()) {
+        //文件
+        QString trFiles = tr("Analysised files");
+        PLWI_ShowPlainText *itemFiles = new PLWI_ShowPlainText(trFiles, result.formatFiles());
+        itemFiles->setText(trFiles);
+        itemFiles->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
+        outputListWidget->addItem(itemFiles);
 
-    if(!Parser::hasError()) {
-        QString strDbClick = tr("(Double click to show detail)");
+        //空串情况
+        QString trSymbolsNil = tr("Empty string state");
+        PLWI_ShowPlainText *itemSymbolsNil = new PLWI_ShowPlainText(trSymbolsNil, result.formatSymbolsNil());
+        itemSymbolsNil->setText(trSymbolsNil);
+        itemSymbolsNil->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
+        outputListWidget->addItem(itemSymbolsNil);
 
-        if(Parser::hasOutputFile()) {
-            QString strDir = Parser::outputDir(mProjPath);
-            QListWidgetItem *item = new QListWidgetItem(tr("Files has been outputted to the directory \"%1\"").arg(strDir));
-            item->setData(Qt::UserRole, (int)UserRole::OpenFolder);
-            item->setData(Qt::UserRole + 1, strDir);
-            outputListWidget->addItem(item);
-        }
-
-        // QString strProds = tr("Productions");
-        QString strNil = tr("Empty string condition");
-        QString strFirstSet = tr("FIRST set");
-        QString strFollowSet = tr("FOLLOW set");
-        QString strSelectSet = tr("SELECT set");
-
-        // QListWidgetItem *itemProds = new QListWidgetItem(strProds + strDbClick);
-        // itemProds->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
-        // itemProds->setData(Qt::UserRole + 1, strProds);
-        // itemProds->setData(Qt::UserRole + 2, Parser::formatProdsMap());
-        // outputListWidget->addItem(itemProds);
-
-        QListWidgetItem *itemNils = new QListWidgetItem(strNil + strDbClick);
-        itemNils->setData(Qt::UserRole, (int)UserRole::ShowPlainText);
-        itemNils->setData(Qt::UserRole + 1, strNil);
-        itemNils->setData(Qt::UserRole + 2, Parser::formatNilVec());
-        outputListWidget->addItem(itemNils);
-
-        QListWidgetItem *itemFirstSet = new QListWidgetItem(strFirstSet + strDbClick);
-        itemFirstSet->setData(Qt::UserRole, (int)UserRole::ShowHtmlText);
-        itemFirstSet->setData(Qt::UserRole + 1, strFirstSet);
-        itemFirstSet->setData(Qt::UserRole + 2, Parser::formatFirstSet(true));
+        //FIRST集
+        QString trFirstSet = tr("FIRST set");
+        PLWI_ShowHtmlText *itemFirstSet = new PLWI_ShowHtmlText(trFirstSet, result.formatFirstSet(true));
+        itemFirstSet->setText(trFirstSet);
+        itemFirstSet->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
         outputListWidget->addItem(itemFirstSet);
 
-        QListWidgetItem *itemFollowSet = new QListWidgetItem(strFollowSet + strDbClick);
-        itemFollowSet->setData(Qt::UserRole, (int)UserRole::ShowHtmlText);
-        itemFollowSet->setData(Qt::UserRole + 1, strFollowSet);
-        itemFollowSet->setData(Qt::UserRole + 2, Parser::formatFollowSet(true));
+        //FOLLOW集
+        QString trFollowSet = tr("FOLLOW set");
+        PLWI_ShowHtmlText *itemFollowSet = new PLWI_ShowHtmlText(trFollowSet, result.formatFollowSet(true));
+        itemFollowSet->setText(trFollowSet);
+        itemFollowSet->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
         outputListWidget->addItem(itemFollowSet);
 
-        QListWidgetItem *itemSelectSet = new QListWidgetItem(strSelectSet + strDbClick);
-        itemSelectSet->setData(Qt::UserRole, (int)UserRole::ShowHtmlText);
-        itemSelectSet->setData(Qt::UserRole + 1, strSelectSet);
-        itemSelectSet->setData(Qt::UserRole + 2, Parser::formatSelectSet(true));
+        //SELECT集
+        QString trSelectSet = tr("SELECT set");
+        PLWI_ShowHtmlText *itemSelectSet = new PLWI_ShowHtmlText(trSelectSet, result.formatSelectSet(true));
+        itemSelectSet->setText(trSelectSet);
+        itemSelectSet->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
         outputListWidget->addItem(itemSelectSet);
-    }*/
+    }
 
     mNoteWidget->setText(tr("Analysis completed"));
     mNoteWidget->setColor(qRgb(0, 128, 0));

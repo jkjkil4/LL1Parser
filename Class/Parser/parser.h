@@ -170,8 +170,9 @@ public:
 
     // 文件-元素
     struct FileElement
-    { 
+    {
         int fileId; QString str;
+        QString format() { return fileId == 0 ? str : QString::number(fileId) + ':' + str; }
         inline bool operator<(const FileElement &other) const { 
             if(fileId != other.fileId)
                 return fileId < other.fileId;
@@ -242,6 +243,13 @@ public:
         bool isTerminal(int id) { return id > mNonterminalMaxIndex && id <= mTerminalMaxIndex; }
 
         QStringList output();
+
+        QString formatFiles();      //将分析过的文件格式化为文本
+        QString formatSymbolsNil(); //将空串情况格式化为文本
+        QString formatSet(const QVector<SymbolVec> &vecSet, bool useHtml, bool showNil);    //将集合格式化为文本，用于下面两个函数
+        QString formatFirstSet(bool useHtml) { return formatSet(mFirstSet, useHtml, true); }       //将FIRST集格式化为文本
+        QString formatFollowSet(bool useHtml) { return formatSet(mFollowSet, useHtml, true); }     //将FOLLOW集格式化为文本
+        QString formatSelectSet(bool useHtml, QVector<SymbolVec> *pVecIntersectedSymbols = nullptr);    //将SELECT集格式化为文本
 
     private:
         FilesDivideds mFilesDivideds;
