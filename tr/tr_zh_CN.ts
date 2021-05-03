@@ -249,7 +249,16 @@
         <translation>产生式重复定义（首次定义在 第%1行 第%2列）</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="903"/>
+        <location filename="../Class/Parser/parser.cpp" line="518"/>
+        <source>green - can be empty string
+red - cannot be empty string
+blue - unknown</source>
+        <translation>绿色 - 可以为空串
+红色 - 不能为空串
+蓝色 - 未知</translation>
+    </message>
+    <message>
+        <location filename="../Class/Parser/parser.cpp" line="911"/>
         <source>JS runs too long in first execution,
 Do you want to force it to terminate?
 If you continue waiting, it may finish.</source>
@@ -258,18 +267,18 @@ If you continue waiting, it may finish.</source>
 如果你继续等待，它可能会完成。</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="914"/>
-        <location filename="../Class/Parser/parser.cpp" line="969"/>
+        <location filename="../Class/Parser/parser.cpp" line="922"/>
+        <location filename="../Class/Parser/parser.cpp" line="977"/>
         <source>Terminate</source>
         <translation>终止</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="920"/>
+        <location filename="../Class/Parser/parser.cpp" line="928"/>
         <source>JS terminated in first execution</source>
         <translation>JS在首次执行时终止</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="1042"/>
+        <location filename="../Class/Parser/parser.cpp" line="1050"/>
         <source>File &quot;%1&quot; does not exists</source>
         <translation>文件 &quot;%1&quot; 不存在</translation>
     </message>
@@ -298,7 +307,7 @@ If you continue waiting, it may finish.</source>
     <message>
         <location filename="../Class/Parser/parser.cpp" line="376"/>
         <location filename="../Class/Parser/parser.cpp" line="403"/>
-        <location filename="../Class/Parser/parser.cpp" line="1000"/>
+        <location filename="../Class/Parser/parser.cpp" line="1008"/>
         <source>Unknown symbol &quot;%1&quot;</source>
         <translation>未知的符号 &quot;%1&quot;</translation>
     </message>
@@ -317,13 +326,13 @@ If you continue waiting, it may finish.</source>
         <translation type="vanished">产生式重复定义</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="928"/>
-        <location filename="../Class/Parser/parser.cpp" line="985"/>
+        <location filename="../Class/Parser/parser.cpp" line="936"/>
+        <location filename="../Class/Parser/parser.cpp" line="993"/>
         <source>JS error: &quot; %1 &quot;</source>
         <translation>JS错误: &quot; %1 &quot;</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="934"/>
+        <location filename="../Class/Parser/parser.cpp" line="942"/>
         <source>JS runs too long when calling &quot;%1&quot;,
 Do you want to force it to terminate?
 If you continue waiting, it may finish.</source>
@@ -332,22 +341,22 @@ If you continue waiting, it may finish.</source>
 如果你继续等待，它可能会完成。</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="975"/>
+        <location filename="../Class/Parser/parser.cpp" line="983"/>
         <source>JS terminated when calling &quot;%1&quot;</source>
         <translation>JS在调用 &quot;%1&quot; 时终止</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="991"/>
+        <location filename="../Class/Parser/parser.cpp" line="999"/>
         <source>Unknown js function &quot;%1&quot;</source>
         <translation>未知js函数 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="1004"/>
+        <location filename="../Class/Parser/parser.cpp" line="1012"/>
         <source>Unknown &quot;%1&quot;</source>
         <translation>未知的 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="517"/>
+        <location filename="../Class/Parser/parser.cpp" line="527"/>
         <source>Appear left recursive</source>
         <translation>出现左递归</translation>
     </message>
@@ -356,11 +365,13 @@ If you continue waiting, it may finish.</source>
         <translation type="vanished">（双击以显示详细信息）</translation>
     </message>
     <message>
+        <location filename="../Class/Parser/parser.cpp" line="515"/>
+        <location filename="../Class/Parser/parser.cpp" line="745"/>
         <source>Error infomation</source>
-        <translation type="vanished">错误信息</translation>
+        <translation>错误信息</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="737"/>
+        <location filename="../Class/Parser/parser.cpp" line="744"/>
         <source>SELECT set has intersections</source>
         <translation>SELECT集有交叉</translation>
     </message>
@@ -369,7 +380,7 @@ If you continue waiting, it may finish.</source>
         <translation type="vanished">无法创建输出目录</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="1047"/>
+        <location filename="../Class/Parser/parser.cpp" line="1055"/>
         <source>Cannot write text to file &quot;%1&quot;</source>
         <translation>无法将文本写入文件 &quot;%1&quot;</translation>
     </message>
@@ -382,12 +393,12 @@ If you continue waiting, it may finish.</source>
         <translation type="obsolete">信息</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="1086"/>
+        <location filename="../Class/Parser/parser.cpp" line="1094"/>
         <source>Can be empty string</source>
         <translation>可以为空串</translation>
     </message>
     <message>
-        <location filename="../Class/Parser/parser.cpp" line="1090"/>
+        <location filename="../Class/Parser/parser.cpp" line="1098"/>
         <source>Cannot be empty string</source>
         <translation>不能为空串</translation>
     </message>
