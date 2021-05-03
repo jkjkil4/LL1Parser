@@ -170,9 +170,9 @@ void ProjWidget::onParse() {
         }
 
         //添加
-        QListWidgetItem *item = issue.newItem();
+        ProjListWidgetItem *item = issue.newItem();
         if(!item)
-            item = new QListWidgetItem;
+            item = new ProjListWidgetItem;
         item->setIcon(issue.icon());
         item->setText(text.isEmpty() ? issue.what : "[ " + text + "] " + issue.what);
         errListWidget->addItem(item);

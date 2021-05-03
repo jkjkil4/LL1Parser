@@ -480,41 +480,51 @@ void Parser::parseSymbolsNil() {
         }
 
         if(isContinue && !isChanged) {  //当出现死循环时结束分析
-            // struct Format
-            // {
-            //     QString color;
-            //     QString lighterColor;
-            // };
-            // QStringList formats = { "#dd3333", "#3333dd", "#33dd33" };
-            // QString formatTerminal = "#000000";
+            struct Format
+            {
+                QString color;
+                QString lighterColor;
+            };
+            QStringList formats = { "#dd3333", "#3333dd", "#33dd33" };
+            QString formatTerminal = "#000000";
 
-            // QString text;
-            // QTextStream ts(&text);
-            // ts.setCodec("UTF-8");
-            // bool hasPrev = false;
-            // for(auto iter = mapProds.cbegin(); iter != mapProds.cend(); ++iter) {  //遍历所有产生式
-            //     const QString &symbolStr = mSymbols.indexKey(iter.key()).format();
-            //     for(const Prod &prod : iter.value()) {   //遍历所有的产生式右部
-            //         const SymbolVec &prodSymbols = prod.symbols;
-            //         //换行
-            //         if(hasPrev) {
-            //             ts << "<br>";
-            //         } else hasPrev = true;
+            QString text;
+            QTextStream ts(&text);
+            ts.setCodec("UTF-8");
+            for(auto iter = mResult.mProds.cbegin(); iter != mResult.mProds.cend(); ++iter) {  //遍历所有产生式
+                const QString &symbolStr = mResult.mSymbols.indexKey(iter.key()).format();
+                for(const Prod &prod : iter.value()) {   //遍历所有的产生式右部
+                    const SymbolVec &prodSymbols = prod.symbols;
+                    //换行
+                    ts << "<br>";
 
-            //         //产生式左侧
-            //         ts << "<font color=\"" << formats[tmpVecNil[iter.key()]] << "\">" << symbolStr << "</font> ->";
+                    //产生式左侧
+                    ts << "<font color=\"" << formats[tmpVecNil[iter.key()]] << "\">" << symbolStr << "</font> ->";
 
-            //         for(int symbol : prodSymbols) {    //遍历该产生式右部
-            //             QString &format = (isNonterminal(symbol) ? formats[tmpVecNil[symbol]] : formatTerminal);
-            //             ts << " <font color=\"" << format << "\">";
-            //             ts << mSymbols.indexKey(symbol).format();
-            //             ts << "</font>";
-            //         }
-            //     }
-            // }
-            // issues << Issue(Issue::Error, tr("Appear left recursive") + tr("(Double click to show detail)"), 
-            //     -1, -1, { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
-            mResult.mIssues << Issue(Issue::Error, tr("Appear left recursive"));
+                    for(int symbol : prodSymbols) {    //遍历该产生式右部
+                        QString &format = (mResult.isNonterminal(symbol) ? formats[tmpVecNil[symbol]] : formatTerminal);
+                        ts << " <font color=\"" << format << "\">";
+                        ts << mResult.mSymbols.indexKey(symbol).format();
+                        ts << "</font>";
+                    }
+                }
+            }
+            auto item = NewPlwiFn([text] {
+                QTextEdit *edit = new QTextEdit;
+                edit->setAttribute(Qt::WA_DeleteOnClose);
+                edit->setWindowTitle(tr("Error infomation"));
+                edit->setReadOnly(true);
+                edit->setHtml(text);
+                edit->insertPlainText(tr("green - can be empty string\n"
+                                         "red - cannot be empty string\n"
+                                         "blue - unknown"));
+                edit->resize(600, 400);
+                edit->setMinimumSize(300, 200);
+                j::SetPointSize(edit, 10);
+                j::SetFamily(edit, fontSourceCodePro.mFamily);
+                edit->show();
+            });
+            mResult.mIssues << Issue(Issue::Error, tr("Appear left recursive"), item);
             return;
         }
     } while(isContinue);
@@ -731,10 +741,8 @@ void Parser::parseSelectSets() {
         }
     }
     if(hasIntersection) {   //如果出现交叉
-        // QString text = formatSelectSet(true, &vecIntersectedSymbols);
-        // issues << Issue(Issue::Error, tr("SELECT set has intersections"), -1, -1, 
-        //     { (int)UserRole::ShowHtmlText, tr("Error infomation"), text });
-        mResult.mIssues << Issue(Issue::Error, tr("SELECT set has intersections"));
+        mResult.mIssues << Issue(Issue::Error, tr("SELECT set has intersections"), 
+            new PLWI_ShowHtmlText(tr("Error infomation"), mResult.formatSelectSet(true, &vecIntersectedSymbols)));
     }
 }
 

@@ -12,6 +12,7 @@
 #include "Widget/Dialog/delayedverifydialog.h"
 #include "Class/ProjListWidgetItem/projlistwidgetitem.h"
 #include <Lib/header.h>
+#include <Lib/paint.h>
 
 
 // 用于进行LL1语法分析
