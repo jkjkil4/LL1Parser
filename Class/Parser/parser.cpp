@@ -102,19 +102,6 @@ Parser::Parser(const QString &filePath, QWidget *dialogParent, QObject *parent)
     }
     
     End:;
-    // qDebug() << "=============================";
-    // for(const Issue &issue : mResult.mIssues.list()) {
-    //     qDebug().noquote() << (issue.type == Issue::Error ? "\033[31m" : "\033[33m")
-    //         << (issue.type == Issue::Error ? "Error" : "Warning")
-    //         << "\033[0m    "
-    //         << QFileInfo(issue.filePath).fileName()
-    //         << "  "
-    //         << issue.row
-    //         << "  "
-    //         << issue.col
-    //         << "  "
-    //         << issue.what;
-    // }
 }
 Parser::~Parser() {
     for(JS *js : mResult.mJS)
@@ -125,7 +112,6 @@ bool Parser::divideFile(const CanonicalFilePath &cFilePath, const QString &baseP
     if(mResult.mFiles.contains(cFilePath))  //如果处理过该文件，则return
         return false;
     mResult.mFiles.appendKey(cFilePath);    //标记处理过该文件
-    emit beforeReadFile(cFilePath);  //在读取文件之前发出信号
 
     QFile file(cFilePath);   //文件
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) { //尝试打开文件
@@ -943,12 +929,12 @@ void Parser::parseOutput(const CanonicalFilePath &cFilePath, const QString &, co
                                 "Do you want to force it to terminate?\n"
                                 "If you continue waiting, it may finish.");
 
-    QString pwd = QFileInfo(mResult.mFiles.indexKey(0)).path();     //项目目录
+    QString mpd = QFileInfo(mResult.mFiles.indexKey(0)).path();     //项目目录 Main Project Directory
     QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式，用于匹配格式化操作
     const QMap<QString, Divided> &map = divideds.map();
     for(auto iter = map.cbegin(); iter != map.cend(); ++iter) {    //遍历所有Divided，得到所有要输出的内容
         const Divided &divided = iter.value();
-        QString outputPath = iter.key().simplified().trimmed().replace("$$PWD", pwd);
+        QString outputPath = iter.key().simplified().trimmed().replace("$$MPD", mpd);
         if(outputPath.isEmpty()) {
             for(int row : divided.rows)
                 mResult.mIssues << Issue(Issue::Error, tr("The output path is empty"), cFilePath, row);

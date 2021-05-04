@@ -283,9 +283,6 @@ public:
     ~Parser() override;
     Result& result() { return mResult; }
 
-signals:
-    void beforeReadFile(const QString &filePath);
-    
 private:
     bool divideFile(const CanonicalFilePath &cFilePath, const QString &basePath = ""); //用于分割文档 返回值若为true则完成了分割，否则为无法读取或已分割过
     void divideAndImportFile(const CanonicalFilePath &cFilePath, const QString &basePath = "");    //分割并递归分割
