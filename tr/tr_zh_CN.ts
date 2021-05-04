@@ -428,7 +428,7 @@ If you continue waiting, it may finish.</source>
     <message>
         <location filename="../Widget/mw/Edit/projwidget.cpp" line="146"/>
         <source>Files have been outputed</source>
-        <translation>文件已被输出</translation>
+        <translation>文件已输出</translation>
     </message>
     <message>
         <location filename="../Widget/mw/Edit/projwidget.cpp" line="159"/>

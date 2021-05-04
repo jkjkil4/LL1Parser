@@ -943,10 +943,16 @@ void Parser::parseOutput(const CanonicalFilePath &cFilePath, const QString &, co
                                 "Do you want to force it to terminate?\n"
                                 "If you continue waiting, it may finish.");
 
+    QString pwd = QFileInfo(mResult.mFiles.indexKey(0)).path();     //项目目录
     QRegularExpression ruleOutputFormat("#\\[(.*?)(?:\\:(.*?)){0,1}\\]#");  //正则表达式，用于匹配格式化操作
     const QMap<QString, Divided> &map = divideds.map();
     for(auto iter = map.cbegin(); iter != map.cend(); ++iter) {    //遍历所有Divided，得到所有要输出的内容
         const Divided &divided = iter.value();
+        QString outputPath = iter.key().simplified().trimmed().replace("$$PWD", pwd);
+        if(outputPath.isEmpty()) {
+            for(int row : divided.rows)
+                mResult.mIssues << Issue(Issue::Error, tr("The output path is empty"), cFilePath, row);
+        }
         QString text;   //用于得到当前内容
         bool hasPrev = false;
         for(const Divided::Part &part : divided.parts) {
@@ -1016,7 +1022,7 @@ void Parser::parseOutput(const CanonicalFilePath &cFilePath, const QString &, co
             res += part.text.mid(start, part.text.length() - start);
             text += res;
         }
-        mResult.mOutput << Output{ path, iter.key(), text };
+        mResult.mOutput << Output{ path, outputPath, text };
     }
 }
 
