@@ -49,6 +49,7 @@ public:
 signals:
     void stateChanged(bool mSaved);    //当保存情况改变时发出的信号
     void processItemDbClick(ProjListWidgetItem *item);
+    void beforeParse(bool &cancel);    //若将cancel设置为true，则取消分析
 
 private slots:
     void onListWidgetDoubleClicked(QListWidgetItem *item);

@@ -12,6 +12,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     ColorWidget *bottomWidget = new ColorWidget(C_BOTTOM);	//底部控件
 
 
+    //读取配置文件
+    QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
+    mAutoSaveBeforeParse->setChecked(config.value("Config/AutoSaveBeforeParse", false).toBool());
+
+
     //创建布局
     QHBoxLayout *layLanguage = new QHBoxLayout;		//选择语言
     layLanguage->addWidget(labLanguage);
@@ -19,6 +24,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 
     QVBoxLayout *layCentral = new QVBoxLayout;		//中心布局
     layCentral->addLayout(layLanguage);
+    layCentral->addWidget(mAutoSaveBeforeParse, 0, Qt::AlignLeft);
     layCentral->addStretch();
     centralWidget->setLayout(layCentral);
 
@@ -40,6 +46,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 }
 
 void SettingsDialog::onAccept() {
+    QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
+    config.setValue("Config/AutoSaveBeforeParse", mAutoSaveBeforeParse->isChecked());
+
     QString locale = mCbbLanguage->currentData().toString();
     if(locale != translator.locale())
         translator.setLocale(locale);

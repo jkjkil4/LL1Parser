@@ -37,6 +37,7 @@ ProjWidget* EditView::open(const QString &projPath) {
     //如果项目未打开，则添加页面打开项目
     ProjWidget *widget = new ProjWidget(canonicalProjPath);
     connect(widget, &ProjWidget::processItemDbClick, this, &EditView::onProcessItemDbClick);
+    connect(widget, &ProjWidget::beforeParse, this, &EditView::onBeforeParse);
     if(!widget->load()) {   //如果读取失败，则提示并return
         delete widget;
         QMessageBox::critical(this, tr("Error"), tr("Cannot load the project \"%1\"").arg(widget->projName()));
@@ -111,5 +112,49 @@ void EditView::onTabCloseRequested(int index) {
 
 void EditView::onProcessItemDbClick(ProjListWidgetItem *item) {
     item->onDoubleClicked(this);
+}
+
+void EditView::onBeforeParse(bool &cancel) {
+    bool verify = false;
+
+    //遍历所有ProjWidget，如果有未保存的，则需要进行确认
+    int count = mTabWidget->count();
+    repeat(int, i, count) {
+        ProjWidget *projWidget = (ProjWidget*)mTabWidget->widget(i);
+        if(!projWidget->isSaved()) {
+            verify = true;
+            break;
+        }
+    }
+
+    if(verify) {    //如果需要确认
+        //从配置文件读取是否需要确认
+        QSettings config(APP_DIR + "/Config/config.ini", QSettings::IniFormat);
+        verify = !config.value("Config/AutoSaveBeforeParse", false).toBool();
+
+        //如果需要确认，则弹出提示框，否则自动保存
+        int res = CheckBoxVerifyDialog::Yes;
+        if(verify) {
+            CheckBoxVerifyDialog dialog(tr("Some projects have not yet saved,\ndo you want to save before parse?"),
+                                        tr("Auto save before parse"), this);
+            res = dialog.exec();
+
+            //如果结果为"Yes"且checkbox为checked，则将配置文件的AutoSaveBeforeParse设置为true
+            if(res == CheckBoxVerifyDialog::Yes && dialog.checked())
+                config.setValue("Config/AutoSaveBeforeParse", true);
+        }
+        
+        if(res == CheckBoxVerifyDialog::Cancel) {   //如果是取消，则取消分析
+            cancel = true;
+            return;
+        }
+        if(res == CheckBoxVerifyDialog::Yes) {  //如果是确定，则自动保存
+            repeat(int, i, count) {
+                ProjWidget *projWidget = (ProjWidget*)mTabWidget->widget(i);
+                if(!projWidget->isSaved())
+                    projWidget->save();
+            }
+        }
+    }
 }
 

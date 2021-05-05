@@ -1039,7 +1039,7 @@ QStringList Parser::Result::output() {
         const QString &filePath = iter.key();
         const QString &text = iter.value();
         if(!QDir(QFileInfo(filePath).path()).exists()) {
-            mIssues << Issue(Issue::Error, tr("File \"%1\" does not exists").arg(filePath));
+            mIssues << Issue(Issue::Error, tr("The path of \"%1\" does not exists").arg(filePath));
             continue;
         }
         QFile file(filePath);

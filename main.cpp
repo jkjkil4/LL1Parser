@@ -1,8 +1,10 @@
 #include "Widget/mainwindow.h"
-#include <QApplication>
+#include <QtSingleApplication>
 #include <QDir>
 
 #include "Class/translator.h"
+
+#include <QDebug>
 
 Translator translator;
 RecentFileManager rfManager;
@@ -11,29 +13,39 @@ FontFamily fontSourceCodePro;
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-
-    QDir appDir(APP_DIR);
-    appDir.mkdir("Config");
-    //appDir.mkdir("Languages");
-
-    translator.setApplication(&a);
-    translator.loadLocale();
-    rfManager.setFilePath(APP_DIR + "/Config/rfl.txt");
-    fontSourceCodePro.load(":/qrc/SourceCodePro-Medium.ttf");
-
-    MainWindow w;
+    QtSingleApplication a(argc, argv);
 
     QStringList args = a.arguments();
-    if(args.length() == 2 && QDir().exists(args[1]))
-        w.onOpenProj(args[1]);
+    bool isOpen = args.length() == 2 && QDir().exists(args[1]);
+    if(a.isRunning()) {
+        a.sendMessage(isOpen ? args[1] : "", 2000);
+        return 0;
+    } else {
+        QDir appDir(APP_DIR);
+        appDir.mkdir("Config");
+        //appDir.mkdir("Languages");
 
-    w.show();
+        translator.setApplication(&a);
+        translator.loadLocale();
+        rfManager.setFilePath(APP_DIR + "/Config/rfl.txt");
+        fontSourceCodePro.load(":/qrc/SourceCodePro-Medium.ttf");
 
-    int res = a.exec();
+        MainWindow w;
+        a.setActivationWindow(&w);
+        QObject::connect(&a, &QtSingleApplication::messageReceived, [&a, &w](const QString &msg) {
+            qDebug().noquote() << "Received message: " << msg;
+            if(!msg.isEmpty())
+                w.onOpenProj(msg);
+            a.activateWindow();
+        });
+        if(isOpen)
+            w.onOpenProj(args[1]);
+        w.show();
 
-    translator.saveLocale();
-    rfManager.save();
+        int res = a.exec();
 
-    return res;
+        translator.saveLocale();
+        rfManager.save();
+        return res;
+    }
 }

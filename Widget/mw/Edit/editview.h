@@ -5,8 +5,10 @@
 #include <QMessageBox>
 
 #include <QHBoxLayout>
+#include <QSettings>
 
 #include "projwidget.h"
+#include "Widget/Dialog/checkboxverifydialog.h"
 
 class EditView : public MainWindowView
 {
@@ -24,6 +26,7 @@ public:
 private slots:
     void onTabCloseRequested(int index);    //当tabWidget标签页的关闭按钮被点击时调用的槽
     void onProcessItemDbClick(ProjListWidgetItem *item);
+    void onBeforeParse(bool &cancel);
 
 private:
     QTabWidget *mTabWidget = new QTabWidget;

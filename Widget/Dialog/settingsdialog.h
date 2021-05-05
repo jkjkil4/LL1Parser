@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QCheckBox>
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -32,6 +33,7 @@ private:
     void initCbbLanguage();     //设置语言选择框内容
 
     QComboBox *mCbbLanguage = new QComboBox;     //语言选择框
+    QCheckBox *mAutoSaveBeforeParse = new QCheckBox(tr("Auto save before parse"));    //是否在分析前自动保存确认框
 
 //    PlainButton *btnOK = new PlainButton(tr("OK"));         //"确定"按钮
 //    PlainButton *btnCancel = new PlainButton(tr("Cancel"));	//"取消"按钮

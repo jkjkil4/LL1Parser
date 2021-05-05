@@ -98,6 +98,10 @@ void ProjWidget::onListWidgetDoubleClicked(QListWidgetItem *item) {
 }
 
 void ProjWidget::onParse() {
+    bool cancel = false;
+    emit beforeParse(cancel);
+    if(cancel) return;
+
     mBtnParse->setEnabled(false);
 
     mOutputWidget->clear();     //清除原有信息

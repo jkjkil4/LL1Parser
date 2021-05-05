@@ -37,6 +37,7 @@ SOURCES += \
         Widget/Dialog/newprojdialog.cpp \
         Widget/Dialog/settingsdialog.cpp \
         Widget/Dialog/delayedverifydialog.cpp \
+        Widget/Dialog/checkboxverifydialog.cpp \
         Widget/Menu/rflmenu.cpp \
         Widget/Other/infowidget.cpp \
         Widget/mw/Edit/editview.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
         Widget/Dialog/newprojdialog.h \
         Widget/Dialog/settingsdialog.h \
         Widget/Dialog/delayedverifydialog.h \
+        Widget/Dialog/checkboxverifydialog.h \
         Widget/Other/infowidget.h \
         Widget/mw/Edit/editview.h \
         Widget/mw/Edit/notewidget.h \
@@ -78,7 +80,7 @@ HEADERS += \
 DISTFILES += \
     tr/tr_zh_CN.ts
 
-include($(Lib)/MyQtLibs/myqtlibs.pri)
+include(inc.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
