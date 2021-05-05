@@ -1118,7 +1118,7 @@ QString Parser::Result::formatSet(const QVector<SymbolVec> &vecSet, bool useHtml
         }
 
         if(showNil && mSymbolsNil[i]) {
-            if(hasPrev) ts << ", ";
+            if(hasPrev2) ts << ", ";
             ts << (useHtml ? "<font color=\"magenta\">nil</font>" : "nil");
         }
 
