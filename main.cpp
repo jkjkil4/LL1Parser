@@ -5,6 +5,7 @@
 #include "Class/translator.h"
 
 #include <QDebug>
+// #include "Widget/mw/Edit/tabsplitwidget.h"
 
 Translator translator;
 RecentFileManager rfManager;

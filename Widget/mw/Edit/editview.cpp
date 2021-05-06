@@ -5,6 +5,7 @@ EditView::EditView(QWidget *parent) : MainWindowView(parent)
     //设置tabWidget的属性
     mTabWidget->setTabsClosable(true);
     mTabWidget->setMovable(true);
+    mTabWidget->setDocumentMode(true);
 
     connect(mTabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequested(int)));
 

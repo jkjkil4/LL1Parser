@@ -45,6 +45,8 @@ SOURCES += \
         Widget/mw/Edit/outputwidget.cpp \
         Widget/mw/Edit/plaintextedit.cpp \
         Widget/mw/Edit/projwidget.cpp \
+        Widget/mw/Edit/projtabwidget.cpp \
+        Widget/mw/Edit/tabsplitwidget.cpp \
         Widget/mw/HomePage/homepage.cpp \
         Widget/mw/HomePage/recentfilelistwidget.cpp \
         Widget/sidebar.cpp \
@@ -70,6 +72,8 @@ HEADERS += \
         Widget/mw/Edit/outputwidget.h \
         Widget/mw/Edit/plaintextedit.h \
         Widget/mw/Edit/projwidget.h \
+        Widget/mw/Edit/projtabwidget.h \
+        Widget/mw/Edit/tabsplitwidget.h \
         Widget/mw/HomePage/homepage.h \
         Widget/mw/HomePage/recentfilelistwidget.h \
         Widget/mw/mainwindowview.h \
