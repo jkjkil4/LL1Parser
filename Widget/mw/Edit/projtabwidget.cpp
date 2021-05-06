@@ -24,11 +24,18 @@ ProjTabWidget::ProjTabWidget(QWidget *parent) : QWidget(parent)
     ColorWidget *tabBarWidget = new ColorWidget(Qt::lightGray);
     tabBarWidget->setLayout(layTabBar);
 
+    QHBoxLayout *layStackedWidget = new QHBoxLayout;
+    layStackedWidget->setMargin(0);
+    layStackedWidget->addWidget(mStackedWidget);
+
+    ColorWidget *stackedWidgetBackground = new ColorWidget(QColor(240, 240, 240));
+    stackedWidgetBackground->setLayout(layStackedWidget);
+
     QVBoxLayout *layMain = new QVBoxLayout;
     layMain->setMargin(0);
     layMain->setSpacing(0);
     layMain->addWidget(tabBarWidget);
-    layMain->addWidget(mStackedWidget);
+    layMain->addWidget(stackedWidgetBackground);
     setLayout(layMain);
 
     setFocusPolicy(Qt::ClickFocus);

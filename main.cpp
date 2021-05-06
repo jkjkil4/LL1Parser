@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
         MainWindow w;
         a.setActivationWindow(&w);
         QObject::connect(&a, &QtSingleApplication::messageReceived, [&a, &w](const QString &msg) {
-            qDebug().noquote() << "Received message: " << msg;
             if(!msg.isEmpty())
                 w.onOpenProj(msg);
             a.activateWindow();
@@ -42,6 +41,14 @@ int main(int argc, char *argv[])
         if(isOpen)
             w.onOpenProj(args[1]);
         w.show();
+
+        // TabSplitWidget tsw;
+        // ColorWidget cw(Qt::darkGray);
+        // QHBoxLayout layout;
+        // layout.setMargin(0);
+        // layout.addWidget(&tsw);
+        // cw.setLayout(&layout);
+        // cw.show();
 
         int res = a.exec();
 
