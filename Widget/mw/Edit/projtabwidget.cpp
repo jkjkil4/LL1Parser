@@ -24,21 +24,20 @@ ProjTabWidget::ProjTabWidget(QWidget *parent) : QWidget(parent)
     ColorWidget *tabBarWidget = new ColorWidget(Qt::lightGray);
     tabBarWidget->setLayout(layTabBar);
 
-    QHBoxLayout *layStackedWidget = new QHBoxLayout;
-    layStackedWidget->setMargin(0);
-    layStackedWidget->addWidget(mStackedWidget);
-
-    ColorWidget *stackedWidgetBackground = new ColorWidget(QColor(240, 240, 240));
-    stackedWidgetBackground->setLayout(layStackedWidget);
-
     QVBoxLayout *layMain = new QVBoxLayout;
     layMain->setMargin(0);
     layMain->setSpacing(0);
     layMain->addWidget(tabBarWidget);
-    layMain->addWidget(stackedWidgetBackground);
+    layMain->addWidget(mStackedWidget);
     setLayout(layMain);
 
     setFocusPolicy(Qt::ClickFocus);
+
+    //设置背景颜色
+    QPalette pal = palette();
+    pal.setColor(QPalette::Background, QColor(240, 240, 240));
+    setPalette(pal);
+    setAutoFillBackground(true);
 }
 
 void ProjTabWidget::focusInEvent(QFocusEvent *) {
