@@ -27,7 +27,9 @@ public:
 
 signals:
     void focused();
-    void splitRequested(Qt::Orientation orientation);
+    void splitRequested(Qt::Orientation orientation);   //用于发送分割请求
+    void removeableRequested(bool &able);   //用于检查是否可移除
+    void removeRequested();     //用于发送移除请求
 
 private slots:
     void onTabBtnClicked();

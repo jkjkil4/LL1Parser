@@ -5,7 +5,7 @@
 #include "Class/translator.h"
 
 #include <QDebug>
-// #include "Widget/mw/Edit/tabsplitwidget.h"
+#include "Widget/mw/Edit/tabsplitwidget.h"
 
 Translator translator;
 RecentFileManager rfManager;
@@ -42,13 +42,13 @@ int main(int argc, char *argv[])
             w.onOpenProj(args[1]);
         w.show();
 
-        // TabSplitWidget tsw;
-        // ColorWidget cw(Qt::darkGray);
-        // QHBoxLayout layout;
-        // layout.setMargin(0);
-        // layout.addWidget(&tsw);
-        // cw.setLayout(&layout);
-        // cw.show();
+        TabSplitWidget tsw;
+        ColorWidget cw(Qt::darkGray);
+        QHBoxLayout layout;
+        layout.setMargin(0);
+        layout.addWidget(&tsw);
+        cw.setLayout(&layout);
+        cw.show();
 
         int res = a.exec();
 

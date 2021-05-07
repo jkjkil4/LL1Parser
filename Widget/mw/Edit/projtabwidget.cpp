@@ -47,13 +47,27 @@ void ProjTabWidget::focusInEvent(QFocusEvent *) {
 void ProjTabWidget::onTabBtnClicked() {
     QMenu menu;
     
+    //向右分割
     QAction actSplitRight(tr("Split right"));
     menu.addAction(&actSplitRight);
     connect(&actSplitRight, &QAction::triggered, [this] { emit splitRequested(Qt::Horizontal); });
 
+    //向下分割
     QAction actSplitDown(tr("Split down"));
     menu.addAction(&actSplitDown);
     connect(&actSplitDown, &QAction::triggered, [this] { emit splitRequested(Qt::Vertical); });
+
+    menu.addSeparator();    //分割线
+
+    //移除
+    QAction actRemove(tr("Remove"));
+    menu.addAction(&actRemove);
+    connect(&actRemove, &QAction::triggered, [this] { emit removeRequested(); });
+    
+    //设置"移除"按钮的可用性
+    bool removeable = false;
+    emit removeableRequested(removeable);
+    actRemove.setEnabled(removeable);
     
     menu.move(mTabBtn->mapToGlobal(QPoint(0, mTabBtn->height())));
     menu.exec();
