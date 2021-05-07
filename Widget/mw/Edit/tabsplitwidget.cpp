@@ -6,10 +6,13 @@ TabSplitWidget::TabSplitWidget(ProjTabManager *pPtManager, QWidget *parent)
     : QSplitter(parent), pPtManager(pPtManager)
 {
     //默认包含一个ptWidget
-    ProjTabWidget *ptWidget = new ProjTabWidget;
-    mManager << ptWidget;
-    if(pPtManager)
-        pPtManager->append(ptWidget);
+    ProjTabWidget *ptWidget = new ProjTabWidget(pPtManager);
+    mPtWidgets << ptWidget;
+    if(pPtManager) {
+        pPtManager->vec << ptWidget;
+        if(!pPtManager->current)
+            setCurrentPtWidget(ptWidget);
+    }
     addWidget(ptWidget);
     connectPtWidget(ptWidget);
 
@@ -24,8 +27,30 @@ TabSplitWidget::TabSplitWidget(ProjTabManager *pPtManager, QWidget *parent)
 }
 TabSplitWidget::~TabSplitWidget() {
     if(pPtManager) {    //在析构时从pPtManager中移除所有该控件包含的ptWidget
-        for(ProjTabWidget *ptWidget : mManager)
-            pPtManager->removeOne(ptWidget);
+        qDebug() << "114:" << mPtWidgets;
+        for(ProjTabWidget *ptWidget : mPtWidgets)
+            pPtManager->vec.removeOne(ptWidget);
+
+        //检查是否移除了pPtManager->current
+        if(mPtWidgets.contains(pPtManager->current)) {
+            if(pPtManager->vec.isEmpty()) {
+                pPtManager->current = nullptr;
+            } else {
+                setCurrentPtWidget(pPtManager->vec[0]);
+            }
+        }
+    }
+}
+
+void TabSplitWidget::setCurrentPtWidget(ProjTabWidget *ptWidget) {
+    if(pPtManager) {
+        if(pPtManager->current) {
+            pPtManager->current->tabBarWidget()->setColor(Qt::lightGray);
+            j::SetPaletteColor(pPtManager->current, QPalette::Background, QColor(230, 230, 230));
+        }
+        pPtManager->current = ptWidget;
+        ptWidget->tabBarWidget()->setColor(QColor(170, 170, 170));
+        j::SetPaletteColor(ptWidget, QPalette::Background, QColor(240, 240, 240));
     }
 }
 
@@ -39,10 +64,13 @@ void TabSplitWidget::onSplitRequested(Qt::Orientation orientation) {
         QList<int> lSizes = sizes();
 
         //直接创建控件到ptWidget后面
-        ProjTabWidget *other = new ProjTabWidget;
-        mManager << ptWidget;
-        if(pPtManager)
-            pPtManager->append(other);
+        ProjTabWidget *other = new ProjTabWidget(pPtManager);
+        mPtWidgets << other;
+        if(pPtManager) {
+            pPtManager->vec << other;
+            if(!pPtManager->current)
+                pPtManager->current = other;
+        }
         insertWidget(index + 1, other);
         connectPtWidget(other);
 
@@ -67,12 +95,20 @@ void TabSplitWidget::onSplitRequested(Qt::Orientation orientation) {
         widget->insertWidget(0, ptWidget);  //将ptWidget作为widget分割部分的第一个
         disconnectPtWidget(ptWidget);   //信号与槽的转交
         widget->connectPtWidget(ptWidget);
-        mManager.removeOne(ptWidget);   //mManager的转交
-        widget->mManager << ptWidget;
+        mPtWidgets.removeOne(ptWidget);   //mPtWidgets的转交
+        widget->mPtWidgets << ptWidget;
 
         //设置大小
         widget->setSizes(QList<int>() << 1 << 1);
     }
+}
+
+void TabSplitWidget::onPtFocused() {
+    //得到发出信号的widget
+    ProjTabWidget *ptWidget = (ProjTabWidget*)sender();
+    if(!ptWidget) return;
+
+    setCurrentPtWidget(ptWidget);       //设置
 }
 
 void TabSplitWidget::onRemoveRequested() {
@@ -86,6 +122,19 @@ void TabSplitWidget::onRemoveRequested() {
     } else {
         ptWidget->setParent(nullptr);
         ptWidget->deleteLater();
+        mPtWidgets.removeOne(ptWidget);
+
+        //检查是否移除了pPtManager->current
+        if(pPtManager) {
+            pPtManager->vec.removeOne(ptWidget);
+            if(pPtManager->current == ptWidget) {
+                if(pPtManager->vec.isEmpty()) {
+                    pPtManager->current = nullptr;
+                } else {
+                    setCurrentPtWidget(pPtManager->vec[0]);
+                }
+            }
+        }
     }
 }
 
@@ -112,11 +161,13 @@ void TabSplitWidget::onSplitRemoveRequested() {
 }
 
 void TabSplitWidget::connectPtWidget(ProjTabWidget *ptWidget) {
+    connect(ptWidget, &ProjTabWidget::focused, this, &TabSplitWidget::onPtFocused);
     connect(ptWidget, &ProjTabWidget::splitRequested, this, &TabSplitWidget::onSplitRequested);
     connect(ptWidget, &ProjTabWidget::removeRequested, this, &TabSplitWidget::onRemoveRequested);
     connect(ptWidget, &ProjTabWidget::removeableRequested, this, &TabSplitWidget::onRemoveableRequested);
 }
 void TabSplitWidget::disconnectPtWidget(ProjTabWidget *ptWidget) {
+    disconnect(ptWidget, &ProjTabWidget::focused, this, &TabSplitWidget::onPtFocused);
     disconnect(ptWidget, &ProjTabWidget::splitRequested, this, &TabSplitWidget::onSplitRequested);
     disconnect(ptWidget, &ProjTabWidget::removeRequested, this, &TabSplitWidget::onRemoveRequested);
     disconnect(ptWidget, &ProjTabWidget::removeableRequested, this, &TabSplitWidget::onRemoveableRequested);

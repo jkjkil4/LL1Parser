@@ -11,7 +11,14 @@
 #include <QVBoxLayout>
 
 #include "Widget/Other/colorwidget.h"
-#include <Lib/header.h>
+#include <Lib/paint.h>
+
+class ProjTabWidget;
+struct ProjTabManager
+{
+    QVector<ProjTabWidget*> vec;
+    ProjTabWidget *current = nullptr;
+};
 
 class ProjTabWidget : public QWidget
 {
@@ -20,10 +27,11 @@ protected:
     void focusInEvent(QFocusEvent *) override;
 
 public:
-    ProjTabWidget(QWidget *parent = nullptr);
+    ProjTabWidget(ProjTabManager *pPtManager = nullptr, QWidget *parent = nullptr);
 
     VAR_GET_FUNC(tabBar, mTabBar, QTabBar*)
     VAR_GET_FUNC(stackedWidget, mStackedWidget, QStackedWidget*)
+    VAR_GET_FUNC(tabBarWidget, mTabBarWidget, ColorWidget*)
 
 signals:
     void focused();
@@ -38,4 +46,8 @@ private:
     QTabBar *mTabBar = new QTabBar;
     QPushButton *mTabBtn = new QPushButton;
     QStackedWidget *mStackedWidget = new QStackedWidget;
+
+    ColorWidget *mTabBarWidget = new ColorWidget(Qt::lightGray);
+
+    ProjTabManager *pPtManager;
 };

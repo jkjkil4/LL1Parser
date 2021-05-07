@@ -42,13 +42,19 @@ int main(int argc, char *argv[])
             w.onOpenProj(args[1]);
         w.show();
 
-        TabSplitWidget tsw;
+        ProjTabManager ptm;
+        TabSplitWidget *tsw = new TabSplitWidget(&ptm);
         ColorWidget cw(Qt::darkGray);
         QHBoxLayout layout;
         layout.setMargin(0);
-        layout.addWidget(&tsw);
+        layout.addWidget(tsw);
         cw.setLayout(&layout);
         cw.show();
+        QPushButton btn("ptm.vec");
+        QObject::connect(&btn, &QPushButton::clicked, [&ptm] {
+            qDebug() << ptm.vec;
+        });
+        btn.show();
 
         int res = a.exec();
 

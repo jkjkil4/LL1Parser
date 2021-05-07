@@ -1,12 +1,16 @@
 #include "projtabwidget.h"
 
-ProjTabWidget::ProjTabWidget(QWidget *parent) : QWidget(parent)
+ProjTabWidget::ProjTabWidget(ProjTabManager *pPtManager, QWidget *parent) 
+    : QWidget(parent), pPtManager(pPtManager)
 {
     mTabBar->setTabsClosable(true);
     mTabBar->setMovable(true);
     mTabBar->setExpanding(false);
     mTabBar->setDrawBase(false);
     mTabBar->setMinimumWidth(32);
+    repeat(int, i, 5) {
+        mTabBar->addTab(QString::number(i));
+    }
 
     mTabBtn->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarUnshadeButton));
     mTabBtn->setIconSize(QSize(10, 10));
@@ -21,22 +25,18 @@ ProjTabWidget::ProjTabWidget(QWidget *parent) : QWidget(parent)
     layTabBar->addWidget(mTabBar);
     layTabBar->addWidget(mTabBtn);
 
-    ColorWidget *tabBarWidget = new ColorWidget(Qt::lightGray);
-    tabBarWidget->setLayout(layTabBar);
+    mTabBarWidget->setLayout(layTabBar);
 
     QVBoxLayout *layMain = new QVBoxLayout;
     layMain->setMargin(0);
     layMain->setSpacing(0);
-    layMain->addWidget(tabBarWidget);
+    layMain->addWidget(mTabBarWidget);
     layMain->addWidget(mStackedWidget);
     setLayout(layMain);
 
     setFocusPolicy(Qt::ClickFocus);
 
-    //设置背景颜色
-    QPalette pal = palette();
-    pal.setColor(QPalette::Background, QColor(240, 240, 240));
-    setPalette(pal);
+    j::SetPaletteColor(this, QPalette::Background, QColor(230, 230, 230));      //设置背景颜色
     setAutoFillBackground(true);
 }
 
