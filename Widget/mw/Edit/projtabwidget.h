@@ -1,17 +1,19 @@
 #pragma once
 
-#include <QTabBar>
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QMenu>
 #include <QMessageBox>
 
 #include <QApplication>
+#include <QDrag>
+#include <QMimeData>
 #include <QStyle>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
 #include "Widget/Other/colorwidget.h"
+#include "projtabbar.h"
 #include "projwidget.h"
 #include <Lib/paint.h>
 
@@ -19,6 +21,7 @@ class ProjTabWidget;
 struct ProjTabManager
 {
     QVector<ProjTabWidget*> vec;
+    QMap<CanonicalFilePath, QTextDocument*> documents;
     ProjTabWidget *current = nullptr;
 };
 
@@ -58,9 +61,10 @@ private slots:
     void onCurrentChanged(int index);
     void onTabCloseRequested(int index);
     void onTabBtnClicked();
+    void onTabDragRequested(int index);
 
 private:
-    QTabBar *mTabBar = new QTabBar;
+    ProjTabBar *mTabBar = new ProjTabBar;
     QPushButton *mTabBtn = new QPushButton;
     QStackedWidget *mStackedWidget = new QStackedWidget;
 

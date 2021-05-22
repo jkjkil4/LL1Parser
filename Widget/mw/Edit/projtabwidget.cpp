@@ -1,6 +1,7 @@
 #include "projtabwidget.h"
 
 #include <QLabel>
+#include <QDebug>
 
 ProjTabWidget::ProjTabWidget(ProjTabManager *pPtManager, QWidget *parent) 
     : QWidget(parent), pPtManager(pPtManager)
@@ -10,9 +11,10 @@ ProjTabWidget::ProjTabWidget(ProjTabManager *pPtManager, QWidget *parent)
     mTabBar->setExpanding(false);
     mTabBar->setDrawBase(false);
     mTabBar->setMinimumWidth(32);
-    connect(mTabBar, &QTabBar::tabMoved, this, &ProjTabWidget::onTabMoved);
-    connect(mTabBar, &QTabBar::currentChanged, this, &ProjTabWidget::onCurrentChanged);
-    connect(mTabBar, &QTabBar::tabCloseRequested, this, &ProjTabWidget::onTabCloseRequested);
+    connect(mTabBar, &ProjTabBar::tabMoved, this, &ProjTabWidget::onTabMoved);
+    connect(mTabBar, &ProjTabBar::currentChanged, this, &ProjTabWidget::onCurrentChanged);
+    connect(mTabBar, &ProjTabBar::tabCloseRequested, this, &ProjTabWidget::onTabCloseRequested);
+    connect(mTabBar, &ProjTabBar::dragRequested, [](int index) { qDebug() << index; });
 
     mTabBtn->setIcon(QApplication::style()->standardIcon(QStyle::SP_TitleBarUnshadeButton));
     mTabBtn->setIconSize(QSize(10, 10));
@@ -178,4 +180,11 @@ void ProjTabWidget::onTabBtnClicked() {
     
     menu.move(mTabBtn->mapToGlobal(QPoint(0, mTabBtn->height())));
     menu.exec();
+}
+
+void ProjTabWidget::onTabDragRequested(int index) {
+    // QDrag drag(this);
+    // QMimeData mimeData;
+    // mimeData.
+    // drag.setMimeData();
 }
