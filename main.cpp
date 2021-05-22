@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
         });
         if(isOpen)
             w.onOpenProj(args[1]);
-        w.show();  
+        w.show();
 
         int res = a.exec();
 

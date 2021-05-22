@@ -66,7 +66,7 @@ ProjWidget* ProjTabWidget::open(const CanonicalFilePath &cFilePath) {
     }
     connect(projWidget, SIGNAL(focused()), this, SIGNAL(focused()));
     mStackedWidget->addWidget(projWidget);
-    mTabBar->addTab(info.fileName());
+    mTabBar->addTab(" " + info.completeBaseName() + " ");
     mTabBar->setCurrentIndex(mTabBar->count() - 1);
     connect(projWidget, &ProjWidget::stateChanged, [this, projWidget](bool isSaved) {
         mTabBar->setTabText(mStackedWidget->indexOf(projWidget), 
@@ -150,12 +150,12 @@ void ProjTabWidget::onTabBtnClicked() {
     QMenu menu;
     
     //向右分割
-    QAction actSplitRight(tr("Split right"));
+    QAction actSplitRight(tr("Split right") + "(&X)");
     menu.addAction(&actSplitRight);
     connect(&actSplitRight, &QAction::triggered, [this] { emit splitRequested(Qt::Horizontal); });
 
     //向下分割
-    QAction actSplitDown(tr("Split down"));
+    QAction actSplitDown(tr("Split down") + "(&Y)");
     menu.addAction(&actSplitDown);
     connect(&actSplitDown, &QAction::triggered, [this] { emit splitRequested(Qt::Vertical); });
 
@@ -167,7 +167,7 @@ void ProjTabWidget::onTabBtnClicked() {
     menu.addSeparator();    //分割线
 
     //移除
-    QAction actRemove(tr("Remove"));
+    QAction actRemove(tr("Remove") + "(&R)");
     menu.addAction(&actRemove);
     connect(&actRemove, SIGNAL(triggered()), this, SIGNAL(removeRequested()));
     

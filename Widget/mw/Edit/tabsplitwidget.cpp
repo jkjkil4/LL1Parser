@@ -15,7 +15,7 @@ TabSplitWidget::TabSplitWidget(ProjTabManager *pPtManager, QWidget *parent)
     connectPtWidget(ptWidget);
 
     setChildrenCollapsible(false);  //设置分割部分不可因拖动而消失
-    setHandleWidth(1);  //设置空隙宽度
+    setHandleWidth(2);  //设置空隙宽度
 
     //设置背景透明
     QPalette pal = palette();
@@ -114,6 +114,9 @@ void TabSplitWidget::onRemoveRequested() {
     //得到发出信号的widget
     ProjTabWidget *ptWidget = (ProjTabWidget*)sender();
     if(!ptWidget) return;
+
+    if(!ptWidget->closeAll())
+        return;
 
     //如果控件数仅为1，则向上发送请求处理，否则将ptWidget从分割部分中移除
     if(count() <= 1) {

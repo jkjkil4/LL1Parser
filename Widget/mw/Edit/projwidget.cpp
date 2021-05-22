@@ -9,6 +9,8 @@ ProjWidget::ProjWidget(const CanonicalFilePath &projPath, QWidget *parent)
     setFocusPolicy(Qt::ClickFocus);
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
+    connect(this, &ProjWidget::textChanged, [this] { setSaved(false); });
+
     // j::SetFamily(mEdit, fontSourceCodePro.mFamily);
     // j::SetPointSize(mEdit, 10);
 
