@@ -37,5 +37,24 @@ enum class UserRole : int {
     OpenFolder              //打开文件夹    (QString path)
 };
 
+// 用于统一化路径
+class CanonicalFilePath
+{
+public:
+    CanonicalFilePath() = default;
+    CanonicalFilePath(const QString &filePath) 
+        : mText(QDir(filePath).absolutePath()) {}
+    const QString& text() { return mText; }
+    inline operator const QString&() const { return mText; }
+    inline bool operator<(const CanonicalFilePath &other) const { return mText < other.mText; }
+    inline bool operator==(const CanonicalFilePath &other) const { return mText == other.mText; }
+    inline bool operator==(const QString &s) const { return mText == CanonicalFilePath(s).mText; }
+    friend inline bool operator==(const QString &s, const CanonicalFilePath &c) 
+        { return CanonicalFilePath(s).mText == c.mText; }
+
+private:
+    QString mText;
+};
+
 extern RecentFileManager rfManager;
 extern FontFamily fontSourceCodePro;

@@ -1,7 +1,5 @@
 #include "tabsplitwidget.h"
 
-#include <QDebug>
-
 TabSplitWidget::TabSplitWidget(ProjTabManager *pPtManager, QWidget *parent)
     : QSplitter(parent), pPtManager(pPtManager)
 {
@@ -27,7 +25,6 @@ TabSplitWidget::TabSplitWidget(ProjTabManager *pPtManager, QWidget *parent)
 }
 TabSplitWidget::~TabSplitWidget() {
     if(pPtManager) {    //在析构时从pPtManager中移除所有该控件包含的ptWidget
-        qDebug() << "114:" << mPtWidgets;
         for(ProjTabWidget *ptWidget : mPtWidgets)
             pPtManager->vec.removeOne(ptWidget);
 
@@ -42,8 +39,8 @@ TabSplitWidget::~TabSplitWidget() {
     }
 }
 
-void TabSplitWidget::setCurrentPtWidget(ProjTabWidget *ptWidget) {
-    if(pPtManager) {
+void TabSplitWidget::setCurrentPtWidget(ProjTabManager *pPtManager, ProjTabWidget *ptWidget) {
+    if(pPtManager && pPtManager->current != ptWidget) {
         if(pPtManager->current) {
             pPtManager->current->tabBarWidget()->setColor(Qt::lightGray);
             j::SetPaletteColor(pPtManager->current, QPalette::Background, QColor(230, 230, 230));
@@ -88,8 +85,10 @@ void TabSplitWidget::onSplitRequested(Qt::Orientation orientation) {
         TabSplitWidget *widget = new TabSplitWidget(pPtManager);
         widget->setOrientation(orientation);
         replaceWidget(index, widget);   //将当前控件分割部分的ptWidget替换为widget
+        connect(widget, SIGNAL(changeViewRequested()), this, SIGNAL(changeViewRequested()));
         connect(widget, &TabSplitWidget::removeableRequested, this, &TabSplitWidget::onRemoveableRequested);
         connect(widget, &TabSplitWidget::splitRemoveRequested, this, &TabSplitWidget::onSplitRemoveRequested);
+        // connect(widget, SIGNAL(windowCreated()), this, SIGNAL(windowCreated()));
 
         //将ptWidget转交到widget中
         widget->insertWidget(0, ptWidget);  //将ptWidget作为widget分割部分的第一个
@@ -160,15 +159,26 @@ void TabSplitWidget::onSplitRemoveRequested() {
     }
 }
 
+// void TabSplitWidget::onNewWindowRequested() {
+//     TabSplitWidget *widget = new TabSplitWidget(pPtManager);
+//     widget->setAttribute(Qt::WA_DeleteOnClose);
+//     widget->show();
+//     emit windowCreated(widget);
+// }
+
 void TabSplitWidget::connectPtWidget(ProjTabWidget *ptWidget) {
     connect(ptWidget, &ProjTabWidget::focused, this, &TabSplitWidget::onPtFocused);
+    connect(ptWidget, SIGNAL(changeViewRequested()), this, SIGNAL(changeViewRequested()));
     connect(ptWidget, &ProjTabWidget::splitRequested, this, &TabSplitWidget::onSplitRequested);
     connect(ptWidget, &ProjTabWidget::removeRequested, this, &TabSplitWidget::onRemoveRequested);
     connect(ptWidget, &ProjTabWidget::removeableRequested, this, &TabSplitWidget::onRemoveableRequested);
+    // connect(ptWidget, &ProjTabWidget::newWindowRequested, this, &TabSplitWidget::onNewWindowRequested);
 }
 void TabSplitWidget::disconnectPtWidget(ProjTabWidget *ptWidget) {
     disconnect(ptWidget, &ProjTabWidget::focused, this, &TabSplitWidget::onPtFocused);
+    disconnect(ptWidget, SIGNAL(changeViewRequested()), this, SIGNAL(changeViewRequested()));
     disconnect(ptWidget, &ProjTabWidget::splitRequested, this, &TabSplitWidget::onSplitRequested);
     disconnect(ptWidget, &ProjTabWidget::removeRequested, this, &TabSplitWidget::onRemoveRequested);
     disconnect(ptWidget, &ProjTabWidget::removeableRequested, this, &TabSplitWidget::onRemoveableRequested);
+    // disconnect(ptWidget, &ProjTabWidget::newWindowRequested, this, &TabSplitWidget::onNewWindowRequested);
 }

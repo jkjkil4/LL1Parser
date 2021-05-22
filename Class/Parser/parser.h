@@ -22,21 +22,6 @@ class Parser : QObject
 public:
     typedef QRegularExpression QRegex;
 
-    // 用于统一化路径
-    class CanonicalFilePath
-    {
-    public:
-        CanonicalFilePath() = default;
-        CanonicalFilePath(const QString &filePath) 
-            : mText(QDir(filePath).absolutePath()) {}
-        const QString& text() { return mText; }
-        inline operator const QString&() const { return mText; }
-        inline bool operator<(const CanonicalFilePath &other) const { return mText < other.mText; }
-
-    private:
-        QString mText;
-    };
-
     // 用于创建对应关系
     template<typename Key>
     class ValueMap 

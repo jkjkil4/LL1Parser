@@ -9,7 +9,7 @@ ProjListWidgetItem* ProjListWidgetItem::copy() const { return new ProjListWidget
 
 //-------------PLWI_MoveDocCursor---------------
 void PLWI_MoveDocCursor::onDoubleClicked(EditView *editView) {
-    QPlainTextEdit *edit = editView->open(projPath)->editWidget();
+    QPlainTextEdit *edit = editView->open(projPath);
     QTextDocument *doc = edit->document();
     if(mRow < 0 || mRow >= doc->lineCount())
         return;

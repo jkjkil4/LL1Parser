@@ -117,7 +117,7 @@ void MainWindow::setCurrentView(MainWindowView *view) {
 }
 
 void MainWindow::updateProjMenuState() {
-    bool atProj = mSideBar->current() == mViewEdit && mViewEdit->count() != 0;
+    bool atProj = mSideBar->current() == mViewEdit && mViewEdit->hasProj();
     mMenu.file_actSave.setEnabled(atProj);
     mMenu.file_actSaveAs.setEnabled(atProj);
 }
