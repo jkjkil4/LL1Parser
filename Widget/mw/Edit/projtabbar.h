@@ -3,6 +3,7 @@
 #include <QTabBar>
 
 #include <QMouseEvent>
+#include <QApplication>
 
 class ProjTabBar : public QTabBar
 {
@@ -12,15 +13,13 @@ protected:
     void mouseMoveEvent(QMouseEvent *ev) override;
 
 public:
-    ProjTabBar(QWidget *parent = nullptr);
+    using QTabBar::QTabBar;
 
 signals:
     void dragRequested(int index);
 
-private slots:
-    void onTabMoved(int from, int to);
-
 private:
-    int dragIndex = -1;
-    bool movedOut = false;
+    QPoint mPressPos;           //用于记录拖动开始的位置
+    int mDragIndex = -1;        //用于记录拖动开始的index
+    bool mMovedOut = false;     //用于防止重复触发拖动
 };

@@ -31,6 +31,9 @@ class ProjTabWidget : public QWidget
 protected:
     void focusInEvent(QFocusEvent *) override;
 
+    void dragEnterEvent(QDragEnterEvent *ev) override;
+    void dropEvent(QDropEvent *ev) override;
+
 public:
     ProjTabWidget(ProjTabManager *pPtManager = nullptr, QWidget *parent = nullptr);
 
@@ -62,6 +65,8 @@ private slots:
     void onTabCloseRequested(int index);
     void onTabBtnClicked();
     void onTabDragRequested(int index);
+
+    void onProjWidgetSaveStateChanged(bool isSaved);
 
 private:
     ProjTabBar *mTabBar = new ProjTabBar;
