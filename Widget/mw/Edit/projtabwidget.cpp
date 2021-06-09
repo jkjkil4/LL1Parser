@@ -9,6 +9,7 @@ ProjTabWidget::ProjTabWidget(ProjTabManager *pPtManager, QWidget *parent)
     mTabBar->setTabsClosable(true);
     mTabBar->setExpanding(false);
     mTabBar->setDrawBase(false);
+    j::LimitHeight(mTabBar, 26);
     connect(mTabBar, &ProjTabBar::tabMoved, this, &ProjTabWidget::onTabMoved);
     connect(mTabBar, &ProjTabBar::currentChanged, this, &ProjTabWidget::onCurrentChanged);
     connect(mTabBar, &ProjTabBar::tabCloseRequested, this, &ProjTabWidget::onTabCloseRequested);

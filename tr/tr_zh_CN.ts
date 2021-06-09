@@ -22,43 +22,34 @@
 <context>
     <name>EditView</name>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="23"/>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="43"/>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="65"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation type="vanished">错误</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="23"/>
         <source>&quot;%1&quot; does not exists</source>
-        <translation>&quot;%1&quot; 不存在</translation>
+        <translation type="vanished">&quot;%1&quot; 不存在</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="43"/>
         <source>Cannot load the project &quot;%1&quot;</source>
-        <translation>无法加载项目 &quot;%1&quot;</translation>
+        <translation type="vanished">无法加载项目 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="58"/>
         <source>Do you want to save the project &quot;%1&quot;?</source>
-        <translation>你要保存项目 &quot;%1&quot; 吗?</translation>
+        <translation type="vanished">你要保存项目 &quot;%1&quot; 吗?</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="65"/>
         <source>Cannot save the project &quot;%1&quot;, force it to close?</source>
-        <translation>无法保存项目 &quot;%1&quot;，强制关闭它吗?</translation>
+        <translation type="vanished">无法保存项目 &quot;%1&quot;，强制关闭它吗?</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="138"/>
         <source>Some projects have not yet saved,
 do you want to save before parse?</source>
-        <translation>某些项目尚未保存，
+        <translation type="vanished">某些项目尚未保存，
 你要在分析前保存吗？</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/editview.cpp" line="139"/>
         <source>Auto save before parse</source>
-        <translation>在分析前自动保存</translation>
+        <translation type="vanished">在分析前自动保存</translation>
     </message>
 </context>
 <context>
@@ -443,96 +434,123 @@ If you continue waiting, it may finish.</source>
     </message>
 </context>
 <context>
+    <name>ProjTabWidget</name>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="59"/>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="66"/>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="93"/>
+        <source>Error</source>
+        <translation type="unfinished">错误</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="59"/>
+        <source>&quot;%1&quot; does not exists</source>
+        <translation type="unfinished">&quot;%1&quot; 不存在</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="66"/>
+        <source>Cannot load the project &quot;%1&quot;</source>
+        <translation type="unfinished">无法加载项目 &quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="86"/>
+        <source>Do you want to save the project &quot;%1&quot;?</source>
+        <translation type="unfinished">你要保存项目 &quot;%1&quot; 吗?</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="93"/>
+        <source>Cannot save the project &quot;%1&quot;, force it to close?</source>
+        <translation type="unfinished">无法保存项目 &quot;%1&quot;，强制关闭它吗?</translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="153"/>
+        <source>Split right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="158"/>
+        <source>Split down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Widget/mw/Edit/projtabwidget.cpp" line="170"/>
+        <source>Remove</source>
+        <translation type="unfinished">移除</translation>
+    </message>
+</context>
+<context>
     <name>ProjWidget</name>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="18"/>
         <source>Pointsize changed: %1 (Default: %2)</source>
-        <translation>点大小变化: %1 (默认: %2)</translation>
+        <translation type="vanished">点大小变化: %1 (默认: %2)</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="92"/>
         <source>Parse</source>
-        <translation>解析</translation>
+        <translation type="vanished">解析</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="136"/>
         <source>Double click to show in folder</source>
-        <translation>双击以在文件夹中显示</translation>
+        <translation type="vanished">双击以在文件夹中显示</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="145"/>
         <source>Files</source>
-        <translation>文件</translation>
+        <translation type="vanished">文件</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="150"/>
         <source>Files have been outputed</source>
-        <translation>文件已输出</translation>
+        <translation type="vanished">文件已输出</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="163"/>
         <source>Row:%1</source>
-        <translation>行:%1</translation>
+        <translation type="vanished">行:%1</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="164"/>
         <source>Col:%1</source>
-        <translation>列:%1</translation>
+        <translation type="vanished">列:%1</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="193"/>
         <source>Debug Message of &quot;%1&quot;</source>
-        <translation>&quot;%1&quot; 的调试信息</translation>
+        <translation type="vanished">&quot;%1&quot; 的调试信息</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="220"/>
         <source>Double click to show detail</source>
-        <translation>双击以显示详细内容</translation>
+        <translation type="vanished">双击以显示详细内容</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="229"/>
         <source>Debug Message</source>
-        <translation>调试信息</translation>
+        <translation type="vanished">调试信息</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="243"/>
         <source>Analysised files</source>
-        <translation>分析的文件</translation>
+        <translation type="vanished">分析的文件</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="250"/>
         <source>Empty string state</source>
-        <translation>空串情况</translation>
+        <translation type="vanished">空串情况</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="157"/>
         <source>Elapsed time: %1ms</source>
-        <translation>用时: %1毫秒</translation>
+        <translation type="vanished">用时: %1毫秒</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="257"/>
         <source>FIRST set</source>
-        <translation>FIRST集</translation>
+        <translation type="vanished">FIRST集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="264"/>
         <source>FOLLOW set</source>
-        <translation>FOLLOW集</translation>
+        <translation type="vanished">FOLLOW集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="271"/>
         <source>SELECT set</source>
-        <translation>SELECT集</translation>
+        <translation type="vanished">SELECT集</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="278"/>
         <source>Analysis completed</source>
-        <translation>分析已完成</translation>
+        <translation type="vanished">分析已完成</translation>
     </message>
     <message>
-        <location filename="../Widget/mw/Edit/projwidget.cpp" line="235"/>
         <source>JS debug message</source>
-        <translation>JS调试信息</translation>
+        <translation type="vanished">JS调试信息</translation>
     </message>
 </context>
 <context>
